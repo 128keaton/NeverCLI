@@ -6,8 +6,20 @@ extern "C" {
 #include <libavutil/timestamp.h>
 }
 
+#include <iostream>
 #include <sys/time.h>
 #include <cstdlib>
+#include <string>
+#include <filesystem>
+#include <nlohmann/json.hpp>
+#include <csignal>
+#include <thread>
+
+using json = nlohmann::json;
+int did_finish = 0;
+int network_init = 0;
+int error_count = 0;
+
 
 time_t get_time() {
     struct timeval tv = {};
@@ -20,57 +32,93 @@ time_t get_time() {
 static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt, const char *tag) {
     AVRational *time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
 
-    printf("%s: pts:%s pts_time:%s dts:%s dts_time:%s duration:%s duration_time:%s stream_index:%d\n",
-           tag,
-           av_ts2str(pkt->pts), av_ts2timestr(pkt->pts, time_base),
-           av_ts2str(pkt->dts), av_ts2timestr(pkt->dts, time_base),
-           av_ts2str(pkt->duration), av_ts2timestr(pkt->duration, time_base),
-           pkt->stream_index);
+    json packet;
+    packet["index"] = pkt->stream_index;
+    packet["tag"] = tag;
+    packet["pts"] = pkt->pts;
+    packet["pts_time"] = av_ts2timestr(pkt->pts, time_base);
+    packet["dts"] = pkt->dts;
+    packet["dts_time"] = av_ts2timestr(pkt->dts, time_base);
+    packet["duration"] = pkt->duration;
+    packet["duration_time"] = av_ts2timestr(pkt->duration, time_base);
+
+    std::cout << packet.dump(4) << std::endl;
 }
 
-int stream_to_file(const char *stream_url, const char *output_file, const long clip_runtime) {
-    AVCodecContext *input_codec_context;
-    AVFormatContext *input_format_context = avformat_alloc_context();
+std::string generate_output_filename(const char *output_path, const char *stream_name) {
+    std::string file_name;
+
+    file_name.append(stream_name);
+    file_name.append("-");
+    file_name.append(std::to_string(get_time()));
+    file_name.append(".mp4");
+
+    std::filesystem::path path = output_path;
+    path /= file_name;
+
+    return path.string();
+}
+
+
+void force_finish([[maybe_unused]] int code) {
+    did_finish = 1;
+}
+
+int stream_to_file(const char *stream_url, const char *output_path, const char *stream_name, const long clip_runtime) {
+    if (did_finish > 0) {
+        return EXIT_SUCCESS;
+    }
     AVFormatContext *output_format_context;
-    AVStream *input_stream;
+    AVFormatContext *input_format_context = avformat_alloc_context();
+    AVCodecContext *input_codec_context;
+    AVStream *input_stream = nullptr;
     AVStream *output_stream;
     AVPacket *packet;
 
-    AVOutputFormat const *output_format;
-
-
-    int input_index = -1;
+    AVOutputFormat const *output_format = nullptr;
     time_t time_now, time_start;
+    int input_index = -1;
+
+    if (network_init == 0) {
+        // Initialize ffmpeg library
+        av_log_set_level(AV_LOG_ERROR);
+        avformat_network_init();
+        network_init = 1;
+    }
 
 
-    // Initialize ffmpeg library
-    av_log_set_level(AV_LOG_ERROR);
-    avformat_network_init();
-
-
-    printf("Opening RTSP stream from URL %s\n", stream_url);
 
     // Open RTSP input
     if (avformat_open_input(&input_format_context, stream_url, nullptr, nullptr) != 0) {
         printf("ERROR: Cannot open input file\n");
         avformat_close_input(&input_format_context);
-        return EXIT_FAILURE;
+        error_count += 1;
+
+        if (error_count > 10) {
+            return EXIT_FAILURE;
+        } else {
+            return stream_to_file(stream_url, output_path, stream_name, clip_runtime);
+        }
     }
 
     // Get RTSP stream info
     if (avformat_find_stream_info(input_format_context, nullptr) < 0) {
         printf("ERROR: Cannot find stream info\n");
         avformat_close_input(&input_format_context);
-        return EXIT_FAILURE;
+        error_count += 1;
+
+        if (error_count > 10) {
+            return EXIT_FAILURE;
+        } else {
+            return stream_to_file(stream_url, output_path, stream_name, clip_runtime);
+        }
     }
+
 
 
 
     // Find the video stream
     for (int i = 0; i < input_format_context->nb_streams; i++) {
-        // Determine the decoder from the codec ID from the given input stream
-
-
         // Check if this is a video
         if (input_format_context->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
             // Set the input stream
@@ -88,6 +136,17 @@ int stream_to_file(const char *stream_url, const char *output_file, const long c
         avformat_close_input(&input_format_context);
         return EXIT_FAILURE;
     }
+
+    // Get output file handle
+    std::string output_file_str = generate_output_filename(output_path, stream_name);
+    const char *output_file = output_file_str.c_str();
+
+    json config;
+    config["outputFile"] = output_file;
+    config["rtspStream"] = stream_url;
+    config["clipRuntime"] = clip_runtime;
+
+    std::cout << config.dump(4) << std::endl;
 
 
     // Determine output format
@@ -112,7 +171,6 @@ int stream_to_file(const char *stream_url, const char *output_file, const long c
         return EXIT_FAILURE;
     }
 
-
     // Set flags on output format context
     if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
         output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
@@ -123,7 +181,6 @@ int stream_to_file(const char *stream_url, const char *output_file, const long c
     output_stream->r_frame_rate = input_stream->r_frame_rate;
     output_stream->avg_frame_rate = output_stream->r_frame_rate;
     output_stream->time_base = av_inv_q(output_stream->r_frame_rate);
-
 
     // Set time_start to whatever current time since epoch
     time_start = time_now = get_time();
@@ -138,10 +195,13 @@ int stream_to_file(const char *stream_url, const char *output_file, const long c
         return EXIT_FAILURE;
     }
 
-    while (av_read_frame(input_format_context, packet) >= 0 && time_now - time_start <= clip_runtime) {
-        if (packet->stream_index == input_index) {
-            log_packet(output_format_context, packet, "out");
 
+    while (av_read_frame(input_format_context, packet) >= 0 && time_now - time_start <= clip_runtime &&
+           did_finish < 1) {
+        if (packet->stream_index == input_index) {
+            std::cout.clear();
+            // log_packet(output_format_context, packet, "out");
+            std::signal(SIGINT, force_finish);
             // Discard invalid packets?
             if (time_start == time_now && packet->stream_index >= input_format_context->nb_streams) {
                 time_start = time_now = get_time();
@@ -166,33 +226,47 @@ int stream_to_file(const char *stream_url, const char *output_file, const long c
         time_now = get_time();
     }
 
-    // Write the closing file bits, close the context
-    av_write_trailer(output_format_context);
-    avio_close(output_format_context->pb);
-    avformat_free_context(input_format_context);
-    avformat_free_context(output_format_context);
+    // Close the context and write file handle but async so we can start next process immediately
+    std::thread([&output_format_context, input_format_context]() {
+        av_write_trailer(output_format_context);
+        avio_close(output_format_context->pb);
+        avformat_free_context(output_format_context);
 
-    avformat_network_deinit();
+
+    }).detach();
+    avformat_close_input(&input_format_context);
+    error_count = 0;
+
+
+    if (did_finish == 0) {
+        return stream_to_file(stream_url, output_path, stream_name, clip_runtime);
+    }
 
     return EXIT_SUCCESS;
 }
 
+
 int main(int argc, char **argv) {
-    if (argc < 4) {
-        printf("usage: %s RTSP_STREAM_URL OUTPUT_PATH SPLIT_EVERY\n"
-               "i.e. %s rtsp://0.0.0.0 ./test.mp4 60\n"
+    if (argc < 4 || argc > 5) {
+        printf("usage: %s RTSP_STREAM_URL OUTPUT_PATH STREAM_NAME SPLIT_EVERY\n"
+               "i.e. %s rtsp://0.0.0.0 ./ 60\n"
                "Write an RTSP stream to file.\n"
                "\n", argv[0], argv[0]);
         return 1;
     }
 
 
-    long clip_runtime = strtol(argv[3], nullptr, 10);
+    const char *stream_url = argv[1],
+            *output_path = argv[2],
+            *stream_name = argv[3];
 
+    const long clip_runtime = strtol(argv[4], nullptr, 10);
 
-    printf("File %s\n", argv[1]);
+    int return_state = EXIT_SUCCESS;
+    std::signal(SIGINT, force_finish);
+    return_state = stream_to_file(stream_url, output_path, stream_name, clip_runtime);
 
-    return stream_to_file(argv[1],
-                          argv[2],  clip_runtime);
+    avformat_network_deinit();
+    return return_state;
 }
 
