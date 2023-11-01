@@ -31,12 +31,13 @@ public:
 private:
     int error_count;
     int network_init;
+    int take_snapshot = 0;
     const char *stream_url;
     const char *output_path;
     const char *stream_name;
     long clip_runtime;
     static time_t get_time();
-    std::string generate_output_filename();
+    std::string generate_output_filename(int is_video);
 
 };
 
