@@ -14,7 +14,9 @@ FetchContent_MakeAvailable(json)
 
 find_package(LIBAV REQUIRED)
 
-add_executable(never_cli main.cpp)
+add_executable(never_cli
+        src/record/record_to_file.cpp
+        src/record/record_to_file.h  src/main.cpp)
 
 if(LIBAV_FOUND)
     message("Found FFMPEG/LibAV libraries")
