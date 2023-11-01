@@ -280,7 +280,6 @@ std::string RecordToFile::generate_output_filename(int is_video) {
     file_name.append(std::to_string(get_time()));
     file_name.append(is_video == 1 ? ".mp4" : ".png");
 
-    printf("%s\r\n", file_name.c_str());
     std::filesystem::path path = output_path;
     path /= file_name;
 
