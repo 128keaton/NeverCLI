@@ -6,6 +6,7 @@
 
 using string = std::string;
 using path = std::filesystem::path;
+namespace fs = std::filesystem;
 
 namespace never {
     string generate_output_filename(const string &name, const string &output_path, bool is_video) {
@@ -17,6 +18,14 @@ namespace never {
         file_name.append(is_video == 1 ? ".mp4" : ".jpeg");
 
         path file_path = output_path;
+        file_path /= (is_video ? "videos" : "snapshots");
+
+        fs::create_directory(file_path);
+
+        file_path /= name;
+
+        fs::create_directory(file_path);
+
         file_path /= file_name;
 
         return file_path.string();

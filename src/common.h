@@ -14,7 +14,7 @@
 using string = std::string;
 
 namespace never {
-    string generate_output_filename(const string& name, const string& output_path, bool is_video = true);
+    string generate_output_filename(const string& name,  const string& output_path, bool is_video = true);
     void replace_first(string &s, string const &to_replace, string const &with);
     string get_username(std::string const &value);
     string get_password(std::string const &value);
