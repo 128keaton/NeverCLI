@@ -13,10 +13,15 @@ FetchContent_MakeAvailable(json)
 
 
 find_package(LIBAV REQUIRED)
+find_package(CURL REQUIRED)
 
 add_executable(never_cli
-        src/record/record_to_file.cpp
-        src/record/record_to_file.h  src/main.cpp)
+        src/main.cpp
+        src/common.cpp
+        src/common.h
+        src/camera.cpp
+        src/camera.h
+)
 
 if(LIBAV_FOUND)
     message("Found FFMPEG/LibAV libraries")
@@ -26,6 +31,8 @@ else()
     message("Can't find libavcodec, libavformat or libavutil. Add them!")
 endif()
 
+include_directories(${CURL_INCLUDE_DIR})
 
+target_link_libraries(never_cli PRIVATE ${CURL_LIBRARIES})
 target_link_libraries(never_cli PUBLIC "-lm")
 target_link_libraries(never_cli PRIVATE nlohmann_json::nlohmann_json)
