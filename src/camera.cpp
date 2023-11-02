@@ -16,15 +16,21 @@ namespace never {
     Camera::Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path) {
         this->error_count = 0;
         this->camera_name = camera_name;
-
         this->input_format_context = avformat_alloc_context();
         this->stream_url = stream_url;
         this->snapshot_url = snapshot_url;
         this->output_path = output_path;
+        this->output_stream = nullptr;
+        this->output_format = nullptr;
+        this->output_format_context = nullptr;
+        this->input_codec_context = nullptr;
+        this->input_stream = nullptr;
     }
 
     bool Camera::connect() {
         if (this->connected) return connected;
+
+        input_format_context->start_time_realtime = get_time();
 
         this->input_index = -1;
         if (avformat_open_input(&input_format_context, stream_url, nullptr, nullptr) != 0)
@@ -152,48 +158,62 @@ namespace never {
         return this->record(did_finish);
     }
 
-    int Camera::record(int &did_finish) {
-        AVOutputFormat *output_format;
-        AVFormatContext *output_format_context;
-        AVStream *output_stream;
-        AVPacket *packet;
 
-        int64_t pts_offset = AV_NOPTS_VALUE;
-        time_t time_now, time_start;
-
-        string output_file_str = generate_output_filename(this->camera_name, this->output_path, true);
+    int Camera::newClip(bool init) {
         string snapshot_file_str = generate_output_filename(this->camera_name, this->output_path, false);
+        string output_file_str = generate_output_filename(this->camera_name, this->output_path, true);
 
+        if (init) {
+            output_format = (AVOutputFormat *) av_guess_format(nullptr, output_file_str.c_str(), nullptr);
+            avformat_alloc_output_context2(&this->output_format_context, output_format, nullptr,output_file_str.c_str());
+            pts_offset = AV_NOPTS_VALUE;
+        } else {
+            av_write_trailer(output_format_context);
+            avio_close(output_format_context->pb);
+        }
 
-        // Generate output format
-        output_format = (AVOutputFormat *) av_guess_format(nullptr, output_file_str.c_str(), nullptr);
-
-        // Initialize output context
-        avformat_alloc_output_context2(&output_format_context, output_format, nullptr, output_file_str.c_str());
-
-        // Get file handle for writing
         if (avio_open2(&output_format_context->pb, output_file_str.c_str(), AVIO_FLAG_WRITE, nullptr, nullptr) != 0)
             return error_return("Cannot open output");
 
+        if (init) {
+            output_stream = avformat_new_stream(output_format_context, nullptr);
 
-        // Create output stream
-        output_stream = avformat_new_stream(output_format_context, nullptr);
-
-
-        // Copy the input stream codec parameters to the output stream
-        if (avcodec_parameters_copy(output_stream->codecpar, input_stream->codecpar) < 0)
-            return error_return("Cannot copy parameters to stream");
+            // Copy the input stream codec parameters to the output stream
+            if (avcodec_parameters_copy(output_stream->codecpar, input_stream->codecpar) < 0)
+                return error_return("Cannot copy parameters to stream");
 
 
-        // Set flags on output format context
-        if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
-            output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            // Set flags on output format context
+            if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
+                output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-        // Customize stream rates/timing/aspect ratios/etc
-        output_stream->sample_aspect_ratio.num = input_codec_context->sample_aspect_ratio.num;
-        output_stream->sample_aspect_ratio.den = input_codec_context->sample_aspect_ratio.den;
-        output_stream->r_frame_rate = input_stream->r_frame_rate;
-        output_stream->avg_frame_rate = output_stream->r_frame_rate;
+            // Customize stream rates/timing/aspect ratios/etc
+            output_stream->sample_aspect_ratio.num = input_codec_context->sample_aspect_ratio.num;
+            output_stream->sample_aspect_ratio.den = input_codec_context->sample_aspect_ratio.den;
+            output_stream->r_frame_rate = input_stream->r_frame_rate;
+            output_stream->avg_frame_rate = output_stream->r_frame_rate;
+        }
+
+        // Write the file header
+        if (avformat_write_header(output_format_context, nullptr) < 0)
+            return error_return("Cannot write header");
+
+        // Take snapshot
+        thread([this]() {
+            takeSnapshot(snapshot_url);
+        }).detach();
+
+
+        // Print nice JSON status
+        this->printStatus(output_file_str, snapshot_file_str);
+
+        return EXIT_SUCCESS;
+    }
+
+    int Camera::record(int &did_finish) {
+        AVPacket *packet;
+
+        time_t time_now, time_start;
 
         // Set time_start to whatever current time since epoch
         time_start = time_now = get_time();
@@ -201,36 +221,25 @@ namespace never {
         // Initialize the AVPacket
         packet = av_packet_alloc();
 
-        // Write the file header
-        if (avformat_write_header(output_format_context, nullptr) < 0)
-            return error_return("Cannot write header");
+        this->newClip();
 
-
-        takeSnapshot(snapshot_file_str);
-
-        // Print nice JSON status
-        printStatus(output_file_str, snapshot_file_str);
+        int current_pts = 0;
 
         // Read the packets incoming
-        while (av_read_frame(input_format_context, packet) >= 0 && time_now - time_start <= clip_runtime &&
-               did_finish < 1) {
+        while (av_read_frame(input_format_context, packet) >= 0 && did_finish < 1) {
             if (packet->stream_index == input_index) {
-                // Discard invalid packets?
                 if (time_start == time_now && packet->stream_index >= input_format_context->nb_streams) {
                     time_start = time_now = get_time();
                     av_packet_unref(packet);
                     continue;
                 }
 
-                if (packet->pts <= 0) {
-                    time_start = time_now = get_time();
-                    av_packet_unref(packet);
-                    continue;
-                }
 
                 packet->stream_index = output_stream->id;
                 packet->pts = av_rescale_q_rnd(packet->pts, input_stream->time_base, output_stream->time_base,
                                                (AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+
+                packet->pts = packet->pts - current_pts;
 
                 if (pts_offset == AV_NOPTS_VALUE) {
                     pts_offset = packet->pts;
@@ -241,33 +250,21 @@ namespace never {
                 packet->dts = av_rescale_q_rnd(packet->dts, input_stream->time_base, output_stream->time_base,
                                                (AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
                 packet->duration = av_rescale_q(packet->duration, input_stream->time_base, output_stream->time_base);
-
                 packet->pos = -1;
 
                 av_interleaved_write_frame(output_format_context, packet);
-                time_now = get_time();
+
+                if (time_now - time_start >= clip_runtime) {
+                    time_start = time_now = get_time();
+                    this->newClip(false);
+                } else {
+                    time_now = get_time();
+                }
+                av_packet_unref(packet);
             }
         }
 
-        // Close the context and write file handle but async, so we can start next process immediately
-        thread([&output_format_context]() {
-            av_write_trailer(output_format_context);
-            avio_close(output_format_context->pb);
-            avformat_free_context(output_format_context);
-        }).detach();
-
-        // Close our input/disconnect
-        avformat_close_input(&input_format_context);
-
-        // Reset our variables
-        this->connected = false;
         this->error_count = 0;
-
-
-        if (did_finish == 0)
-            return startRecording(this->clip_runtime, did_finish);
-
-
         return EXIT_SUCCESS;
     }
 } // never
