@@ -1,5 +1,10 @@
 # Never CLI
 
+## Dependencies
+
+Requires `libavcodec-dev libavutil-dev libavformat-dev libcurl4-openssl-dev` on Debian
+
+
 ## Building
 
 ```shell
