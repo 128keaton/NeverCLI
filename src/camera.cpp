@@ -81,7 +81,7 @@ namespace never {
     }
 
     static size_t handleSnapshot(void *ptr, size_t size, size_t nmemb, void *stream) {
-        size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+        size_t written = fwrite(ptr, size, nmemb, (FILE *) stream);
         return written;
     }
 
@@ -94,7 +94,6 @@ namespace never {
         /* init the curl session */
         curl_handle = curl_easy_init();
 
-
         // Probably not the best way to handle this all but its w/e
         std::regex rgx("(\\w+?:.+@)?");
         std::smatch matches;
@@ -104,7 +103,7 @@ namespace never {
 
         string username, password;
 
-        if(std::regex_search(snapshot_url_str, matches, rgx)) {
+        if (std::regex_search(snapshot_url_str, matches, rgx)) {
             username = get_username(matches[0]);
             password = get_password(matches[0]);
         }
@@ -116,12 +115,12 @@ namespace never {
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, handleSnapshot);
 
         curl_easy_setopt(curl_handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-        curl_easy_setopt(curl_handle, CURLOPT_TRANSFERTEXT , 1);
+        curl_easy_setopt(curl_handle, CURLOPT_TRANSFERTEXT, 1);
         curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
 
         snapshot_file = fopen(snapshot_file_str.c_str(), "wb");
 
-        if(snapshot_file) {
+        if (snapshot_file) {
             /* write the page body to this file handle */
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, snapshot_file);
 
@@ -159,18 +158,21 @@ namespace never {
         AVStream *output_stream;
         AVPacket *packet;
 
+        int64_t pts_offset = AV_NOPTS_VALUE;
         time_t time_now, time_start;
 
         string output_file_str = generate_output_filename(this->camera_name, this->output_path, true);
-        const char *output_file = output_file_str.c_str();
+        string snapshot_file_str = generate_output_filename(this->camera_name, this->output_path, false);
 
-        output_format = (AVOutputFormat *)  av_guess_format(nullptr, output_file, nullptr);
+
+        // Generate output format
+        output_format = (AVOutputFormat *) av_guess_format(nullptr, output_file_str.c_str(), nullptr);
 
         // Initialize output context
-        avformat_alloc_output_context2(&output_format_context, output_format, nullptr, output_file);
+        avformat_alloc_output_context2(&output_format_context, output_format, nullptr, output_file_str.c_str());
 
         // Get file handle for writing
-        if (avio_open2(&output_format_context->pb, output_file, AVIO_FLAG_WRITE, nullptr, nullptr) != 0)
+        if (avio_open2(&output_format_context->pb, output_file_str.c_str(), AVIO_FLAG_WRITE, nullptr, nullptr) != 0)
             return error_return("Cannot open output");
 
 
@@ -183,7 +185,6 @@ namespace never {
             return error_return("Cannot copy parameters to stream");
 
 
-
         // Set flags on output format context
         if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
             output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
@@ -193,7 +194,6 @@ namespace never {
         output_stream->sample_aspect_ratio.den = input_codec_context->sample_aspect_ratio.den;
         output_stream->r_frame_rate = input_stream->r_frame_rate;
         output_stream->avg_frame_rate = output_stream->r_frame_rate;
-        output_stream->time_base = av_inv_q(output_stream->r_frame_rate);
 
         // Set time_start to whatever current time since epoch
         time_start = time_now = get_time();
@@ -205,11 +205,13 @@ namespace never {
         if (avformat_write_header(output_format_context, nullptr) < 0)
             return error_return("Cannot write header");
 
-        string snapshot_file_str = generate_output_filename(this->camera_name, this->output_path, false);
+
         takeSnapshot(snapshot_file_str);
 
+        // Print nice JSON status
         printStatus(output_file_str, snapshot_file_str);
 
+        // Read the packets incoming
         while (av_read_frame(input_format_context, packet) >= 0 && time_now - time_start <= clip_runtime &&
                did_finish < 1) {
             if (packet->stream_index == input_index) {
@@ -226,19 +228,24 @@ namespace never {
                     continue;
                 }
 
-
-                //    log_packet(input_format_context, packet, "out");
-
                 packet->stream_index = output_stream->id;
+                packet->pts = av_rescale_q_rnd(packet->pts, input_stream->time_base, output_stream->time_base,
+                                               (AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
 
-                // This is where the magic happens, our rate is "calculated" so this is how we scale
-                av_packet_rescale_ts(packet, input_stream->time_base, output_stream->time_base);
+                if (pts_offset == AV_NOPTS_VALUE) {
+                    pts_offset = packet->pts;
+                }
+
+                packet->pts -= pts_offset;
+                packet->dts -= pts_offset;
+                packet->dts = av_rescale_q_rnd(packet->dts, input_stream->time_base, output_stream->time_base,
+                                               (AVRounding) (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+                packet->duration = av_rescale_q(packet->duration, input_stream->time_base, output_stream->time_base);
+
                 packet->pos = -1;
 
                 av_interleaved_write_frame(output_format_context, packet);
-
                 time_now = get_time();
-
             }
         }
 
@@ -249,7 +256,10 @@ namespace never {
             avformat_free_context(output_format_context);
         }).detach();
 
+        // Close our input/disconnect
         avformat_close_input(&input_format_context);
+
+        // Reset our variables
         this->connected = false;
         this->error_count = 0;
 
