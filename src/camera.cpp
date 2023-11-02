@@ -154,7 +154,7 @@ namespace never {
     }
 
     int Camera::record(int &did_finish) {
-        const AVOutputFormat *output_format;
+        AVOutputFormat *output_format;
         AVFormatContext *output_format_context;
         AVStream *output_stream;
         AVPacket *packet;
@@ -164,9 +164,7 @@ namespace never {
         string output_file_str = generate_output_filename(this->camera_name, this->output_path, true);
         const char *output_file = output_file_str.c_str();
 
-
-        output_format = av_guess_format(nullptr, output_file, nullptr);
-
+        output_format = (AVOutputFormat *)  av_guess_format(nullptr, output_file, nullptr);
 
         // Initialize output context
         avformat_alloc_output_context2(&output_format_context, output_format, nullptr, output_file);
