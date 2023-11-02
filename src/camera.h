@@ -8,7 +8,6 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
 #include <libavformat/avio.h>
 #include <libavutil/time.h>
 #include <libavutil/timestamp.h>

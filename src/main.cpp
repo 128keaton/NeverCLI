@@ -1,9 +1,6 @@
 #include "camera.h"
 #include <csignal>
 
-
-
-
 int did_finish = 0;
 
 void force_finish([[maybe_unused]] int code) {
