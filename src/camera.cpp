@@ -223,7 +223,6 @@ namespace never {
             }
 
 
-
             // Keeps track of clip duration
             duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
 
@@ -233,10 +232,10 @@ namespace never {
             av_interleaved_write_frame(output_format_context, packet);
 
             if (duration_counter >= (double) this->clip_runtime) {
-                logPacket(input_format_context, packet, "out");
                 this->takeSnapshot(generateOutputFilename(this->camera_name, this->output_path, false));
                 duration_counter = 0.0;
             }
+
             av_packet_unref(packet);
         }
 

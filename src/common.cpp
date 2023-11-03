@@ -94,21 +94,6 @@ namespace never {
         return clip_count;
     }
 
-    void logPacket(const AVFormatContext *fmt_ctx, const AVPacket *pkt, const char *tag) {
-        AVRational *time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
-
-        json packet;
-        packet["tag"] = tag;
-        packet["pts"] = av_ts_make_string((char[AV_TS_MAX_STRING_SIZE]){0}, pkt->pts);
-        packet["ptsTime"] = av_ts_make_time_string((char[AV_TS_MAX_STRING_SIZE]){0}, pkt->pts, time_base);
-        packet["dts"] = av_ts_make_string((char[AV_TS_MAX_STRING_SIZE]){0}, pkt->dts);
-        packet["dtsTime"] = av_ts_make_time_string((char[AV_TS_MAX_STRING_SIZE]){0}, pkt->dts, time_base);
-        packet["duration"] =  av_ts_make_string((char[AV_TS_MAX_STRING_SIZE]){0}, pkt->duration);
-        packet["durationTime"] = av_ts_make_time_string((char[AV_TS_MAX_STRING_SIZE]){0}, pkt->duration, time_base);
-        packet["streamIndex"] = pkt->stream_index;
-
-        std::cout << packet.dump() << std::endl;
-    }
 
 
 } // never

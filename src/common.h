@@ -24,7 +24,6 @@ using string = std::string;
 namespace never {
     string generateOutputFilename(const string& name, const string& output_path, bool is_video = true);
     void replaceFirst(string &s, string const &to_replace, string const &with);
-    void logPacket(const AVFormatContext *fmt_ctx, const AVPacket *pkt, const char *tag);
     string getUsername(std::string const &value);
     string getPassword(std::string const &value);
     time_t getTime();
