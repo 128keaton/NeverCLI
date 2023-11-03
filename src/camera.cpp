@@ -82,9 +82,9 @@ namespace never {
         return written;
     }
 
-    void Camera::takeSnapshot(const string &snapshot_file_str) {
+    void Camera::takeSnapshot() {
         FILE *snapshot_file;
-
+        string snapshot_file_str = generateOutputFilename(this->camera_name, this->output_path, false);
 
         if (curl_handle == nullptr) {
             curl_global_init(CURL_GLOBAL_ALL);
@@ -120,6 +120,7 @@ namespace never {
         snapshot_file = fopen(snapshot_file_str.c_str(), "wb");
 
         if (snapshot_file) {
+            printf("writing to %s\n", snapshot_file_str.c_str());
             /* write the page body to this file handle */
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, snapshot_file);
 
@@ -205,10 +206,8 @@ namespace never {
         // Build the muxer
         this->setupMuxer();
 
-
-
         // Take first snapshot
-        this->takeSnapshot(generateOutputFilename(this->camera_name, this->output_path, false));
+        this->takeSnapshot();
 
         // Read the packets incoming
         while (av_read_frame(input_format_context, packet) >= 0) {
@@ -232,7 +231,7 @@ namespace never {
             av_interleaved_write_frame(output_format_context, packet);
 
             if (duration_counter >= (double) this->clip_runtime) {
-                this->takeSnapshot(generateOutputFilename(this->camera_name, this->output_path, false));
+                this->takeSnapshot();
                 duration_counter = 0.0;
             }
 

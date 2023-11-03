@@ -55,7 +55,7 @@ namespace never {
 
         int record();
         int setupMuxer();
-        void takeSnapshot(const string &snapshot_file_str);
+        void takeSnapshot();
         bool handleError(const string &message, bool close_input = true);
     };
 
