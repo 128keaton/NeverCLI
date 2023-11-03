@@ -1,7 +1,7 @@
 #include "camera.h"
 #include <csignal>
 
-bool did_finish = false;
+volatile bool did_finish = false;
 
 void force_finish([[maybe_unused]] int code) {
     printf("Bye!\n");

@@ -8,8 +8,6 @@
 #include "common.h"
 #include <regex>
 
-using json = nlohmann::json;
-
 
 namespace never {
     Camera::Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path) {
@@ -35,7 +33,7 @@ namespace never {
         AVDictionary *params = nullptr;
         av_dict_set(&params, "rtsp_flags", "prefer_tcp", AV_DICT_APPEND);
 
-        if (avformat_open_input(&input_format_context, stream_url, nullptr,&params) != 0)
+        if (avformat_open_input(&input_format_context, stream_url, nullptr, &params) != 0)
             return handleError("Cannot open input file", false);
 
 
@@ -133,7 +131,7 @@ namespace never {
 
     }
 
-    int Camera::startRecording(long _clip_runtime, bool &did_finish) {
+    int Camera::startRecording(long _clip_runtime, volatile bool &did_finish) {
         if (did_finish)
             return EXIT_SUCCESS;
 
@@ -185,7 +183,6 @@ namespace never {
         output_stream->avg_frame_rate = output_stream->r_frame_rate;
 
 
-
         AVDictionary *params = nullptr;
 
         // Set our muxer options
@@ -202,10 +199,9 @@ namespace never {
         return EXIT_SUCCESS;
     }
 
-    int Camera::record(bool &did_finish) {
+    int Camera::record(volatile bool &did_finish) {
         double duration_counter = 0;
         AVPacket *packet;
-
 
         // Initialize the AVPacket
         packet = av_packet_alloc();
@@ -216,38 +212,41 @@ namespace never {
         // Take first snapshot
         this->takeSnapshot();
 
-        int64_t  last_pts = 0;
+        int64_t last_pts = 0;
         // Read the packets incoming
+
         while (av_read_frame(input_format_context, packet) >= 0 && !did_finish) {
             if (packet->pts < 0) {
                 av_packet_unref(packet);
-                continue;
+               continue;
             }
 
             if (packet->stream_index != input_index) {
                 printf("Not right index");
-                continue;
+               continue;
+            }
+
+            if (packet->duration == 0) {
+                packet->duration = packet->pts - last_pts;
             }
 
             // Keeps track of clip duration
-            duration_counter +=  (double) (packet->pts - last_pts) * av_q2d(input_stream->time_base);
+            duration_counter += (double) (packet->duration) * av_q2d(input_stream->time_base);
             last_pts = packet->pts;
 
             packet->stream_index = output_stream->id;
             packet->pos = -1;
 
-
             av_interleaved_write_frame(output_format_context, packet);
-
 
             if (duration_counter >= (double) this->clip_runtime) {
                 this->takeSnapshot();
                 duration_counter = 0.0;
             }
 
-
             av_packet_unref(packet);
         }
+
 
         this->error_count = 0;
 

@@ -30,7 +30,7 @@ namespace never {
     public:
         Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path);
         bool connect();
-        int startRecording(long _clip_runtime, bool &did_finish);
+        int startRecording(long _clip_runtime, volatile bool &did_finish);
         int clipCount();
 
     private:
@@ -53,7 +53,7 @@ namespace never {
         long clip_runtime = 0;
         int error_count = 0;
 
-        int record(bool &did_finish);
+        int record(volatile bool &did_finish);
         int setupMuxer();
         void takeSnapshot();
         bool handleError(const string &message, bool close_input = true);
