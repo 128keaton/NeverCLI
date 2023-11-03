@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-Requires `libavcodec-dev libavutil-dev libavformat-dev libcurl4-openssl-dev` on Debian
+Requires `libavcodec-dev libavutil-dev libavformat-dev libcurl4-openssl-dev libavdevice-dev libavfilter-dev` on Debian
 
 
 ## Building
