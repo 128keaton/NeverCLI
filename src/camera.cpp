@@ -152,6 +152,7 @@ namespace never {
 
 
     int Camera::setupMuxer() {
+        input_stream->start_time = getTime();
         string output_file_str = generateOutputFilename(this->camera_name, this->output_path, true);
 
         // Segment muxer
