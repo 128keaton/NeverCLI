@@ -216,6 +216,7 @@ namespace never {
         // Take first snapshot
         this->takeSnapshot();
 
+        int64_t  last_pts;
         // Read the packets incoming
         while (av_read_frame(input_format_context, packet) >= 0 && !did_finish) {
             if (packet->pts < 0) {
@@ -235,7 +236,7 @@ namespace never {
             if (packet->duration > 0)
                 duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
             else
-                duration_counter += av_q2d(input_stream->time_base);
+                duration_counter +=  (double) (packet->pts - last_pts) * av_q2d(input_stream->time_base);
 
             packet->stream_index = output_stream->id;
             packet->pos = -1;
@@ -250,6 +251,7 @@ namespace never {
                 duration_counter = 0.0;
             }
 
+            last_pts = packet->pts;
             av_packet_unref(packet);
         }
 
