@@ -221,7 +221,7 @@ namespace never {
                 continue;
             }
 
-
+            printf("Packet duration: %lld, Duration: %f, clip runtime: %ld\n", packet->duration, duration_counter, clip_runtime);
             // Keeps track of clip duration
             duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
 
@@ -230,7 +230,7 @@ namespace never {
 
             av_interleaved_write_frame(output_format_context, packet);
 
-            printf("Packet duration: %lld, Duration: %f, clip runtime: %ld\n", packet->duration, duration_counter, clip_runtime);
+
 
             if (duration_counter >= (double) this->clip_runtime) {
                 this->takeSnapshot();
