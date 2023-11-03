@@ -168,6 +168,11 @@ namespace never {
         if (avcodec_parameters_copy(output_stream->codecpar, input_stream->codecpar) < 0)
             return handleError("Cannot copy parameters to stream");
 
+        output_format_context->strict_std_compliance = -1;
+
+        // Allow macOS/iOS to play this natively
+        output_stream->codecpar->codec_tag = MKTAG('h', 'v', 'c', '1');
+
         // Set flags on output format context
         if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
             output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
@@ -177,6 +182,7 @@ namespace never {
         output_stream->sample_aspect_ratio.den = input_codec_context->sample_aspect_ratio.den;
         output_stream->r_frame_rate = input_stream->r_frame_rate;
         output_stream->avg_frame_rate = output_stream->r_frame_rate;
+
 
 
         AVDictionary *params = nullptr;
@@ -227,6 +233,7 @@ namespace never {
 
             packet->stream_index = output_stream->id;
             packet->pos = -1;
+
 
             av_interleaved_write_frame(output_format_context, packet);
 
