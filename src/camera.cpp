@@ -174,7 +174,7 @@ namespace never {
 
         // Set our muxer options
         av_dict_set(&params, "strftime", "true", 0);
-        av_dict_set(&params, "reset_timestamps", "true", 0);
+       // av_dict_set(&params, "reset_timestamps", "true", 0);
         av_dict_set(&params, "segment_time", std::to_string(clip_runtime).c_str(), 0);
 
         // Write the AVFormat header
