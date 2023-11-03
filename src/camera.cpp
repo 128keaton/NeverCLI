@@ -221,7 +221,7 @@ namespace never {
                 continue;
             }
 
-            printf("Packet duration: %lld, Duration: %f, clip runtime: %ld\n", packet->duration, duration_counter, clip_runtime);
+            printf("Packet duration: %ld, Duration: %f, clip runtime: %ld\n", packet->duration, duration_counter, clip_runtime);
             // Keeps track of clip duration
             duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
 
