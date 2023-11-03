@@ -1,10 +1,11 @@
 #include "camera.h"
 #include <csignal>
 
-int did_finish = 0;
+bool did_finish = false;
 
 void force_finish([[maybe_unused]] int code) {
-    did_finish = 1;
+    printf("Bye!\n");
+    did_finish = true;
 }
 
 int main(int argc, char **argv) {

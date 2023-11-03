@@ -133,8 +133,8 @@ namespace never {
 
     }
 
-    int Camera::startRecording(long _clip_runtime, int &did_finish) {
-        if (did_finish > 0)
+    int Camera::startRecording(long _clip_runtime, bool &did_finish) {
+        if (did_finish)
             return EXIT_SUCCESS;
 
 
@@ -147,7 +147,7 @@ namespace never {
                 return handleError("Could not connect to camera", false);
         }
 
-        return this->record();
+        return this->record(did_finish);
     }
 
 
@@ -195,7 +195,7 @@ namespace never {
         return EXIT_SUCCESS;
     }
 
-    int Camera::record() {
+    int Camera::record(bool &did_finish) {
         double duration_counter = 0;
         AVPacket *packet;
 
@@ -210,7 +210,7 @@ namespace never {
         this->takeSnapshot();
 
         // Read the packets incoming
-        while (av_read_frame(input_format_context, packet) >= 0) {
+        while (av_read_frame(input_format_context, packet) >= 0 && !did_finish) {
             if (packet->pts < 0) {
                 av_packet_unref(packet);
                 continue;
