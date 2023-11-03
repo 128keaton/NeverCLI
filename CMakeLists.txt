@@ -11,9 +11,18 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
 FetchContent_MakeAvailable(json)
 
 
-
-find_package(LIBAV REQUIRED)
+find_package(PkgConfig REQUIRED)
 find_package(CURL REQUIRED)
+
+pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
+        libavdevice
+        libavfilter
+        libavformat
+        libavcodec
+        libswresample
+        libswscale
+        libavutil
+)
 
 add_executable(never_cli
         src/main.cpp
@@ -23,16 +32,11 @@ add_executable(never_cli
         src/camera.h
 )
 
-if(LIBAV_FOUND)
-    message("Found FFMPEG/LibAV libraries")
-    include_directories(${LIBAV_INCLUDE_DIR})
-    target_link_libraries(never_cli PUBLIC ${LIBAV_LIBRARIES})
-else()
-    message("Can't find libavcodec, libavformat or libavutil. Add them!")
-endif()
+
 
 include_directories(${CURL_INCLUDE_DIR})
 
 target_link_libraries(never_cli PRIVATE ${CURL_LIBRARIES})
 target_link_libraries(never_cli PUBLIC "-lm")
+target_link_libraries(never_cli PRIVATE PkgConfig::LIBAV)
 target_link_libraries(never_cli PRIVATE nlohmann_json::nlohmann_json)

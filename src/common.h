@@ -2,11 +2,19 @@
 // Created by Keaton Burleson on 11/2/23.
 //
 
+
 #include <sys/time.h>
 #include <string>
 #include <cstdlib>
 #include <iostream>
 #include <filesystem>
+#include "nlohmann/json.hpp"
+
+extern "C" {
+#include <libavformat/avformat.h>
+#include <libavutil/timestamp.h>
+}
+
 
 #ifndef NEVER_CLI_COMMON_H
 #define NEVER_CLI_COMMON_H
@@ -14,11 +22,13 @@
 using string = std::string;
 
 namespace never {
-    string generate_output_filename(const string& name,  const string& output_path, bool is_video = true);
-    void replace_first(string &s, string const &to_replace, string const &with);
-    string get_username(std::string const &value);
-    string get_password(std::string const &value);
-    time_t get_time();
+    string generateOutputFilename(const string& name, const string& output_path, bool is_video = true);
+    void replaceFirst(string &s, string const &to_replace, string const &with);
+    void logPacket(const AVFormatContext *fmt_ctx, const AVPacket *pkt, const char *tag);
+    string getUsername(std::string const &value);
+    string getPassword(std::string const &value);
+    time_t getTime();
+    int countClips(const string &output_path, const string &camera_name);
 
 } // never
 
