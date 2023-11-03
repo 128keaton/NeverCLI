@@ -233,7 +233,7 @@ namespace never {
             if (packet->duration > 0)
                 duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
             else
-                duration_counter += av_q2d(input_stream->time_base);;
+                duration_counter += av_q2d(input_stream->time_base);
 
             packet->stream_index = output_stream->id;
             packet->pos = -1;
