@@ -228,6 +228,7 @@ namespace never {
                 continue;
             }
 
+            av_pkt_dump_log2(nullptr, AV_LOG_DEBUG, packet, 0, input_stream);
             printf("Packet duration: %ld, Duration: %f, clip runtime: %ld\n", packet->duration, duration_counter, clip_runtime);
             // Keeps track of clip duration
 
