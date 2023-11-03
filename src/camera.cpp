@@ -23,6 +23,7 @@ namespace never {
         this->input_codec_context = nullptr;
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
+        av_log_set_level(AV_LOG_QUIET);
     }
 
     bool Camera::connect() {
@@ -86,8 +87,6 @@ namespace never {
 
         if (curl_handle == nullptr) {
             curl_global_init(CURL_GLOBAL_ALL);
-
-            /* init the curl session */
             curl_handle = curl_easy_init();
 
             // Probably not the best way to handle this all but its w/e
@@ -118,14 +117,8 @@ namespace never {
         snapshot_file = fopen(snapshot_file_str.c_str(), "wb");
 
         if (snapshot_file) {
-            printf("writing to %s\n", snapshot_file_str.c_str());
-            /* write the page body to this file handle */
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, snapshot_file);
-
-            /* get it! */
             curl_easy_perform(curl_handle);
-
-            /* close the header file */
             fclose(snapshot_file);
         }
 
@@ -135,12 +128,9 @@ namespace never {
         if (did_finish)
             return EXIT_SUCCESS;
 
-
         if (this->clip_runtime != _clip_runtime) this->clip_runtime = _clip_runtime;
-
         if (!this->connected) {
             bool did_connect = connect();
-
             if (!did_connect)
                 return handleError("Could not connect to camera", false);
         }
@@ -150,7 +140,6 @@ namespace never {
 
 
     int Camera::setupMuxer() {
-        input_stream->start_time = getTime();
         string output_file_str = generateOutputFilename(this->camera_name, this->output_path, true);
 
         // Segment muxer
@@ -161,7 +150,6 @@ namespace never {
 
         // Create stream with context
         output_stream = avformat_new_stream(output_format_context, nullptr);
-
 
         // Copy the input stream codec parameters to the output stream
         if (avcodec_parameters_copy(output_stream->codecpar, input_stream->codecpar) < 0)
@@ -182,7 +170,6 @@ namespace never {
         output_stream->r_frame_rate = input_stream->r_frame_rate;
         output_stream->avg_frame_rate = output_stream->r_frame_rate;
 
-
         AVDictionary *params = nullptr;
 
         // Set our muxer options
@@ -190,11 +177,9 @@ namespace never {
         av_dict_set(&params, "reset_timestamps", "true", 0);
         av_dict_set(&params, "segment_time", std::to_string(clip_runtime).c_str(), 0);
 
-
         // Write the AVFormat header
         if (avformat_write_header(output_format_context, &params) < 0)
             return handleError("Cannot write header");
-
 
         return EXIT_SUCCESS;
     }
@@ -212,18 +197,19 @@ namespace never {
         // Take first snapshot
         this->takeSnapshot();
 
+        // Keep track of last packet's pts
         int64_t last_pts = 0;
-        // Read the packets incoming
 
+        // Read the packets incoming
         while (av_read_frame(input_format_context, packet) >= 0 && !did_finish) {
             if (packet->pts < 0) {
                 av_packet_unref(packet);
-               continue;
+                continue;
             }
 
             if (packet->stream_index != input_index) {
                 printf("Not right index");
-               continue;
+                continue;
             }
 
             if (packet->duration == 0) {
