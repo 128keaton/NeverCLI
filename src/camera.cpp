@@ -229,7 +229,11 @@ namespace never {
 
             printf("Packet duration: %ld, Duration: %f, clip runtime: %ld\n", packet->duration, duration_counter, clip_runtime);
             // Keeps track of clip duration
-            duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
+
+            if (packet->duration > 0)
+                duration_counter += (double) packet->duration * av_q2d(input_stream->time_base);
+            else
+                duration_counter += av_q2d(input_stream->time_base);;
 
             packet->stream_index = output_stream->id;
             packet->pos = -1;
