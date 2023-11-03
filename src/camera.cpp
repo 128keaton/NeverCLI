@@ -230,6 +230,8 @@ namespace never {
 
             av_interleaved_write_frame(output_format_context, packet);
 
+            printf("Duration: %f, clip runtime: %ld\n", duration_counter, clip_runtime);
+
             if (duration_counter >= (double) this->clip_runtime) {
                 this->takeSnapshot();
                 duration_counter = 0.0;
