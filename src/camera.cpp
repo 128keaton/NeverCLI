@@ -29,13 +29,20 @@ namespace never {
     void Camera::setupLogger() {
         string log_file_output = generateOutputFilename(this->camera_name, this->output_path, log);
         try {
+            std::vector<spdlog::sink_ptr> sinks;
+
             auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
             console_sink->set_level(spdlog::level::trace);
 
-            auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_output, 1024*1024*10, 3);
-            file_sink->set_level(spdlog::level::trace);
+            sinks.push_back(console_sink);
 
-            std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
+            // Disables log file output if using systemd
+            if (!getenv("INVOCATION_ID")) {
+                auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_output,1024 * 1024 * 10, 3);
+                file_sink->set_level(spdlog::level::trace);
+                sinks.push_back(file_sink);
+            }
+
 
             logger = std::make_shared<spdlog::logger>(camera_name, sinks.begin(), sinks.end());
             logger->info("Initializing never-camera");
