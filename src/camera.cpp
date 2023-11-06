@@ -119,7 +119,19 @@ namespace never {
         if (snapshot_file) {
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, snapshot_file);
             curl_easy_perform(curl_handle);
-            fclose(snapshot_file);
+
+            unsigned char bytes[3];
+            fread(bytes, 3, 1, snapshot_file);
+
+
+            if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[1] == 0xff) {
+                fclose(snapshot_file);
+            } else {
+                printf("Invalid JPEG!\r\n");
+                printf("Bytes returned: %s\r\n", bytes);
+            }
+
+
         }
 
     }
