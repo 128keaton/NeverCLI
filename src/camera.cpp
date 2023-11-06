@@ -8,7 +8,6 @@
 #include "common.h"
 #include <regex>
 
-
 namespace never {
     Camera::Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path) {
         this->error_count = 0;
@@ -24,6 +23,22 @@ namespace never {
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
         av_log_set_level(AV_LOG_QUIET);
+        this->setupLogger();
+    }
+
+    void Camera::setupLogger() {
+        string log_file_output = generateOutputFilename(this->camera_name, this->output_path, log);
+        try {
+            logger = spdlog::basic_logger_mt(this->camera_name, log_file_output);
+            logger->set_level(spdlog::level::trace);
+            logger->info("Initializing never-camera");
+            logger->flush();
+            logger->flush_on(spdlog::level::err);
+        }
+        catch (const spdlog::spdlog_ex &ex) {
+            std::cout << "Log init failed: " << ex.what() << std::endl;
+            logger = spdlog::stdout_color_mt("console");
+        }
     }
 
     bool Camera::connect() {
@@ -67,7 +82,7 @@ namespace never {
 
     bool Camera::handleError(const string &message, bool close_input) {
         this->error_count += 1;
-        printf("ERROR: %s\n", message.c_str());
+        logger->error(message);
 
         if (close_input)
             avformat_close_input(&this->input_format_context);
@@ -81,9 +96,12 @@ namespace never {
         return written;
     }
 
+    /**
+     * Take a camera snapshot
+     */
     void Camera::takeSnapshot() {
         FILE *snapshot_file;
-        string snapshot_file_str = generateOutputFilename(this->camera_name, this->output_path, false);
+        string snapshot_file_str = generateOutputFilename(this->camera_name, this->output_path, image);
 
         if (curl_handle == nullptr) {
             curl_global_init(CURL_GLOBAL_ALL);
@@ -120,26 +138,33 @@ namespace never {
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, snapshot_file);
             curl_easy_perform(curl_handle);
 
-            unsigned char bytes[3];
-            fread(bytes, 3, 1, snapshot_file);
-
-
-            if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[1] == 0xff) {
-                fclose(snapshot_file);
-            } else {
-                printf("Invalid JPEG!\r\n");
-                printf("Bytes returned: %s\r\n", bytes);
-            }
-
-
+            fclose(snapshot_file);
+            this->validateSnapshot(snapshot_file_str);
         }
 
     }
 
-    int Camera::startRecording(long _clip_runtime, volatile bool &did_finish) {
-        if (did_finish)
-            return EXIT_SUCCESS;
 
+    /**
+     * Validate a snapshot given at the file path
+     * @param snapshot_file_path
+     */
+    void Camera::validateSnapshot(string snapshot_file_path) {
+        FILE *snapshot_file = fopen(snapshot_file_path.c_str(), "r");
+
+        unsigned char bytes[3];
+        fread(bytes, 3, 1, snapshot_file);
+
+        if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[2] == 0xff) {
+            fclose(snapshot_file);
+            this->logger->debug("Wrote snapshot to {}", snapshot_file_path);
+        } else {
+            this->logger->error("Invalid JPEG!\r\n");
+            remove(snapshot_file_path.c_str());
+        }
+    }
+
+    int Camera::startRecording(long _clip_runtime) {
         if (this->clip_runtime != _clip_runtime) this->clip_runtime = _clip_runtime;
         if (!this->connected) {
             bool did_connect = connect();
@@ -147,12 +172,13 @@ namespace never {
                 return handleError("Could not connect to camera", false);
         }
 
-        return this->record(did_finish);
+        this->logger->info("{} starting to record", this->camera_name);
+        return this->record();
     }
 
 
     int Camera::setupMuxer() {
-        string output_file_str = generateOutputFilename(this->camera_name, this->output_path, true);
+        string output_file_str = generateOutputFilename(this->camera_name, this->output_path, video);
 
         // Segment muxer
         output_format = (AVOutputFormat *) av_guess_format("segment", output_file_str.c_str(), nullptr);
@@ -196,7 +222,7 @@ namespace never {
         return EXIT_SUCCESS;
     }
 
-    int Camera::record(volatile bool &did_finish) {
+    int Camera::record() {
         double duration_counter = 0;
         AVPacket *packet;
 
@@ -212,19 +238,25 @@ namespace never {
         // Keep track of last packet's pts
         int64_t last_pts = 0;
 
+        // Keep track of packet's duration
+        int64_t  duration = 0;
+
         // Read the packets incoming
-        while (av_read_frame(input_format_context, packet) >= 0 && !did_finish) {
+        while (av_read_frame(input_format_context, packet) >= 0) {
             if (packet->pts < 0) {
                 av_packet_unref(packet);
                 continue;
             }
 
             if (packet->stream_index != input_index) {
-                printf("Not right index");
+                logger->error("Not right index");
                 continue;
             }
 
-            if (packet->duration == 0) {
+            // This is _literally_ just to keep clang happy i.e. not marking it as unreachable
+            duration += packet->duration;
+
+            if (duration == 0) {
                 packet->duration = packet->pts - last_pts;
             }
 
@@ -239,6 +271,7 @@ namespace never {
 
             if (duration_counter >= (double) this->clip_runtime) {
                 this->takeSnapshot();
+                this->logger->flush();
                 duration_counter = 0.0;
             }
 
@@ -255,6 +288,8 @@ namespace never {
         avcodec_close(input_codec_context);
         avformat_flush(output_format_context);
         av_packet_free(&packet);
+
+        this->logger->info("{} stopping recording", this->camera_name);
 
         return EXIT_SUCCESS;
     }

@@ -22,6 +22,10 @@ extern "C" {
 #include <iostream>
 #include <thread>
 #include <curl/curl.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/fmt/bin_to_hex.h>
 
 using string = std::string;
 
@@ -30,7 +34,7 @@ namespace never {
     public:
         Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path);
         bool connect();
-        int startRecording(long _clip_runtime, volatile bool &did_finish);
+        int startRecording(long _clip_runtime);
         int clipCount();
 
     private:
@@ -41,6 +45,7 @@ namespace never {
         AVFormatContext *output_format_context;
         AVStream *output_stream;
         CURL *curl_handle;
+        std::shared_ptr<spdlog::logger> logger;
 
         const char *camera_name;
         const char *stream_url;
@@ -53,9 +58,11 @@ namespace never {
         long clip_runtime = 0;
         int error_count = 0;
 
-        int record(volatile bool &did_finish);
+        int record();
         int setupMuxer();
         void takeSnapshot();
+        void setupLogger();
+        void validateSnapshot(string snapshot_file_path);
         bool handleError(const string &message, bool close_input = true);
     };
 

@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(json)
 
 find_package(PkgConfig REQUIRED)
 find_package(CURL REQUIRED)
+find_package(spdlog REQUIRED)
 
 pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         libavdevice
@@ -40,3 +41,4 @@ target_link_libraries(never_cli PRIVATE ${CURL_LIBRARIES})
 target_link_libraries(never_cli PUBLIC "-lm")
 target_link_libraries(never_cli PRIVATE PkgConfig::LIBAV)
 target_link_libraries(never_cli PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(never_cli PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)

@@ -22,7 +22,8 @@ extern "C" {
 using string = std::string;
 
 namespace never {
-    string generateOutputFilename(const string& name, const string& output_path, bool is_video = true);
+    enum FileType { video, image, log };
+    string generateOutputFilename(const string& name, const string& output_path, FileType file_type);
     void replaceFirst(string &s, string const &to_replace, string const &with);
     string getUsername(std::string const &value);
     string getPassword(std::string const &value);

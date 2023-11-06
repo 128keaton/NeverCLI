@@ -1,11 +1,10 @@
 #include "camera.h"
-#include <csignal>
+#include <thread>
 
-volatile bool did_finish = false;
 
-void force_finish([[maybe_unused]] int code) {
-    printf("Bye!\n");
-    did_finish = true;
+
+void start_recording(never::Camera *camera, long clip_runtime) {
+    camera->startRecording(clip_runtime);
 }
 
 int main(int argc, char **argv) {
@@ -33,11 +32,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    int return_state = EXIT_SUCCESS;
-    std::signal(SIGINT, force_finish);
-    return_state = camera->startRecording(clip_runtime, did_finish);
-
-
-    return return_state;
+    std::thread t1(start_recording, camera, clip_runtime);
+    t1.join();
 }
 

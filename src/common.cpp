@@ -11,29 +11,51 @@ using path = std::filesystem::path;
 namespace fs = std::filesystem;
 
 namespace never {
-    string generateOutputFilename(const string &name, const string &output_path, bool is_video) {
+    string append_timestamp(string &current) {
+        char buf[1024];
+        time_t now0;
+        struct tm *tm, temp_buffer{};
+        time(&now0);
+        tm = localtime_r(&now0, &temp_buffer);
+        strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", tm);
+        current.append(buf);
+        return current;
+    }
+
+    string generateOutputFilename(const string &name, const string &output_path, FileType file_type) {
         string file_name;
 
         file_name.append(name);
         file_name.append("-");
 
-        if (!is_video) {
-            char buf[1024];
-            time_t now0;
-            struct tm *tm, tmpbuf{};
-            time(&now0);
-            tm = localtime_r(&now0, &tmpbuf);
-            strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", tm);
-            file_name.append(buf);
-        } else {
-            file_name.append("%Y-%m-%d_%H-%M-%S");
+        switch (file_type) {
+            case video:
+                file_name.append("%Y-%m-%d_%H-%M-%S");
+                file_name.append(".mp4");
+                break;
+            case image:
+                file_name = append_timestamp(file_name);
+                file_name.append(".jpeg");
+                break;
+            case log:
+                file_name.append("log.txt");
+                break;
         }
 
 
-        file_name.append(is_video == 1 ? ".mp4" : ".jpeg");
 
         path file_path = output_path;
-        file_path /= (is_video ? "videos" : "snapshots");
+
+        switch (file_type) {
+            case video:
+                file_path /= ("videos");
+                break;
+            case image:
+                file_path /= ("snapshots");
+                break;
+            case log:
+                file_path /= ("logs");
+        }
 
         fs::create_directory(file_path);
 
