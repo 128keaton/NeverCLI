@@ -5,7 +5,6 @@
 #include <libavformat/avformat.h>
 #include "common.h"
 
-using json = nlohmann::json;
 using string = std::string;
 using path = std::filesystem::path;
 namespace fs = std::filesystem;

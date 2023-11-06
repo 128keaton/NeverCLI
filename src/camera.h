@@ -23,19 +23,20 @@ extern "C" {
 #include <thread>
 #include <curl/curl.h>
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/fmt/bin_to_hex.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 using string = std::string;
 
 namespace never {
     class Camera {
     public:
-        Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path);
+        Camera(const string &camera_name, const string &stream_url, const string &snapshot_url, const string &output_path);
         bool connect();
         int startRecording(long _clip_runtime);
         int clipCount();
+        string getName();
 
     private:
         AVCodecContext *input_codec_context;

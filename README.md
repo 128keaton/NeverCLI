@@ -21,3 +21,18 @@ cmake --build cmake-build-debug
 
 Binary is available at `./cmake-build-debug/never_cli`
 
+## Usage
+
+The binary expects to be passed the path to a JSON file containing the following:
+
+```json
+{
+	"streamURL": "rtsp://camera/Streaming/Channels/101/",
+	"snapshotURL": "http://camera/ISAPI/Streaming/Channels/101/picture",
+	"outputPath": "./",
+	"splitEvery": 30
+}
+```
+(replacing the appropriate details)
+
+systemd support is _coming_ since PID files are written to working directory

@@ -9,13 +9,13 @@
 #include <regex>
 
 namespace never {
-    Camera::Camera(const char *camera_name, const char *stream_url, const char *snapshot_url, const char *output_path) {
+    Camera::Camera(const string &camera_name, const string &stream_url, const string &snapshot_url, const string &output_path) {
         this->error_count = 0;
-        this->camera_name = camera_name;
+        this->camera_name = camera_name.c_str();
         this->input_format_context = avformat_alloc_context();
-        this->stream_url = stream_url;
-        this->snapshot_url = snapshot_url;
-        this->output_path = output_path;
+        this->stream_url = stream_url.c_str();
+        this->snapshot_url = snapshot_url.c_str();
+        this->output_path = output_path.c_str();
         this->output_stream = nullptr;
         this->output_format = nullptr;
         this->output_format_context = nullptr;
@@ -29,9 +29,17 @@ namespace never {
     void Camera::setupLogger() {
         string log_file_output = generateOutputFilename(this->camera_name, this->output_path, log);
         try {
-            logger = spdlog::basic_logger_mt(this->camera_name, log_file_output);
-            logger->set_level(spdlog::level::trace);
+            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            console_sink->set_level(spdlog::level::trace);
+
+            auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_output, 1024*1024*10, 3);
+            file_sink->set_level(spdlog::level::trace);
+
+            std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
+
+            logger = std::make_shared<spdlog::logger>(camera_name, sinks.begin(), sinks.end());
             logger->info("Initializing never-camera");
+
             logger->flush();
             logger->flush_on(spdlog::level::err);
         }
@@ -103,6 +111,7 @@ namespace never {
         FILE *snapshot_file;
         string snapshot_file_str = generateOutputFilename(this->camera_name, this->output_path, image);
 
+        this->logger->info("Taking snapshot");
         if (curl_handle == nullptr) {
             curl_global_init(CURL_GLOBAL_ALL);
             curl_handle = curl_easy_init();
@@ -139,6 +148,7 @@ namespace never {
             curl_easy_perform(curl_handle);
 
             fclose(snapshot_file);
+            this->logger->info("Validating snapshot");
             this->validateSnapshot(snapshot_file_str);
         }
 
@@ -270,6 +280,7 @@ namespace never {
             av_interleaved_write_frame(output_format_context, packet);
 
             if (duration_counter >= (double) this->clip_runtime) {
+                this->logger->info("Finished clip with duration {}, starting new clip", duration_counter);
                 this->takeSnapshot();
                 this->logger->flush();
                 duration_counter = 0.0;
@@ -290,8 +301,11 @@ namespace never {
         av_packet_free(&packet);
 
         this->logger->info("{} stopping recording", this->camera_name);
-
         return EXIT_SUCCESS;
+    }
+
+    string Camera::getName() {
+        return this->camera_name;
     }
 
     int Camera::clipCount() {
