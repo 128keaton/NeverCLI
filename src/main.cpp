@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
     if (getenv("INVOCATION_ID")) {
         spdlog::info("INVOCATION_ID is set, meaning we are running from systemd");
-        string pid_file_name = string("/var/run/never/");
+        string pid_file_name = string("/run/");
         pid_file_name.append(stream_name);
         pid_file_name.append(".pid");
 
