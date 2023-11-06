@@ -19,7 +19,7 @@ then
 cmake --build cmake-build-debug   
 ```
 
-Binary is available at `./cmake-build-debug/never_cli`
+Binary is available at `./cmake-build-debug/never_stream`
 
 ## Usage
 

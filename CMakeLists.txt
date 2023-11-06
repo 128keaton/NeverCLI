@@ -25,20 +25,23 @@ pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         libavutil
 )
 
-add_executable(never_cli
-        src/main.cpp
-        src/common.cpp
-        src/common.h
-        src/camera.cpp
-        src/camera.h
+add_executable(never_stream
+        never_stream/main.cpp
+        never_stream/common.cpp
+        never_stream/common.h
+        never_stream/camera.cpp
+        never_stream/camera.h
+        never_service_gen/main.cpp
 )
 
 
 
 include_directories(${CURL_INCLUDE_DIR})
 
-target_link_libraries(never_cli PRIVATE ${CURL_LIBRARIES})
-target_link_libraries(never_cli PUBLIC "-lm")
-target_link_libraries(never_cli PRIVATE PkgConfig::LIBAV)
-target_link_libraries(never_cli PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(never_cli PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+target_link_libraries(never_stream PRIVATE ${CURL_LIBRARIES})
+target_link_libraries(never_stream PUBLIC "-lm")
+target_link_libraries(never_stream PRIVATE PkgConfig::LIBAV)
+target_link_libraries(never_stream PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(never_stream PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+
+add_executable(never_service_gen never_service_gen/main.cpp)
