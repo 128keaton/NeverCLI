@@ -37,22 +37,6 @@ The binary expects to be passed the path to a JSON file containing the following
 
 ### systemd
 
-An example systemd file is shown below:
-```systemd
-[Unit]
-Description=Never Camera 1
-After=syslog.target network.target
-
-[Service]
-User=root
-Type=forking
-PIDFile=camera-1.pid
-ExecStart=/usr/local/bin/never_cli /nvr/cameras/camera-1.json
-ExecStop=/usr/local/bin/never_cli /nvr/cameras/camera-1.json
-TimeoutSec=100
-TimeoutStopSec=300
-RemainAfterExit=yes
-WorkingDirectory=/nvr
-```
+An example systemd file is included in the root of the repository (`camera-1.service`).
 
 This assumes you have a directory at root called `nvr`, this also assumes you have copied your compiled binary into `/usr/local/bin`
