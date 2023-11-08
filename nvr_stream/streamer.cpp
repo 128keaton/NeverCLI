@@ -44,6 +44,7 @@ namespace nvr {
     }
 
     int Streamer::start() {
+        int return_state = 0;
         GstStateChangeReturn ret;
         GstMessage *msg;
 
@@ -127,10 +128,9 @@ namespace nvr {
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
-
+                g_object_set(G_OBJECT(appData.encoder), "rate-tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 65, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
             }
 
 
@@ -182,12 +182,15 @@ namespace nvr {
                     logger->error("Debugging information: {}", debug_info ? debug_info : "none");
                     g_clear_error(&err);
                     g_free(debug_info);
+                    return_state = EXIT_FAILURE;
                     break;
                 case GST_MESSAGE_EOS:
                     logger->info("End-Of-Stream reached.");
+                    return_state = EXIT_SUCCESS;
                     break;
                 default:
                     logger->info("Unexpected message received.");
+                    return_state = EXIT_FAILURE;
                     break;
             }
             gst_message_unref(msg);
@@ -195,7 +198,7 @@ namespace nvr {
 
         /* Free resources */
         quit();
-        return 0;
+        return return_state;
     }
 
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
