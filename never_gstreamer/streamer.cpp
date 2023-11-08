@@ -2,13 +2,11 @@
 // Created by Keaton Burleson on 11/7/23.
 //
 
-#include "stream.h"
 #include <gst/gst.h>
 
-namespace never {
 
 
-    int stream::start() {
+    int main() {
         auto loop = g_main_loop_new (nullptr, FALSE);
 
         GstElement *pipeline, *video_src, *depay, *parse, *dec,*enc, *pay, *udp;
@@ -54,4 +52,3 @@ namespace never {
 
         return 0;
     }
-} // never
