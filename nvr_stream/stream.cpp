@@ -36,7 +36,6 @@ void startStreaming() {
 void spawnStreaming(const std::function<void()>& callback)
 {
     std::thread stream(startStreaming);
-    stream.detach();
     callback();
 }
 
