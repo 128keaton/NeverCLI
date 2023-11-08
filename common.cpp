@@ -34,65 +34,51 @@ namespace nvr {
         const string stream_url = config["streamURL"];
         const string snapshot_url = config["snapshotURL"];
         const string output_path = config["outputPath"];
+        const string ip_address = config["ipAddress"];
+        const string rtsp_username = config["rtspUsername"];
+        const string rtsp_password = config["rtspPassword"];
 
         return {
-            stream_url,
-            snapshot_url,
-            output_path,
-            stream_name,
-            clip_runtime,
-            rtp_port
+                stream_url,
+                snapshot_url,
+                output_path,
+                stream_name,
+                ip_address,
+                rtsp_username,
+                rtsp_password,
+                clip_runtime,
+                rtp_port
         };
     }
 
-    int spawnTask(const string &pid_file_name) {
-        pid_t pid;
+    bool isReachable(const string &ip_addr) {
+        CURL *connection;
+        CURLcode res;
+        bool reachable = false;
 
-        /* Fork off the parent process */
-        pid = fork();
+        connection = curl_easy_init();
 
-        /* An error occurred */
-        if (pid < 0)
-            exit(EXIT_FAILURE);
+        string url = string("http://").append(ip_addr);
 
-        /* Success: Let the parent terminate */
-        if (pid > 0) {
-            exit(EXIT_SUCCESS);
+
+        if (connection) {
+            curl_easy_setopt(connection, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(connection, CURLOPT_CUSTOMREQUEST, "OPTIONS");
+            /* issue an OPTIONS * request (no leading slash) */
+            curl_easy_setopt(connection, CURLOPT_REQUEST_TARGET, "*");
+
+            /* if this operation fails, allow risking a memory leak and do quick exit
+               from libcurl as this will exit() anyway */
+            curl_easy_setopt(connection, CURLOPT_QUICK_EXIT, 1L);
+            res = curl_easy_perform(connection);
+
+            if (res == CURLE_OK)
+                reachable = true;
+
+            curl_easy_cleanup(connection);
         }
 
-        /* On success: The child process becomes session leader */
-        if (setsid() < 0)
-            exit(EXIT_FAILURE);
-
-        /* Fork off for the second time*/
-        pid = fork();
-
-        /* An error occurred */
-        if (pid < 0)
-            exit(EXIT_FAILURE);
-
-        /* Success: Let the parent terminate */
-        if (pid > 0)
-            exit(EXIT_SUCCESS);
-
-        int curr_pid = getpid();
-        nvr::writePID(curr_pid, pid_file_name);
-        return curr_pid;
-    }
-
-    pid_t readPID(const string &pid_file_name) {
-        ifstream pid_file(pid_file_name.c_str());
-        if (!pid_file.is_open()) {
-            remove(pid_file_name.c_str());
-            return 0;
-        }
-
-        int number;
-        while (pid_file >> number) {
-        }
-
-        pid_file.close();
-        return number;
+        return reachable;
     }
 
     void writePID(pid_t pid, const string &pid_file_name) {

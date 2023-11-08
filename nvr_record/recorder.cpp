@@ -4,18 +4,20 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-no-recursion"
 
-#include "camera.h"
+#include "recorder.h"
 #include "../common.h"
-#include <regex>
 
 namespace nvr {
-    Camera::Camera(const CameraConfig &config) {
+    Recorder::Recorder(const CameraConfig &config) {
         this->error_count = 0;
-        this->camera_name = config.stream_name.c_str();
+        this->camera_name = config.stream_name;
         this->input_format_context = avformat_alloc_context();
-        this->stream_url = config.stream_url.c_str();
-        this->snapshot_url = config.snapshot_url.c_str();
-        this->output_path = config.output_path.c_str();
+        this->stream_url = config.stream_url;
+        this->snapshot_url = config.snapshot_url;
+        this->output_path = config.output_path;
+        this->rtsp_username = config.rtsp_username;
+        this->rtsp_password = config.rtsp_password;
+        this->ip_address = config.ip_address;
         this->output_stream = nullptr;
         this->output_format = nullptr;
         this->output_format_context = nullptr;
@@ -26,7 +28,7 @@ namespace nvr {
         this->logger = buildLogger(config);
     }
 
-    bool Camera::connect() {
+    bool Recorder::connect() {
         if (this->connected) return this->connected;
 
         this->input_index = -1;
@@ -34,13 +36,26 @@ namespace nvr {
         AVDictionary *params = nullptr;
         av_dict_set(&params, "rtsp_flags", "prefer_tcp", AV_DICT_APPEND);
 
-        if (avformat_open_input(&input_format_context, stream_url, nullptr, &params) != 0)
+        const string full_stream_url = string("rtsp://")
+                .append(this->rtsp_username)
+                .append(":")
+                .append(this->rtsp_password)
+                .append("@")
+                .append(this->ip_address)
+                .append(":554")
+                .append(this->stream_url);
+
+        this->logger->info("Opening connection to '{}'", full_stream_url);
+
+        if (avformat_open_input(&input_format_context, full_stream_url.c_str(), nullptr, &params) != 0)
             return handleError("Cannot open input file", false);
 
 
         // Get RTSP stream info
         if (avformat_find_stream_info(input_format_context, nullptr) < 0)
             return handleError("Cannot find stream info");
+
+        this->logger->info("Connected to '{}'", full_stream_url);
 
         // Find the video stream
         for (int i = 0; i < input_format_context->nb_streams; i++) {
@@ -65,7 +80,7 @@ namespace nvr {
         return true;
     }
 
-    bool Camera::handleError(const string &message, bool close_input) {
+    bool Recorder::handleError(const string &message, bool close_input) {
         this->error_count += 1;
         logger->error(message);
 
@@ -84,31 +99,18 @@ namespace nvr {
     /**
      * Take a camera snapshot
      */
-    void Camera::takeSnapshot() {
+    void Recorder::takeSnapshot() {
         FILE *snapshot_file;
         string snapshot_file_str = generateOutputFilename(this->camera_name, this->output_path, image);
+        string full_snapshot_url = string("http://").append(this->ip_address).append(this->snapshot_url);
 
-        this->logger->info("Taking snapshot");
+        this->logger->info("Taking snapshot from URL '{}'", full_snapshot_url);
+
         if (curl_handle == nullptr) {
             curl_global_init(CURL_GLOBAL_ALL);
             curl_handle = curl_easy_init();
 
-            // Probably not the best way to handle this all but its w/e
-            std::regex rgx("(\\w+?:.+@)?");
-            std::smatch matches;
 
-            string snapshot_url_str = string(this->snapshot_url);
-            replaceFirst(snapshot_url_str, "http://", "");
-
-            string username, password;
-
-            if (std::regex_search(snapshot_url_str, matches, rgx)) {
-                username = getUsername(matches[0]);
-                password = getPassword(matches[0]);
-            }
-
-            curl_easy_setopt(curl_handle, CURLOPT_USERNAME, username.c_str());
-            curl_easy_setopt(curl_handle, CURLOPT_PASSWORD, password.c_str());
             curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
             curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, handleSnapshot);
 
@@ -117,8 +119,13 @@ namespace nvr {
             curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
         }
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, this->snapshot_url);
+        curl_easy_setopt(curl_handle, CURLOPT_USERNAME, this->rtsp_username.c_str());
+        curl_easy_setopt(curl_handle, CURLOPT_PASSWORD, this->rtsp_password.c_str());
+        curl_easy_setopt(curl_handle, CURLOPT_URL, full_snapshot_url.c_str());
+
         snapshot_file = fopen(snapshot_file_str.c_str(), "wb");
+
+        this->logger->info("Saving snapshot to '{}'", snapshot_file_str);
 
         if (snapshot_file) {
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, snapshot_file);
@@ -128,7 +135,6 @@ namespace nvr {
             this->logger->info("Validating snapshot");
             this->validateSnapshot(snapshot_file_str);
         }
-
     }
 
 
@@ -136,7 +142,7 @@ namespace nvr {
      * Validate a snapshot given at the file path
      * @param snapshot_file_path
      */
-    void Camera::validateSnapshot(string snapshot_file_path) {
+    void Recorder::validateSnapshot(string snapshot_file_path) {
         FILE *snapshot_file = fopen(snapshot_file_path.c_str(), "r");
 
         unsigned char bytes[3];
@@ -151,7 +157,7 @@ namespace nvr {
         }
     }
 
-    int Camera::startRecording(long _clip_runtime) {
+    int Recorder::startRecording(long _clip_runtime) {
         if (this->clip_runtime != _clip_runtime) this->clip_runtime = _clip_runtime;
         if (!this->connected) {
             bool did_connect = connect();
@@ -164,7 +170,7 @@ namespace nvr {
     }
 
 
-    int Camera::setupMuxer() {
+    int Recorder::setupMuxer() {
         string output_file_str = generateOutputFilename(this->camera_name, this->output_path, video);
 
         // Segment muxer
@@ -209,7 +215,7 @@ namespace nvr {
         return EXIT_SUCCESS;
     }
 
-    int Camera::record() {
+    int Recorder::record() {
         double duration_counter = 0;
         AVPacket *packet;
 
@@ -226,7 +232,7 @@ namespace nvr {
         int64_t last_pts = 0;
 
         // Keep track of packet's duration
-        int64_t  duration = 0;
+        int64_t duration = 0;
 
         // Read the packets incoming
         while (av_read_frame(input_format_context, packet) >= 0) {
@@ -281,12 +287,12 @@ namespace nvr {
         return EXIT_SUCCESS;
     }
 
-    string Camera::getName() {
+    string Recorder::getName() {
         return this->camera_name;
     }
 
-    int Camera::clipCount() {
+    int Recorder::clipCount() {
         return countClips(output_path, camera_name);
     }
-} // never
+} // nvr
 #pragma clang diagnostic pop

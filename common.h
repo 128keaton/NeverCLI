@@ -16,6 +16,7 @@
 #include <thread>
 #include <cstdio>
 #include <unistd.h>
+#include <curl/curl.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -34,6 +35,9 @@ namespace nvr {
         string snapshot_url;
         string output_path;
         string stream_name;
+        string ip_address;
+        string rtsp_username;
+        string rtsp_password;
         const long clip_runtime;
         const int rtp_port;
     };

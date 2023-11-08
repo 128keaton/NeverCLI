@@ -2,8 +2,8 @@
 // Created by Keaton Burleson on 11/2/23.
 //
 
-#ifndef NEVER_CLI_CAMERA_H
-#define NEVER_CLI_CAMERA_H
+#ifndef NEVER_CLI_RECORDER_H
+#define NEVER_CLI_RECORDER_H
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -31,12 +31,16 @@ extern "C" {
 using string = std::string;
 
 namespace nvr {
-    class Camera {
+    class Recorder {
     public:
-        Camera(const CameraConfig &config);
+        Recorder(const CameraConfig &config);
+
         bool connect();
+
         int startRecording(long _clip_runtime);
+
         int clipCount();
+
         string getName();
 
     private:
@@ -49,10 +53,13 @@ namespace nvr {
         CURL *curl_handle;
         std::shared_ptr<spdlog::logger> logger;
 
-        const char *camera_name;
-        const char *stream_url;
-        const char *snapshot_url;
-        const char *output_path;
+        string camera_name;
+        string stream_url;
+        string snapshot_url;
+        string output_path;
+        string rtsp_username;
+        string rtsp_password;
+        string ip_address;
 
 
         bool connected = false;
@@ -61,12 +68,16 @@ namespace nvr {
         int error_count = 0;
 
         int record();
+
         int setupMuxer();
+
         void takeSnapshot();
+
         void validateSnapshot(string snapshot_file_path);
+
         bool handleError(const string &message, bool close_input = true);
     };
 
 } // never
 
-#endif //NEVER_CLI_CAMERA_H
+#endif //NEVER_CLI_RECORDER_H
