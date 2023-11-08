@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
 
     signal(SIGINT, quit);
     spawnStreaming([] {
-        return handleJanus();
+       fork();
+       handleJanus();
     });
 
     return return_code;
