@@ -35,20 +35,19 @@ namespace nvr {
     }
 
     void Streamer::quit() {
-        if (!quitting)
+        if (!quitting) {
+            quitting = true;
             this->logger->info("Exiting...");
+            if (this->bus != nullptr) {
+                gst_object_unref(bus);
+            }
 
-        if (this->bus != nullptr && !quitting)
-            gst_object_unref(bus);
+            if (this->appData.pipeline != nullptr) {
+                gst_element_set_state(appData.pipeline, GST_STATE_NULL);
+                gst_object_unref(appData.pipeline);
+            }
 
-
-        if (this->appData.pipeline != nullptr && !quitting) {
-            gst_element_set_state(appData.pipeline, GST_STATE_NULL);
-            gst_object_unref(appData.pipeline);
-            this->appData.pipeline = nullptr;
         }
-
-        quitting = true;
     }
 
     int Streamer::start() {
@@ -147,12 +146,14 @@ namespace nvr {
 
 
             // add everything
-            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.decoder, appData.queue,
+            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.decoder,
+                             appData.queue,
                              appData.encoder,
                              appData.payloader, appData.sink, nullptr);
 
             // link everything except source
-            gst_element_link_many(appData.dePayloader, appData.decoder, appData.queue, appData.encoder, appData.payloader,
+            gst_element_link_many(appData.dePayloader, appData.decoder, appData.queue, appData.encoder,
+                                  appData.payloader,
                                   appData.sink, NULL);
 
         } else {
@@ -177,7 +178,6 @@ namespace nvr {
             gst_object_unref(appData.pipeline);
             return -1;
         }
-
 
 
         bus = gst_element_get_bus(appData.pipeline);
