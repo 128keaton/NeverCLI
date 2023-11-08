@@ -38,7 +38,6 @@ void spawnStreaming(const std::function<void()>& callback)
     std::thread stream(startStreaming);
     stream.detach();
     callback();
-    stream.join();
 }
 
 int main(int argc, char *argv[]) {
