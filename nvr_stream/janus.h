@@ -16,6 +16,7 @@ namespace nvr {
     public:
         Janus();
 
+        int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
 
     private:
