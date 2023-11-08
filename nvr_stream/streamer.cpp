@@ -4,6 +4,7 @@
 
 #include "../common.h"
 #include "streamer.h"
+#include "janus.h"
 #include <gst/gst.h>
 #include <string>
 #include <gst/gstpad.h>
@@ -174,6 +175,13 @@ namespace nvr {
             gst_object_unref(appData.pipeline);
             return -1;
         }
+
+
+        auto janus = Janus();
+        auto sessionID = janus.getSessionID();
+        auto handlerID = janus.getPluginHandlerID(sessionID);
+        auto streamList = janus.getStreamList();
+        janus.createStream(sessionID, handlerID, camera_name, 1, rtp_port);
 
         bus = gst_element_get_bus(appData.pipeline);
         msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
