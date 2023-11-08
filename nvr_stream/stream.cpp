@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     auto handlerID = janus.getPluginHandlerID(sessionID);
     spdlog::info("Session ID: {}, Handler ID: {}", sessionID, handlerID);
 
-    janus.createStream(sessionID, handlerID, "test", 2, 5122);
+    janus.createStream(sessionID, handlerID, "test", 1, 5123);
 
     exit(0);
     streamer = nvr::Streamer(config);

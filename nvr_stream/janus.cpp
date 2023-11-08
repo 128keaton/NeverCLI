@@ -107,6 +107,7 @@ namespace nvr {
 
 
         body["request"] = "create";
+        body["name"] = streamName;
         body["description"] = streamName;
         body["type"] = "rtp";
 
