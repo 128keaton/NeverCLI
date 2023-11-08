@@ -113,11 +113,18 @@ int start_pipeline(const string& rtsp_url, const int rtp_port) {
 
     appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
     appData.decoder = gst_element_factory_make("avdec_h265", "dec");
+    g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
+    g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
+    g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
     appData.encoder = gst_element_factory_make("x264enc", "enc");
     g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
     g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
     g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
+    g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
+    g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+    g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
+    g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
 
     appData.payloader = gst_element_factory_make("rtph264pay", "pay");
     g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
