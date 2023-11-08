@@ -180,10 +180,9 @@ int start_pipeline(const string& rtsp_url, const int rtp_port) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2 || argc > 2) {
-        spdlog::error("usage: %s camera-config.json\n"
-                      "i.e. %s ./cameras/camera-1.json\n"
-                      "Stream an RTSP camera to an RTP port.\n"
-                      "\n", argv[0], argv[0]);
+        spdlog::error("usage: {} camera-config.json\n"
+                      "i.e. {} ./cameras/camera-1.json\n"
+                      "Stream an RTSP camera to an RTP port.\n", argv[0], argv[0]);
         return 1;
     }
 
