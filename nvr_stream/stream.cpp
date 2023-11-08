@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     auto janus = nvr::Janus();
     spdlog::info(janus.getSessionID());
 
+    exit(0);
     streamer = nvr::Streamer(config);
     signal(SIGINT, quit);
 

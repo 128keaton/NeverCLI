@@ -60,16 +60,17 @@ namespace nvr {
             printf("Client: Error on send() call \n");
         }
 
-        std::string response;
+        std::string raw_response;
 
-        ssize_t n;
         char buf[1024] = { 0 };
 
         printf("Waiting for response\n");
 
         read(out_sock, buf, 1024 - 1);
-        response.append(buf);
+        raw_response.append(buf);
 
-        return response;
+        json response = json::parse(raw_response);
+
+        return response["data"]["id"];
     }
 }
