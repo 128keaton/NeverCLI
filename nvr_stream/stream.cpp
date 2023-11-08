@@ -4,6 +4,17 @@
 
 #include "streamer.h"
 
+
+nvr::Streamer streamer;
+
+void quit(int sig)
+{
+    if (streamer.valid())
+        streamer.quit();
+
+    exit(sig);
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2 || argc > 2) {
         spdlog::error("usage: {} camera-config.json\n"
@@ -12,10 +23,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    const char *config_file = argv[1];
-    const auto config = nvr::getConfig(config_file);
+    const auto config = nvr::getConfig(argv[1]);
 
-    auto streamer = nvr::Streamer(config);
+    streamer = nvr::Streamer(config);
+    signal(SIGINT, quit);
 
     return streamer.start();
 }

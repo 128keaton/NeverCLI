@@ -33,14 +33,14 @@ using string = std::string;
 namespace nvr {
     class Recorder {
     public:
+        Recorder();
+
         Recorder(const CameraConfig &config);
-
         bool connect();
-
         int startRecording(long _clip_runtime);
-
         int clipCount();
-
+        void quit();
+        bool valid();
         string getName();
 
     private:

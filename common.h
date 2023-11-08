@@ -13,7 +13,6 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <fstream>
 #include <csignal>
-#include <thread>
 #include <cstdio>
 #include <unistd.h>
 #include <curl/curl.h>

@@ -23,20 +23,24 @@ namespace nvr {
 
     class Streamer {
     public:
+        Streamer();
         explicit Streamer(const CameraConfig &config);
         int start();
+        void quit();
+        bool valid();
 
     private:
+        GstBus *bus{};
         StreamType type;
+        StreamData appData{};
         std::shared_ptr<spdlog::logger> logger;
-        int rtp_port;
+        int rtp_port{};
         string camera_name;
         string stream_url;
         string rtsp_username;
         string rtsp_password;
         string ip_address;
-        bool has_vaapi;
-        StreamData appData{};
+        bool has_vaapi{};
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
     };
 }

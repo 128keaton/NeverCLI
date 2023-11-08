@@ -9,6 +9,7 @@
 
 namespace nvr {
     Recorder::Recorder(const CameraConfig &config) {
+        av_log_set_level(AV_LOG_QUIET);
         this->error_count = 0;
         this->camera_name = config.stream_name;
         this->input_format_context = avformat_alloc_context();
@@ -24,8 +25,29 @@ namespace nvr {
         this->input_codec_context = nullptr;
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
-        av_log_set_level(AV_LOG_QUIET);
         this->logger = buildLogger(config);
+    }
+
+    void Recorder::quit() {
+        this->logger->info("Exiting...");
+
+        if (this->curl_handle != nullptr) {
+            curl_easy_cleanup(this->curl_handle);
+            curl_global_cleanup();
+        }
+
+        if (this->input_format_context != nullptr)
+            avformat_close_input(&this->input_format_context);
+
+        if (this->input_codec_context != nullptr)
+            avcodec_close(this->input_codec_context);
+
+        if (this->output_format_context != nullptr)
+            avformat_flush(this->output_format_context);
+    }
+
+    bool Recorder::valid() {
+        return this->logger != nullptr;
     }
 
     bool Recorder::connect() {
@@ -272,18 +294,11 @@ namespace nvr {
             av_packet_unref(packet);
         }
 
+        this->logger->warn("Recording loop exited");
 
-        this->error_count = 0;
-
-        curl_easy_cleanup(curl_handle);
-        curl_global_cleanup();
-
-        avformat_close_input(&input_format_context);
-        avcodec_close(input_codec_context);
-        avformat_flush(output_format_context);
+        quit();
         av_packet_free(&packet);
 
-        this->logger->info("{} stopping recording", this->camera_name);
         return EXIT_SUCCESS;
     }
 
@@ -293,6 +308,10 @@ namespace nvr {
 
     int Recorder::clipCount() {
         return countClips(output_path, camera_name);
+    }
+
+    Recorder::Recorder() {
+        this->logger = nullptr;
     }
 } // nvr
 #pragma clang diagnostic pop

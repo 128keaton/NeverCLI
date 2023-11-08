@@ -1,11 +1,14 @@
 #include "recorder.h"
 
-using std::thread;
+nvr::Recorder *recorder;
 
-int startRecording(nvr::Recorder *recorder, long clip_runtime) {
-    return recorder->startRecording(clip_runtime);
+void quit(int sig)
+{
+    if (recorder->valid())
+        recorder->quit();
+
+    exit(sig);
 }
-
 
 int main(int argc, char **argv) {
     if (argc < 2 || argc > 2) {
@@ -16,17 +19,18 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    const char *config_file = argv[1];
-    const auto config = nvr::getConfig(config_file);
+    const auto config = nvr::getConfig(argv[1]);
 
+    recorder = new nvr::Recorder(config);
 
-    auto *recorder = new nvr::Recorder(config);
+    signal(SIGINT, quit);
+
     if (!recorder->connect()) {
         spdlog::error("Could not connect\n");
         return EXIT_FAILURE;
     }
 
-    thread rec_thread(startRecording, recorder, config.clip_runtime);
-    rec_thread.join();
+
+    return recorder->startRecording(config.clip_runtime);
 }
 

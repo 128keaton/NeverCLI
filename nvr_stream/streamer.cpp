@@ -24,13 +24,28 @@ namespace nvr {
         this->rtsp_username = config.rtsp_username;
         this->rtp_port = config.rtp_port;
         this->stream_url = config.stream_url;
+        this->bus = nullptr;
     }
 
+    bool Streamer::valid() {
+        return this->logger != nullptr;
+    }
+
+    void Streamer::quit() {
+        this->logger->info("Exiting...");
+        if (this->bus != nullptr)
+            gst_object_unref(bus);
+
+
+        if (this->appData.pipeline != nullptr) {
+            gst_element_set_state(appData.pipeline, GST_STATE_NULL);
+            gst_object_unref(appData.pipeline);
+        }
+    }
 
     int Streamer::start() {
         GstStateChangeReturn ret;
         GstMessage *msg;
-        GstBus *bus;
 
         const string full_stream_url = string("rtsp://")
                 .append(this->rtsp_username)
@@ -56,7 +71,7 @@ namespace nvr {
             }
         }
 
-        gst_plugin_list_free (plugins);
+        gst_plugin_list_free(plugins);
 
 
         logger->info("Opening connection to '{}'", full_stream_url);
@@ -184,9 +199,7 @@ namespace nvr {
         }
 
         /* Free resources */
-        gst_object_unref(bus);
-        gst_element_set_state(appData.pipeline, GST_STATE_NULL);
-        gst_object_unref(appData.pipeline);
+        quit();
         return 0;
     }
 
@@ -229,6 +242,10 @@ namespace nvr {
             gst_caps_unref(new_pad_caps);
 
         gst_object_unref(sink_pad);
+    }
+
+    Streamer::Streamer() {
+        this->logger = nullptr;
     }
 }
 
