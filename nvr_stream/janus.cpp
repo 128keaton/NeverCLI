@@ -8,10 +8,11 @@ using json = nlohmann::json;
 
 namespace nvr {
     Janus::Janus() {
-        if ((sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
+        if ((out_sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
             printf("Client: Error on socket() call \n");
             exit(1);
         }
+
 
         struct sockaddr_un serv_addr{};
         bzero(&serv_addr, sizeof(serv_addr));
@@ -20,10 +21,12 @@ namespace nvr {
         strcpy(serv_addr.sun_path, "/tmp/nvr");
 
         printf("Client: Trying to connect... \n");
-        if (connect(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
+        if (connect(out_sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
             printf("Client: Error on connect call \n");
             exit(1);
         }
+
+
 
         printf("Client: Connected \n");
     }
@@ -53,7 +56,7 @@ namespace nvr {
         string request_str = request.dump(4);
 
         printf("sent\n");
-        if (send(sock, request_str.data(), request_str.size(), 0) == -1) {
+        if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
             printf("Client: Error on send() call \n");
         }
 
@@ -64,7 +67,7 @@ namespace nvr {
 
         printf("Waiting for response\n");
 
-        while((n = recv(sock, buf, sizeof(buf), 0)) > 0)
+        while((n = read(in_sock, buf, sizeof(buf))) > 0)
             response.append(buf, buf + n);
 
         return response;
