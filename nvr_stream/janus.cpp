@@ -106,7 +106,7 @@ namespace nvr {
 
         body["request"] = "create";
         body["description"] = streamName;
-        body["type"] = "rdp";
+        body["type"] = "rtp";
 
         media = json::array({media});
 
