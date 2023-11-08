@@ -23,6 +23,7 @@ namespace nvr {
         int64_t getSessionID();
 
     private:
+        json getStreamList();
         static string generateRandom();
         int out_sock;
 

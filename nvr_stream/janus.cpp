@@ -22,6 +22,15 @@ namespace nvr {
             exit(1);
         }
 
+        getStreamList();
+    }
+
+    json Janus::getStreamList() {
+        json request;
+
+        request["janus"] = "list";
+        json response = sendAndReceive(request);
+        return response;
     }
 
     string Janus::generateRandom() {
@@ -101,8 +110,8 @@ namespace nvr {
 
         media["mid"] = mid;
         media["type"] = "video";
-        media["port"] = port;
         media["videocodec"] = "h264";
+        media["videoport"] = port;
         media["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
 
