@@ -48,7 +48,7 @@ namespace nvr {
             this->appData.pipeline = nullptr;
         }
 
-        this->quitting = true;
+        quitting = true;
     }
 
     int Streamer::start() {
