@@ -21,7 +21,6 @@ namespace nvr {
     private:
         string generateRandom();
         int out_sock;
-        int in_sock;
     };
 }
 

@@ -67,7 +67,7 @@ namespace nvr {
 
         printf("Waiting for response\n");
 
-        read(in_sock, buf, sizeof(buf));
+        read(out_sock, buf, 1024 - 1);
         response.append(buf);
 
         return response;
