@@ -7,5 +7,6 @@
   "ipAddress": "10.2.5.70",
   "rtspUsername": "admin",
   "rtspPassword": "BlueVip2020",
-  "type": "h265"
+  "type": "h265",
+  "id": 1
 }

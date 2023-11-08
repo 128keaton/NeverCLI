@@ -21,6 +21,7 @@ namespace nvr {
         GstElement *sink;
         string stream_name;
         int64_t rtp_port;
+        int stream_id;
     } StreamData;
 
 

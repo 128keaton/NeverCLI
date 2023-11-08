@@ -28,6 +28,7 @@ namespace nvr {
         this->appData.rtp_port = this->rtp_port;
         this->appData.stream_name = this->camera_name;
         this->bus = nullptr;
+        this->appData.stream_id = config.stream_id;
     }
 
     bool Streamer::valid() {
@@ -255,8 +256,7 @@ namespace nvr {
             auto janus = Janus();
             auto sessionID = janus.getSessionID();
             auto handlerID = janus.getPluginHandlerID(sessionID);
-            janus.createStream(sessionID, handlerID, data->stream_name, sessionID, data->rtp_port);
-            janus.cleanup();
+            janus.createStream(sessionID, handlerID, data->stream_name, data->stream_id, data->rtp_port);
             spdlog::info("Streaming");
         }
 

@@ -39,6 +39,7 @@ namespace nvr {
         string rtsp_username;
         string rtsp_password;
         StreamType type;
+        int stream_id;
         const long clip_runtime;
         const int rtp_port;
     };
