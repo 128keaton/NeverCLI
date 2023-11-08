@@ -254,6 +254,7 @@ namespace nvr {
             auto handlerID = janus.getPluginHandlerID(sessionID);
             janus.createStream(sessionID, handlerID, data->stream_name, 1, data->rtp_port);
             janus.cleanup();
+            spdlog::info("Streaming");
         }
 
         exit:

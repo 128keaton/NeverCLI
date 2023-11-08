@@ -115,7 +115,7 @@ namespace nvr {
         media["codec"] = "h264";
         media["is_private"] = false;
         media["port"] = port;
-        media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
+      //  media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
 
         body["request"] = "create";
@@ -133,7 +133,7 @@ namespace nvr {
         request["body"] = body;
 
         json response = sendAndReceive(request);
-        spdlog::info("Stream create response\n {}", response.dump(4));
+        spdlog::info("Stream create response\n {}", response.dump());
 
         return true;
     }
