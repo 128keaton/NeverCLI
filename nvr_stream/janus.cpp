@@ -97,7 +97,9 @@ namespace nvr {
         json mediaItem;
         json media;
 
-        media["mid"] = streamID;
+        string mid = string(streamName).append("-").append(std::to_string(streamID));
+
+        media["mid"] = mid;
         media["type"] = "video";
         media["port"] = port;
         media["videocodec"] = "h264";
