@@ -63,12 +63,12 @@ namespace nvr {
         std::string response;
 
         ssize_t n;
-        char buf[256];
+        char buf[1024] = { 0 };
 
         printf("Waiting for response\n");
 
-        while((n = read(in_sock, buf, sizeof(buf))) > 0)
-            response.append(buf, buf + n);
+        read(in_sock, buf, sizeof(buf));
+        response.append(buf);
 
         return response;
     }
