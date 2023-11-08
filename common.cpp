@@ -67,9 +67,6 @@ namespace nvr {
             /* issue an OPTIONS * request (no leading slash) */
             curl_easy_setopt(connection, CURLOPT_REQUEST_TARGET, "*");
 
-            /* if this operation fails, allow risking a memory leak and do quick exit
-               from libcurl as this will exit() anyway */
-            curl_easy_setopt(connection, CURLOPT_QUICK_EXIT, 1L);
             res = curl_easy_perform(connection);
 
             if (res == CURLE_OK)
@@ -81,13 +78,6 @@ namespace nvr {
         return reachable;
     }
 
-    void writePID(pid_t pid, const string &pid_file_name) {
-        FILE *pid_file;
-
-        pid_file = fopen(pid_file_name.c_str(), "w");
-        fprintf(pid_file, "%d", pid);
-        fclose(pid_file);
-    }
 
     std::shared_ptr<spdlog::logger> buildLogger(const CameraConfig &config) {
         string log_file_output = generateOutputFilename(config.stream_name, config.output_path, log);
