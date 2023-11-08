@@ -110,7 +110,7 @@ namespace nvr {
         media["mid"] = mid;
         media["type"] = "video";
         media["videocodec"] = "h264";
-        media["videoport"] = port;
+        media["port"] = port;
         media["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
 
