@@ -69,6 +69,8 @@ namespace nvr {
     json Janus::sendAndReceive(const json &request) const {
         string request_str = request.dump(4);
 
+        spdlog::info("Sending: \n{}", request_str);
+
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
             printf("Client: Error on send() call \n");
         }
@@ -80,7 +82,10 @@ namespace nvr {
         read(out_sock, buf, 1024 - 1);
         raw_response.append(buf);
 
+        spdlog::info("Received: \n{}", raw_response);
+
         json response = json::parse(raw_response);
+
         return response;
     }
 
@@ -89,16 +94,23 @@ namespace nvr {
                         int64_t port) {
         json request;
         json body;
+        json mediaItem;
+        json media;
 
-        body["id"] = streamID;
-        body["name"] = streamName;
+        media["mid"] = streamID;
+        media["type"] = "video";
+        media["port"] = port;
+        media["videocodec"] = "h264";
+        media["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
+
+
+        body["request"] = "create";
         body["description"] = streamName;
         body["type"] = "rdp";
-        body["audio"] = false;
-        body["video"] = true;
-        body["videoport"] = port;
-        body["videocodec"] = "h264";
-        body["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
+
+        media = json::array({media});
+
+        body["media"] = media;
 
         request["janus"] = "message";
         request["session_id"] = sessionID;
