@@ -11,17 +11,22 @@
 #ifndef NEVER_CLI_JANUS_H
 #define NEVER_CLI_JANUS_H
 
+using json = nlohmann::json;
+
 namespace nvr {
     class Janus {
     public:
         Janus();
 
+        bool createStream(int64_t sessionID, int64_t handlerID, const string& streamName, int64_t streamID, int64_t port);
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
 
     private:
-        string generateRandom();
+        static string generateRandom();
         int out_sock;
+
+        [[nodiscard]] json sendAndReceive(const json& request) const;
     };
 }
 

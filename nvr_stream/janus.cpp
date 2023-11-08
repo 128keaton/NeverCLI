@@ -12,14 +12,13 @@ namespace nvr {
             exit(1);
         }
 
-
         struct sockaddr_un serv_addr{};
         bzero(&serv_addr, sizeof(serv_addr));
         serv_addr.sun_family = AF_UNIX;
 
         strcpy(serv_addr.sun_path, "/tmp/nvr");
 
-        if (connect(out_sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
+        if (connect(out_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1) {
             exit(1);
         }
 
@@ -42,25 +41,12 @@ namespace nvr {
 
 
     int64_t Janus::getSessionID() {
-
         json request;
+
         request["janus"] = "create";
         request["transaction"] = generateRandom();
 
-        string request_str = request.dump(4);
-
-        if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
-            printf("Client: Error on send() call \n");
-        }
-
-        std::string raw_response;
-
-        char buf[1024] = { 0 };
-
-        read(out_sock, buf, 1024 - 1);
-        raw_response.append(buf);
-
-        json response = json::parse(raw_response);
+        json response = sendAndReceive(request);
         json data = response["data"];
 
         return data["id"];
@@ -68,28 +54,61 @@ namespace nvr {
 
     int64_t Janus::getPluginHandlerID(int64_t sessionID) {
         json request;
+
         request["janus"] = "attach";
         request["session_id"] = sessionID;
         request["plugin"] = "janus.plugin.streaming";
         request["transaction"] = generateRandom();
 
+        json response = sendAndReceive(request);
+        json data = response["data"];
+
+        return data["id"];
+    }
+
+    json Janus::sendAndReceive(const json &request) const {
         string request_str = request.dump(4);
 
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
             printf("Client: Error on send() call \n");
         }
 
-        std::string raw_response;
+        string raw_response;
 
-        char buf[1024] = { 0 };
+        char buf[1024] = {0};
 
         read(out_sock, buf, 1024 - 1);
         raw_response.append(buf);
 
-        spdlog::info("Raw response: {}", raw_response);
         json response = json::parse(raw_response);
-        json data = response["data"];
+        return response;
+    }
 
-        return data["id"];
+    bool
+    Janus::createStream(int64_t sessionID, int64_t handlerID, const string &streamName, int64_t streamID,
+                        int64_t port) {
+        json request;
+        json body;
+
+        body["id"] = streamID;
+        body["name"] = streamName;
+        body["description"] = streamName;
+        body["type"] = "rdp";
+        body["audio"] = false;
+        body["video"] = true;
+        body["videoport"] = port;
+        body["videocodec"] = "h264";
+        body["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
+
+        request["janus"] = "message";
+        request["session_id"] = sessionID;
+        request["handle_id"] = handlerID;
+        request["transaction"] = generateRandom();
+        request["body"] = body;
+
+        json response = sendAndReceive(request);
+        spdlog::info("Stream create response\n {}", response.dump(4));
+
+        return true;
     }
 }
