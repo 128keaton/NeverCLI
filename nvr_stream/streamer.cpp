@@ -44,36 +44,18 @@ namespace nvr {
 
         gst_init(nullptr, nullptr);
 
-        GList *features, *f;
         GList *plugins, *p;
 
         plugins = gst_registry_get_plugin_list(gst_registry_get());
         for (p = plugins; p; p = p->next) {
             auto *plugin = static_cast<GstPlugin *>(p->data);
-
-            logger->info("PLUGIN: {}", gst_plugin_get_name(plugin));
-
-            features =
-                    gst_registry_get_feature_list_by_plugin (gst_registry_get (),
-                                                             gst_plugin_get_name (plugin));
-
-
-            for (f = features; f; f = f->next) {
-                auto *feature = static_cast<GstPluginFeature *>(f->data);
-                const gchar *name;
-                name = GST_OBJECT_NAME (feature);
-                if (strcmp(name, "vaapi") != 0) {
-                    this->has_vaapi = true;
-                    this->logger->info("Found vaapi plugin");
-                    break;
-                }
+            if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
+                has_vaapi = true;
+                logger->info("Found vaapi plugin");
+                break;
             }
-
-            if (!this->has_vaapi)
-                this->logger->warn("Could not find vaapi plugin");
-
-            gst_plugin_feature_list_free (features);
         }
+
         gst_plugin_list_free (plugins);
 
 
