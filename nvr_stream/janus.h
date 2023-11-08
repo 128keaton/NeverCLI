@@ -18,7 +18,7 @@ namespace nvr {
         string getSessionID();
 
     private:
-      string generateRandom(int len);
+      string generateRandom();
 
         int sock;
         int data_len;

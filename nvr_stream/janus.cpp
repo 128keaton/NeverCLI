@@ -14,18 +14,21 @@ namespace nvr {
         memset(recv_msg, 0, 255 * sizeof(char));
         memset(send_msg, 0, 255 * sizeof(char));
 
-        if ((sock = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1) {
+        if ((sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
             printf("Client: Error on socket() call \n");
             exit(1);
         }
 
-        remote.sun_family = AF_UNIX;
-        strcpy(remote.sun_path, "/tmp/nvr");
-        data_len = strlen(remote.sun_path) + sizeof(remote.sun_family);
+        struct sockaddr_un serv_addr{};
+        bzero(&serv_addr, sizeof(serv_addr));
+        serv_addr.sun_family = AF_UNIX;
+
+        strcpy(serv_addr.sun_path, "/tmp/.nvr");
+
 
 
         printf("Client: Trying to connect... \n");
-        if (connect(sock, (struct sockaddr *) &remote, data_len) == -1) {
+        if (bind(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
             printf("Client: Error on connect call \n");
             exit(1);
         }
@@ -33,15 +36,15 @@ namespace nvr {
         printf("Client: Connected \n");
     }
 
-    string Janus::generateRandom(const int len) {
+    string Janus::generateRandom() {
         static const char alphanum[] =
                 "0123456789"
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 "abcdefghijklmnopqrstuvwxyz";
         std::string tmp_s;
-        tmp_s.reserve(len);
+        tmp_s.reserve(15);
 
-        for (int i = 0; i < len; ++i) {
+        for (int i = 0; i < 15; ++i) {
             tmp_s += alphanum[random() % (sizeof(alphanum) - 1)];
         }
 
@@ -53,7 +56,7 @@ namespace nvr {
 
         json request;
         request["janus"] = "create";
-        request["transaction"] = generateRandom(15);
+        request["transaction"] = generateRandom();
 
         string request_str = request.dump();
 
