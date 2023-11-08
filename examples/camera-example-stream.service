@@ -1,0 +1,14 @@
+[Unit]
+Description=Stream NVR camera-1
+After=syslog.target network.target
+
+[Service]
+User=root
+Type=forking
+PIDFile=camera-1.pid
+ExecStart=/usr/local/bin/nvr_stream /nvr/cameras/camera-1.json
+ExecStop=/usr/local/bin/nvr_stream /nvr/cameras/camera-1.json
+TimeoutSec=100
+TimeoutStopSec=300
+RemainAfterExit=yes
+WorkingDirectory=/nvr

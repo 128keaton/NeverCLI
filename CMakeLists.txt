@@ -26,17 +26,16 @@ pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         libavutil
 )
 
-add_executable(never_stream
-        never_stream/main.cpp
+add_executable(nvr_record
+        nvr_record/main.cpp
         common.cpp
         common.h
-        never_stream/camera.cpp
-        never_stream/camera.h
+        nvr_record/camera.cpp
+        nvr_record/camera.h
 )
 
 
-target_include_directories(never_stream PUBLIC ${CURL_INCLUDE_DIR})
-target_link_libraries(never_stream PRIVATE ${CURL_LIBRARIES} PkgConfig::LIBAV -lm  nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+target_link_libraries(nvr_record PRIVATE CURL::libcurl PkgConfig::LIBAV -lm  nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 
 
 
@@ -47,10 +46,10 @@ pkg_check_modules(GSTLIBS REQUIRED
 )
 
 include_directories(${GSTLIBS_INCLUDE_DIRS})
-link_libraries(gstreamer-1.0 gobject-2.0 glib-2.0)
+link_libraries(gstreamer-1.0 gobject-2.0 glib-2.0 curl)
 link_directories(${GSTLIBS_LIBRARY_DIRS})
 
-add_executable(never_gstreamer  common.cpp common.h  never_gstreamer/streamer.cpp)
-add_executable(never_service_gen never_service_gen/service_gen.cpp)
+add_executable(nvr_stream  common.cpp common.h  nvr_stream/streamer.cpp)
+add_executable(nvr_service_gen nvr_service_gen/service_gen.cpp)
 
-target_link_libraries(never_gstreamer PRIVATE ${CURL_LIBRARIES} nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+target_link_libraries(nvr_stream PRIVATE nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
