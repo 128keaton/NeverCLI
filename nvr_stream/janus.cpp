@@ -19,8 +19,6 @@ namespace nvr {
 
         strcpy(serv_addr.sun_path, "/tmp/nvr");
 
-
-
         printf("Client: Trying to connect... \n");
         if (connect(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
             printf("Client: Error on connect call \n");
@@ -54,6 +52,7 @@ namespace nvr {
 
         string request_str = request.dump(4);
 
+        printf("sent\n");
         if (send(sock, request_str.data(), request_str.size(), 0) == -1) {
             printf("Client: Error on send() call \n");
         }
@@ -62,6 +61,8 @@ namespace nvr {
 
         ssize_t n;
         char buf[256];
+
+        printf("Waiting for response\n");
 
         while((n = recv(sock, buf, sizeof(buf), 0)) > 0)
             response.append(buf, buf + n);
