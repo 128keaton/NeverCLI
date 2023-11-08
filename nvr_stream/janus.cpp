@@ -28,6 +28,7 @@ namespace nvr {
         json request;
 
         request["janus"] = "list";
+        request["transaction"] = generateRandom();
         json response = sendAndReceive(request);
         return response;
     }
@@ -75,7 +76,7 @@ namespace nvr {
     }
 
     json Janus::sendAndReceive(const json &request) const {
-        string request_str = request.dump(4);
+        string request_str = request.dump();
 
         spdlog::info("Sending: \n{}", request_str);
 
@@ -111,12 +112,11 @@ namespace nvr {
         media["type"] = "video";
         media["videocodec"] = "h264";
         media["port"] = port;
-        media["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
+      //  media["videofmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
 
         body["request"] = "create";
         body["name"] = streamName;
-        body["description"] = streamName;
         body["type"] = "rtp";
 
         media = json::array({media});
