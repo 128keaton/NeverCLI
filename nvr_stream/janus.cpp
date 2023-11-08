@@ -70,7 +70,8 @@ namespace nvr {
         raw_response.append(buf);
 
         json response = json::parse(raw_response);
+        json data = response["data"];
 
-        return response["data"]["id"];
+        return data["id"];
     }
 }
