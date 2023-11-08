@@ -48,6 +48,9 @@ namespace nvr {
             }
 
         }
+
+        free(this->bus);
+        free(appData.pipeline);
     }
 
     int Streamer::start() {
