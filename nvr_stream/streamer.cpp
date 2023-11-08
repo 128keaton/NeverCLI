@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
     const char *config_file = argv[1];
     const auto config = nvr::getConfig(config_file);
 
-    nvr::buildLogger(config);
+    logger = nvr::buildLogger(config);
 
     return startPipeline(config.stream_url, config.rtp_port);
 }

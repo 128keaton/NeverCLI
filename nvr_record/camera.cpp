@@ -23,7 +23,7 @@ namespace nvr {
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
         av_log_set_level(AV_LOG_QUIET);
-        buildLogger(config);
+        this->logger = buildLogger(config);
     }
 
     bool Camera::connect() {
