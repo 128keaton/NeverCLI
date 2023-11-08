@@ -22,7 +22,7 @@ namespace nvr {
 
 
         printf("Client: Trying to connect... \n");
-        if (bind(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
+        if (connect(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
             printf("Client: Error on connect call \n");
             exit(1);
         }
