@@ -127,9 +127,9 @@ namespace nvr {
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 50, nullptr);
+
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 5, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 50, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 65, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
             }
 
