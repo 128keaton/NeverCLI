@@ -47,7 +47,7 @@ namespace nvr {
     }
 
 
-    string Janus::getSessionID() {
+    int64_t Janus::getSessionID() {
 
         json request;
         request["janus"] = "create";

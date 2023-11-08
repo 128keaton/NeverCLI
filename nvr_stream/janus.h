@@ -16,7 +16,7 @@ namespace nvr {
     public:
         Janus();
 
-        string getSessionID();
+        int64_t getSessionID();
 
     private:
         string generateRandom();
