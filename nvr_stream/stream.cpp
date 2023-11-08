@@ -4,7 +4,7 @@
 
 #include "streamer.h"
 #include "janus.h"
-
+#include <thread>
 
 nvr::Streamer streamer;
 int return_code = 0;
