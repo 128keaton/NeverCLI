@@ -38,6 +38,7 @@ namespace nvr {
 
 
         if (this->appData.pipeline != nullptr) {
+            gst_element_set_state(appData.pipeline, GST_STATE_NULL);
             gst_object_unref(appData.pipeline);
             this->appData.pipeline = nullptr;
         }
