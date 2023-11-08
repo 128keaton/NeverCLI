@@ -6,8 +6,11 @@
 Requires `libavcodec-dev libavutil-dev libavformat-dev libcurl4-openssl-dev libavdevice-dev libavfilter-dev libspdlog-dev` on Debian
 
 ### macOS
-Requires `ffmpeg` and `spdlog` installable through Homebrew
+Requires `pkg-config`, `ffmpeg`, `gstreamer`, and `spdlog` installable through Homebrew
 
+```shell
+brew install pkg-config ffmpeg spdlog gstreamer
+```
 ## Building
 
 ```shell
