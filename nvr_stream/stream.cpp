@@ -7,6 +7,7 @@
 
 
 nvr::Streamer streamer;
+int return_code = 0;
 
 void quit(int sig)
 {
@@ -14,6 +15,20 @@ void quit(int sig)
         streamer.quit();
 
     exit(sig);
+}
+
+void handleJanus() {
+    auto janus = nvr::Janus();
+    auto sessionID = janus.getSessionID();
+    auto handlerID = janus.getPluginHandlerID(sessionID);
+    auto streamList = janus.getStreamList();
+    spdlog::info("Session ID: {}, Handler ID: {}", sessionID, handlerID);
+    spdlog::info("Stream List: \n{}", streamList.dump(4));
+    janus.createStream(sessionID, handlerID, "test", 1, 5123);
+}
+
+void startStreaming() {
+    return_code = streamer.start();
 }
 
 int main(int argc, char *argv[]) {
@@ -24,20 +39,18 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    const auto config = nvr::getConfig(argv[1]);
-
-    auto janus = nvr::Janus();
-    auto sessionID = janus.getSessionID();
-    auto handlerID = janus.getPluginHandlerID(sessionID);
-    auto streamList = janus.getStreamList();
-    spdlog::info("Session ID: {}, Handler ID: {}", sessionID, handlerID);
-    spdlog::info("Stream List: \n{}", streamList.dump(4));
-
-    janus.createStream(sessionID, handlerID, "test", 1, 5123);
-
-    exit(0);
+    auto config = nvr::getConfig(argv[1]);
     streamer = nvr::Streamer(config);
+
     signal(SIGINT, quit);
 
-    return streamer.start();
+    std::thread stream(startStreaming);
+    stream.detach();
+
+    std::thread janus(handleJanus);
+    janus.join();
+
+    stream.join();
+
+    return return_code;
 }
