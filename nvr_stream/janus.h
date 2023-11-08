@@ -15,16 +15,12 @@ namespace nvr {
     class Janus {
     public:
         Janus();
+
         string getSessionID();
 
     private:
-      string generateRandom();
-
+        string generateRandom();
         int sock;
-        int data_len;
-        struct sockaddr_un remote{};
-        char recv_msg[255]{};
-        char send_msg[255]{};
     };
 }
 

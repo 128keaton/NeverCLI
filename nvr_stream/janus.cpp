@@ -8,12 +8,6 @@ using json = nlohmann::json;
 
 namespace nvr {
     Janus::Janus() {
-        sock = 0;
-        data_len = 0;
-
-        memset(recv_msg, 0, 255 * sizeof(char));
-        memset(send_msg, 0, 255 * sizeof(char));
-
         if ((sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
             printf("Client: Error on socket() call \n");
             exit(1);
@@ -23,7 +17,7 @@ namespace nvr {
         bzero(&serv_addr, sizeof(serv_addr));
         serv_addr.sun_family = AF_UNIX;
 
-        strcpy(serv_addr.sun_path, "/tmp/.nvr");
+        strcpy(serv_addr.sun_path, "/tmp/nvr");
 
 
 
@@ -58,14 +52,11 @@ namespace nvr {
         request["janus"] = "create";
         request["transaction"] = generateRandom();
 
-        string request_str = request.dump();
+        string request_str = request.dump(4);
 
         if (send(sock, request_str.data(), request_str.size(), 0) == -1) {
             printf("Client: Error on send() call \n");
         }
-
-        memset(send_msg, 0, 255 * sizeof(char));
-        memset(recv_msg, 0, 255 * sizeof(char));
 
         std::string response;
 
