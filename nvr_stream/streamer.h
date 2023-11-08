@@ -27,6 +27,7 @@ namespace nvr {
         int start();
 
     private:
+        StreamType type;
         std::shared_ptr<spdlog::logger> logger;
         int rtp_port;
         string camera_name;
@@ -34,6 +35,7 @@ namespace nvr {
         string rtsp_username;
         string rtsp_password;
         string ip_address;
+        bool has_vaapi;
         StreamData appData{};
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
     };

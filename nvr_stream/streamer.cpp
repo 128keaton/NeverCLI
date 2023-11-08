@@ -15,7 +15,9 @@ using json = nlohmann::json;
 
 namespace nvr {
     Streamer::Streamer(const CameraConfig &config) {
-        logger = nvr::buildLogger(config);
+        this->has_vaapi = false;
+        this->type = config.type;
+        this->logger = nvr::buildLogger(config);
         this->camera_name = config.stream_name;
         this->ip_address = config.ip_address;
         this->rtsp_password = config.rtsp_password;
@@ -23,6 +25,7 @@ namespace nvr {
         this->rtp_port = config.rtp_port;
         this->stream_url = config.stream_url;
     }
+
 
     int Streamer::start() {
         GstStateChangeReturn ret;
@@ -41,47 +44,128 @@ namespace nvr {
 
         gst_init(nullptr, nullptr);
 
+        GList *features, *f;
+        GList *plugins, *p;
 
-        logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
+        plugins = gst_registry_get_plugin_list(gst_registry_get());
+        for (p = plugins; p; p = p->next) {
+            auto *plugin = static_cast<GstPlugin *>(p->data);
+
+            logger->info("PLUGIN: {}", gst_plugin_get_name(plugin));
+
+            features =
+                    gst_registry_get_feature_list_by_plugin (gst_registry_get (),
+                                                             gst_plugin_get_name (plugin));
+
+
+            for (f = features; f; f = f->next) {
+                auto *feature = static_cast<GstPluginFeature *>(f->data);
+                const gchar *name;
+                name = GST_OBJECT_NAME (feature);
+                if (strcmp(name, "vaapi") != 0) {
+                    this->has_vaapi = true;
+                    this->logger->info("Found vaapi plugin");
+                    break;
+                }
+            }
+
+            if (!this->has_vaapi)
+                this->logger->warn("Could not find vaapi plugin");
+
+            gst_plugin_feature_list_free (features);
+        }
+        gst_plugin_list_free (plugins);
+
+
         logger->info("Opening connection to '{}'", full_stream_url);
 
+        // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
 
+        // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "location", full_stream_url.c_str(), nullptr);
 
-        appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-        appData.decoder = gst_element_factory_make("avdec_h265", "dec");
-        g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
-        g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
-        g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
-
-        appData.encoder = gst_element_factory_make("x264enc", "enc");
-        g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
-        g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
-        g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
-        g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-        g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-        g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
-        g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
-
+        // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 1, nullptr);
 
+        // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
 
+        if (this->type == h265) {
+            logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
 
-        gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.decoder, appData.encoder,
-                         appData.payloader, appData.sink, nullptr);
+            // h265 de-payload
+            appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
 
-        gst_element_link_many(appData.dePayloader, appData.decoder, appData.encoder, appData.payloader, appData.sink, NULL);
+
+            if (!this->has_vaapi) {
+                logger->warn("Not using vaapi for encoding/decoding");
+
+                // h265 decode without vaapi
+                appData.decoder = gst_element_factory_make("avdec_h265", "dec");
+                g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
+
+                // h264 encode without vaapi
+                appData.encoder = gst_element_factory_make("x264enc", "enc");
+                g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
+            } else {
+                logger->info("Using vaapi for encoding/decoding");
+
+                // h265 decode with vaapi
+                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
+
+                // h264 encode with vaapi
+                appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
+
+                // tune for 'low-power'
+                g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
+
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
+
+                // compliance-mode set to restrict-buf-alloc ?
+                g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
+            }
+
+
+            // add everything
+            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.decoder,
+                             appData.encoder,
+                             appData.payloader, appData.sink, nullptr);
+
+            // link everything except source
+            gst_element_link_many(appData.dePayloader, appData.decoder, appData.encoder, appData.payloader,
+                                  appData.sink, NULL);
+
+        } else {
+            logger->info("Starting h264->h264 pipeline on port {}", rtp_port);
+
+            // h264 de-payload
+            appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
+
+            // add everything
+            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.payloader,
+                             appData.sink, nullptr);
+
+            // link everything except source
+            gst_element_link_many(appData.dePayloader, appData.payloader, appData.sink, NULL);
+        }
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(padAddedHandler), &appData);
-
 
         ret = gst_element_set_state(appData.pipeline, GST_STATE_PLAYING);
         if (ret == GST_STATE_CHANGE_FAILURE) {
@@ -91,8 +175,8 @@ namespace nvr {
         }
 
         bus = gst_element_get_bus(appData.pipeline);
-        msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
-
+        msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
+                                         (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
         /* Parse message */
         if (msg != nullptr) {
@@ -124,7 +208,7 @@ namespace nvr {
         return 0;
     }
 
-     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
+    void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
         GstPad *sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
         GstCaps *new_pad_caps = nullptr;

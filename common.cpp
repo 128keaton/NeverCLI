@@ -38,6 +38,9 @@ namespace nvr {
         const string rtsp_username = config["rtspUsername"];
         const string rtsp_password = config["rtspPassword"];
 
+        const string raw_type = config["type"];
+        const StreamType type = raw_type == "h264" ? h264 : h265;
+
         return {
                 stream_url,
                 snapshot_url,
@@ -46,6 +49,7 @@ namespace nvr {
                 ip_address,
                 rtsp_username,
                 rtsp_password,
+                type,
                 clip_runtime,
                 rtp_port
         };

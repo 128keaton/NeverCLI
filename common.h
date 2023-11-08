@@ -30,6 +30,7 @@ extern "C" {
 using string = std::string;
 
 namespace nvr {
+    enum StreamType { h265, h264 };
     struct CameraConfig{
         string stream_url;
         string snapshot_url;
@@ -38,6 +39,7 @@ namespace nvr {
         string ip_address;
         string rtsp_username;
         string rtsp_password;
+        StreamType type;
         const long clip_runtime;
         const int rtp_port;
     };
