@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, quit);
 
     std::thread stream(startStreaming);
+    sleep(150);
     stream.detach();
 
     std::thread janus(handleJanus);
