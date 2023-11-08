@@ -42,6 +42,7 @@ namespace nvr {
         string rtsp_password;
         string ip_address;
         bool has_vaapi{};
+        bool quitting = false;
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
     };
 }

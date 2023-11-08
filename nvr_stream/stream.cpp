@@ -8,6 +8,8 @@
 
 nvr::Streamer streamer;
 
+int return_code = EXIT_SUCCESS;
+
 void quit(int sig)
 {
     if (streamer.valid())
@@ -26,6 +28,18 @@ void handleJanus() {
     janus.createStream(sessionID, handlerID, "test", 1, 5123);
 }
 
+void startStreaming() {
+    return_code = streamer.start();
+}
+
+
+void spawnStreaming(const std::function<void()>& callback)
+{
+    std::thread stream(startStreaming);
+    stream.detach();
+    callback();
+    stream.join();
+}
 
 int main(int argc, char *argv[]) {
     if (argc < 2 || argc > 2) {
@@ -39,10 +53,9 @@ int main(int argc, char *argv[]) {
     streamer = nvr::Streamer(config);
 
     signal(SIGINT, quit);
+    spawnStreaming([] {
+        return handleJanus();
+    });
 
-
-    std::thread janus(handleJanus);
-    janus.detach();
-
-    return streamer.start();
+    return return_code;
 }

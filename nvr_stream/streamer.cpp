@@ -32,16 +32,20 @@ namespace nvr {
     }
 
     void Streamer::quit() {
-        this->logger->info("Exiting...");
-        if (this->bus != nullptr)
+        if (!quitting)
+            this->logger->info("Exiting...");
+
+        if (this->bus != nullptr && !quitting)
             gst_object_unref(bus);
 
 
-        if (this->appData.pipeline != nullptr) {
+        if (this->appData.pipeline != nullptr && !quitting) {
             gst_element_set_state(appData.pipeline, GST_STATE_NULL);
             gst_object_unref(appData.pipeline);
             this->appData.pipeline = nullptr;
         }
+
+        this->quitting = true;
     }
 
     int Streamer::start() {
