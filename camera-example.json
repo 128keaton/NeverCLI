@@ -1,0 +1,7 @@
+{
+  "streamURL": "rtsp://admin:BlueVip2020@10.2.5.70:554/Streaming/Channels/101/",
+  "snapshotURL": "http://admin:BlueVip2020@10.2.5.70/ISAPI/Streaming/Channels/101/picture",
+  "outputPath": "./",
+  "splitEvery": 30,
+  "rtpPort": 5123
+}

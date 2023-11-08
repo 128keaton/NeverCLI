@@ -28,8 +28,8 @@ pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
 
 add_executable(never_stream
         never_stream/main.cpp
-        never_stream/common.cpp
-        never_stream/common.h
+        common.cpp
+        common.h
         never_stream/camera.cpp
         never_stream/camera.h
 )
@@ -52,3 +52,5 @@ link_directories(${GSTLIBS_LIBRARY_DIRS})
 
 add_executable(never_gstreamer never_gstreamer/streamer.cpp)
 add_executable(never_service_gen never_service_gen/service_gen.cpp)
+
+target_link_libraries(never_gstreamer PRIVATE ${CURL_LIBRARIES} nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)

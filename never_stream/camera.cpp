@@ -5,7 +5,7 @@
 #pragma ide diagnostic ignored "misc-no-recursion"
 
 #include "camera.h"
-#include "common.h"
+#include "../common.h"
 #include <regex>
 
 namespace never {
