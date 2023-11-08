@@ -132,7 +132,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "quality-level", 7, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "quality-factor", 80, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "quality-factor", 50, nullptr);
             }
 
 
