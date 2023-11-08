@@ -25,6 +25,8 @@ namespace nvr {
         this->rtsp_username = config.rtsp_username;
         this->rtp_port = config.rtp_port;
         this->stream_url = config.stream_url;
+        this->appData.rtp_port = this->rtp_port;
+        this->appData.stream_name = this->camera_name;
         this->bus = nullptr;
     }
 
@@ -177,11 +179,6 @@ namespace nvr {
         }
 
 
-        auto janus = Janus();
-        auto sessionID = janus.getSessionID();
-        auto handlerID = janus.getPluginHandlerID(sessionID);
-        auto streamList = janus.getStreamList();
-        janus.createStream(sessionID, handlerID, camera_name, 1, rtp_port);
 
         bus = gst_element_get_bus(appData.pipeline);
         msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
@@ -250,6 +247,12 @@ namespace nvr {
             spdlog::error("Type dictated is '{}', but link failed", new_pad_type);
         } else {
             spdlog::info("Link of type '{}' succeeded", new_pad_type);
+
+            auto janus = Janus();
+            auto sessionID = janus.getSessionID();
+            auto handlerID = janus.getPluginHandlerID(sessionID);
+            auto streamList = janus.getStreamList();
+            janus.createStream(sessionID, handlerID, data->stream_name, 1, data->rtp_port);
         }
 
         exit:
