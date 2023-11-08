@@ -33,6 +33,13 @@ The binary expects to be passed the path to a JSON file similar to the one under
 
 ### systemd
 
-An example systemd file is included in the `examples/` of the repository (`camera-example-record.service`).
+There are two systemd unit templates included, one for streaming and one for recording. 
 
-This assumes you have a directory at root called `nvr`, this also assumes you have copied your compiled binary into `/usr/local/bin`
+To start recording:
+```shell
+systemd enable --now nvr-record@camera-1
+```
+This assumes you have a directory at root called `nvr`, 
+this also assumes you have copied your compiled binary into `/usr/local/bin`, 
+and this assumes `/nvr/cameras/` has a file named `camera-1.json`
+

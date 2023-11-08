@@ -1,0 +1,12 @@
+[Unit]
+Description=NVR recording process for %i
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/nvr_record /nvr/cameras/%i.json
+ExecStop=/usr/local/bin/nvr_record /nvr/cameras/%i.json
+TimeoutSec=100
+TimeoutStopSec=300
+RemainAfterExit=yes
+WorkingDirectory=/nvr
