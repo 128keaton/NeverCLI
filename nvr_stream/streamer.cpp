@@ -113,7 +113,7 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
 
             // decoding/encoding queue
-            appData.queue = gst_element_factory_make("queue", "queue0");
+            appData.queue = gst_element_factory_make("queue2", "queue0");
 
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");

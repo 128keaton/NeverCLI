@@ -124,6 +124,7 @@ namespace nvr {
         body["name"] = streamName;
         body["type"] = "rtp";
         body["permanent"] = true;
+        body["id"] = streamID;
 
         media = json::array({media});
 
