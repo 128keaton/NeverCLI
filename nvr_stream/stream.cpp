@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     const auto config = nvr::getConfig(argv[1]);
 
     auto janus = nvr::Janus();
-    spdlog::info(janus.getSessionID());
+    spdlog::info("Session ID: {}", janus.getSessionID());
 
     exit(0);
     streamer = nvr::Streamer(config);
