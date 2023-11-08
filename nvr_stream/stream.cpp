@@ -50,6 +50,10 @@ int main(int argc, char *argv[]) {
     std::thread janus(handleJanus);
     janus.join();
 
+    while (true)
+        if (stream.joinable())
+            break;
+
     stream.join();
 
     return return_code;
