@@ -248,10 +248,10 @@ namespace nvr {
         } else {
             spdlog::info("Link of type '{}' succeeded", new_pad_type);
 
+            sleep(2);
             auto janus = Janus();
             auto sessionID = janus.getSessionID();
             auto handlerID = janus.getPluginHandlerID(sessionID);
-            auto streamList = janus.getStreamList();
             janus.createStream(sessionID, handlerID, data->stream_name, 1, data->rtp_port);
         }
 
