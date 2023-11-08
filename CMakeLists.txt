@@ -50,7 +50,7 @@ include_directories(${GSTLIBS_INCLUDE_DIRS})
 link_libraries(gstreamer-1.0 gobject-2.0 glib-2.0)
 link_directories(${GSTLIBS_LIBRARY_DIRS})
 
-add_executable(never_gstreamer never_gstreamer/streamer.cpp)
+add_executable(never_gstreamer  common.cpp common.h  never_gstreamer/streamer.cpp)
 add_executable(never_service_gen never_service_gen/service_gen.cpp)
 
 target_link_libraries(never_gstreamer PRIVATE ${CURL_LIBRARIES} nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
