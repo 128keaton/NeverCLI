@@ -3,6 +3,9 @@
 ## Dependencies
 
 ### Debian
+
+Requires a new-ish version of [cmake](https://apt.kitware.com/)
+
 Requires `libavcodec-dev libavutil-dev libavformat-dev libcurl4-openssl-dev libavdevice-dev libavfilter-dev libspdlog-dev gstreamer-1.0` on Debian
 
 ### macOS
