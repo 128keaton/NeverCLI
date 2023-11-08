@@ -7,7 +7,6 @@
 #include <thread>
 
 nvr::Streamer streamer;
-int return_code = 0;
 
 void quit(int sig)
 {
@@ -27,9 +26,6 @@ void handleJanus() {
     janus.createStream(sessionID, handlerID, "test", 1, 5123);
 }
 
-void startStreaming() {
-    return_code = streamer.start();
-}
 
 int main(int argc, char *argv[]) {
     if (argc < 2 || argc > 2) {
@@ -44,18 +40,9 @@ int main(int argc, char *argv[]) {
 
     signal(SIGINT, quit);
 
-    std::thread stream(startStreaming);
-    sleep(3);
-    stream.detach();
 
     std::thread janus(handleJanus);
-    janus.join();
+    janus.detach();
 
-    while (true)
-        if (stream.joinable())
-            break;
-
-    stream.join();
-
-    return return_code;
+    return streamer.start();
 }
