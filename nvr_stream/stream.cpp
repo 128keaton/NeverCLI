@@ -3,6 +3,7 @@
 //
 
 #include "streamer.h"
+#include "janus.h"
 
 
 nvr::Streamer streamer;
@@ -24,6 +25,9 @@ int main(int argc, char *argv[]) {
     }
 
     const auto config = nvr::getConfig(argv[1]);
+
+    auto janus = nvr::Janus();
+    spdlog::info(janus.getSessionID());
 
     streamer = nvr::Streamer(config);
     signal(SIGINT, quit);
