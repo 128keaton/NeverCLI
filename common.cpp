@@ -5,12 +5,133 @@
 #include <libavformat/avformat.h>
 #include "common.h"
 
+using std::ifstream;
 using string = std::string;
 using path = std::filesystem::path;
+using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-namespace never {
-    string append_timestamp(string &current) {
+
+namespace nvr {
+    CameraConfig getConfig(const char *config_file) {
+        const string config_file_path = string(config_file);
+
+        size_t last_path_index = config_file_path.find_last_of('/');
+        string config_file_name = config_file_path.substr(last_path_index + 1);
+        size_t last_ext_index = config_file_name.find_last_of('.');
+        string stream_name = config_file_name.substr(0, last_ext_index);
+
+        if (access(config_file, F_OK) != 0) {
+            spdlog::error("Cannot read config file: {}", config_file);
+            exit(-1);
+        }
+
+        ifstream config_stream(config_file);
+        json config = json::parse(config_stream);
+
+        const long clip_runtime = config["splitEvery"];
+        const int rtp_port = config["rtpPort"];
+        const string stream_url = config["streamURL"];
+        const string snapshot_url = config["snapshotURL"];
+        const string output_path = config["outputPath"];
+
+        return {
+            stream_url,
+            snapshot_url,
+            output_path,
+            stream_name,
+            clip_runtime,
+            rtp_port
+        };
+    }
+
+    int spawnTask(const string &pid_file_name) {
+        pid_t pid;
+
+        /* Fork off the parent process */
+        pid = fork();
+
+        /* An error occurred */
+        if (pid < 0)
+            exit(EXIT_FAILURE);
+
+        /* Success: Let the parent terminate */
+        if (pid > 0) {
+            exit(EXIT_SUCCESS);
+        }
+
+        /* On success: The child process becomes session leader */
+        if (setsid() < 0)
+            exit(EXIT_FAILURE);
+
+        /* Fork off for the second time*/
+        pid = fork();
+
+        /* An error occurred */
+        if (pid < 0)
+            exit(EXIT_FAILURE);
+
+        /* Success: Let the parent terminate */
+        if (pid > 0)
+            exit(EXIT_SUCCESS);
+
+        int curr_pid = getpid();
+        nvr::writePID(curr_pid, pid_file_name);
+        return curr_pid;
+    }
+
+    pid_t readPID(const string &pid_file_name) {
+        ifstream pid_file(pid_file_name.c_str());
+        if (!pid_file.is_open()) {
+            remove(pid_file_name.c_str());
+            return 0;
+        }
+
+        int number;
+        while (pid_file >> number) {
+        }
+
+        pid_file.close();
+        return number;
+    }
+
+    void writePID(pid_t pid, const string &pid_file_name) {
+        FILE *pid_file;
+
+        pid_file = fopen(pid_file_name.c_str(), "w");
+        fprintf(pid_file, "%d", pid);
+        fclose(pid_file);
+    }
+
+    std::shared_ptr<spdlog::logger> buildLogger(const CameraConfig &config) {
+        string log_file_output = generateOutputFilename(config.stream_name, config.output_path, log);
+        try {
+            std::vector<spdlog::sink_ptr> sinks;
+
+            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            console_sink->set_level(spdlog::level::trace);
+
+            sinks.push_back(console_sink);
+
+            // Disables log file output if using systemd
+            if (!getenv("INVOCATION_ID")) {
+                auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_output,
+                                                                                        1024 * 1024 * 10, 3);
+                file_sink->set_level(spdlog::level::trace);
+                sinks.push_back(file_sink);
+            }
+
+            auto logger = std::make_shared<spdlog::logger>(config.stream_name, sinks.begin(), sinks.end());
+            logger->flush_on(spdlog::level::err);
+            return logger;
+        }
+        catch (const spdlog::spdlog_ex &ex) {
+            std::cout << "Log init failed: " << ex.what() << std::endl;
+            return spdlog::stdout_color_mt("console");
+        }
+    }
+
+    string appendTimestamp(string &current) {
         char buf[1024];
         time_t now0;
         struct tm *tm, temp_buffer{};
@@ -33,14 +154,13 @@ namespace never {
                 file_name.append(".mp4");
                 break;
             case image:
-                file_name = append_timestamp(file_name);
+                file_name = appendTimestamp(file_name);
                 file_name.append(".jpeg");
                 break;
             case log:
                 file_name.append("log.txt");
                 break;
         }
-
 
 
         path file_path = output_path;
@@ -99,7 +219,7 @@ namespace never {
     }
 
     int countClips(const string &output_path, const string &camera_name) {
-        fs::path videos_path { output_path };
+        fs::path videos_path{output_path};
         videos_path /= "videos";
 
         fs::create_directory(videos_path);
@@ -107,14 +227,13 @@ namespace never {
         fs::create_directory(videos_path);
 
         int clip_count = 0;
-        for (auto const& dir_entry : std::filesystem::directory_iterator{videos_path}) {
+        for (auto const &dir_entry: std::filesystem::directory_iterator{videos_path}) {
             std::cout << dir_entry.file_size() << '\n';
             clip_count += 1;
         }
 
         return clip_count;
     }
-
 
 
 } // never

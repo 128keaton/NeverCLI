@@ -6,18 +6,12 @@
 #include <gst/gst.h>
 #include <string>
 #include <gst/gstpad.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <unistd.h>
-#include <fstream>
-#include "nlohmann/json.hpp"
 
 using string = std::string;
 using std::ifstream;
 using json = nlohmann::json;
 
-typedef struct myDataTag {
+typedef struct StreamData {
     GstElement *pipeline;
     GstElement *rtspSrc;
     GstElement *dePayloader;
@@ -25,12 +19,12 @@ typedef struct myDataTag {
     GstElement *encoder;
     GstElement *payloader;
     GstElement *sink;
-} myData_t;
+} StreamData;
 
-myData_t appData;
+StreamData appData;
 std::shared_ptr<spdlog::logger> logger;
 
-static void pad_added_handler(GstElement *src, GstPad *new_pad, myData_t *pThis) {
+static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *pThis) {
     GstPad *sink_pad = gst_element_get_static_pad(pThis->dePayloader, "sink");
     GstPadLinkReturn ret;
     GstCaps *new_pad_caps = nullptr;
@@ -71,33 +65,7 @@ static void pad_added_handler(GstElement *src, GstPad *new_pad, myData_t *pThis)
     gst_object_unref(sink_pad);
 }
 
-void setup_logger(const string &stream_name, const string &output_path) {
-    string log_file_output = never::generateOutputFilename(stream_name, output_path, never::FileType::log);
-    try {
-        std::vector<spdlog::sink_ptr> sinks;
-
-        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        console_sink->set_level(spdlog::level::trace);
-
-        sinks.push_back(console_sink);
-
-        // Disables log file output if using systemd
-        if (!getenv("INVOCATION_ID")) {
-            auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_output,1024 * 1024 * 10, 3);
-            file_sink->set_level(spdlog::level::trace);
-            sinks.push_back(file_sink);
-        }
-
-        logger = std::make_shared<spdlog::logger>(stream_name, sinks.begin(), sinks.end());
-        logger->flush_on(spdlog::level::err);
-    }
-    catch (const spdlog::spdlog_ex &ex) {
-        std::cout << "Log init failed: " << ex.what() << std::endl;
-        logger = spdlog::stdout_color_mt("console");
-    }
-}
-
-int start_pipeline(const string& rtsp_url, const int rtp_port) {
+int startPipeline(const string &rtsp_url, const int rtp_port) {
     GstStateChangeReturn ret;
     GstMessage *msg;
     GstBus *bus;
@@ -105,11 +73,12 @@ int start_pipeline(const string& rtsp_url, const int rtp_port) {
 
     gst_init(nullptr, nullptr);
 
+    logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
+
     appData.pipeline = gst_pipeline_new("pipeline");
 
     appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-    g_object_set(G_OBJECT(appData.rtspSrc), "location",
-                 rtsp_url.c_str(), nullptr);
+    g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_url.c_str(), nullptr);
 
     appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
     appData.decoder = gst_element_factory_make("avdec_h265", "dec");
@@ -140,7 +109,7 @@ int start_pipeline(const string& rtsp_url, const int rtp_port) {
 
     gst_element_link_many(appData.dePayloader, appData.decoder, appData.encoder, appData.payloader, appData.sink, NULL);
 
-    g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(pad_added_handler), &appData);
+    g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(padAddedHandler), &appData);
 
 
     ret = gst_element_set_state(appData.pipeline, GST_STATE_PLAYING);
@@ -194,28 +163,9 @@ int main(int argc, char *argv[]) {
     }
 
     const char *config_file = argv[1];
-    const string config_file_path = string(config_file);
+    const auto config = nvr::getConfig(config_file);
 
+    nvr::buildLogger(config);
 
-    size_t last_path_index = config_file_path.find_last_of('/');
-    string config_file_name = config_file_path.substr(last_path_index + 1);
-    size_t last_ext_index = config_file_name.find_last_of('.');
-    string stream_name = config_file_name.substr(0, last_ext_index);
-
-    if (access(config_file, F_OK) != 0) {
-        spdlog::error("Cannot read config file: {}", config_file);
-        exit(-1);
-    }
-
-
-    std::ifstream config_stream(config_file);
-    json config = json::parse(config_stream);
-
-    const int rtp_port = config["rtpPort"];
-    const string stream_url = config["streamURL"];
-    const string output_path = config["outputPath"];
-
-    setup_logger(stream_name, output_path);
-
-    return start_pipeline(stream_url, rtp_port);
+    return startPipeline(config.stream_url, config.rtp_port);
 }

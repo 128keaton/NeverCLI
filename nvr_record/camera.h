@@ -18,6 +18,7 @@ extern "C" {
 }
 
 #include "nlohmann/json.hpp"
+#include "../common.h"
 #include <string>
 #include <iostream>
 #include <thread>
@@ -29,10 +30,10 @@ extern "C" {
 
 using string = std::string;
 
-namespace never {
+namespace nvr {
     class Camera {
     public:
-        Camera(const string &camera_name, const string &stream_url, const string &snapshot_url, const string &output_path);
+        Camera(const CameraConfig &config);
         bool connect();
         int startRecording(long _clip_runtime);
         int clipCount();
@@ -62,7 +63,6 @@ namespace never {
         int record();
         int setupMuxer();
         void takeSnapshot();
-        void setupLogger();
         void validateSnapshot(string snapshot_file_path);
         bool handleError(const string &message, bool close_input = true);
     };

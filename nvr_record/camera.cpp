@@ -8,14 +8,14 @@
 #include "../common.h"
 #include <regex>
 
-namespace never {
-    Camera::Camera(const string &camera_name, const string &stream_url, const string &snapshot_url, const string &output_path) {
+namespace nvr {
+    Camera::Camera(const CameraConfig &config) {
         this->error_count = 0;
-        this->camera_name = camera_name.c_str();
+        this->camera_name = config.stream_name.c_str();
         this->input_format_context = avformat_alloc_context();
-        this->stream_url = stream_url.c_str();
-        this->snapshot_url = snapshot_url.c_str();
-        this->output_path = output_path.c_str();
+        this->stream_url = config.stream_url.c_str();
+        this->snapshot_url = config.snapshot_url.c_str();
+        this->output_path = config.output_path.c_str();
         this->output_stream = nullptr;
         this->output_format = nullptr;
         this->output_format_context = nullptr;
@@ -23,37 +23,7 @@ namespace never {
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
         av_log_set_level(AV_LOG_QUIET);
-        this->setupLogger();
-    }
-
-    void Camera::setupLogger() {
-        string log_file_output = generateOutputFilename(this->camera_name, this->output_path, log);
-        try {
-            std::vector<spdlog::sink_ptr> sinks;
-
-            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-            console_sink->set_level(spdlog::level::trace);
-
-            sinks.push_back(console_sink);
-
-            // Disables log file output if using systemd
-            if (!getenv("INVOCATION_ID")) {
-                auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_output,1024 * 1024 * 10, 3);
-                file_sink->set_level(spdlog::level::trace);
-                sinks.push_back(file_sink);
-            }
-
-
-            logger = std::make_shared<spdlog::logger>(camera_name, sinks.begin(), sinks.end());
-            logger->info("Initializing never-camera");
-
-            logger->flush();
-            logger->flush_on(spdlog::level::err);
-        }
-        catch (const spdlog::spdlog_ex &ex) {
-            std::cout << "Log init failed: " << ex.what() << std::endl;
-            logger = spdlog::stdout_color_mt("console");
-        }
+        buildLogger(config);
     }
 
     bool Camera::connect() {

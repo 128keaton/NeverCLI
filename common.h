@@ -2,13 +2,20 @@
 // Created by Keaton Burleson on 11/2/23.
 //
 
-
 #include <sys/time.h>
 #include <string>
 #include <cstdlib>
 #include <iostream>
 #include <filesystem>
 #include "nlohmann/json.hpp"
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <fstream>
+#include <csignal>
+#include <thread>
+#include <cstdio>
+#include <unistd.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -21,7 +28,16 @@ extern "C" {
 
 using string = std::string;
 
-namespace never {
+namespace nvr {
+    struct CameraConfig{
+        string stream_url;
+        string snapshot_url;
+        string output_path;
+        string stream_name;
+        const long clip_runtime;
+        const int rtp_port;
+    };
+    CameraConfig getConfig(const char *config_file);
     enum FileType { video, image, log };
     string generateOutputFilename(const string& name, const string& output_path, FileType file_type);
     void replaceFirst(string &s, string const &to_replace, string const &with);
@@ -29,7 +45,10 @@ namespace never {
     string getPassword(std::string const &value);
     time_t getTime();
     int countClips(const string &output_path, const string &camera_name);
+    pid_t readPID(const string &pid_file_name);
+    void writePID(pid_t pid, const string &pid_file_name);
+    std::shared_ptr<spdlog::logger> buildLogger(const CameraConfig &config);
+    int spawnTask(const string &pid_file_name);
+} // nvr
 
-} // never
-
-#endif //NEVER_CLI_COMMON_H
+#endif
