@@ -24,6 +24,10 @@ namespace nvr {
 
     }
 
+    void Janus::cleanup() {
+        close(out_sock);
+    }
+
     json Janus::getStreamList() {
         json request;
 
@@ -78,7 +82,6 @@ namespace nvr {
     json Janus::sendAndReceive(const json &request) const {
         string request_str = request.dump();
 
-        spdlog::info("Sending: \n{}", request_str);
 
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
             printf("Client: Error on send() call \n");
@@ -91,7 +94,6 @@ namespace nvr {
         read(out_sock, buf, 1024 - 1);
         raw_response.append(buf);
 
-        spdlog::info("Received: \n{}", raw_response);
 
         json response = json::parse(raw_response);
 
@@ -111,6 +113,7 @@ namespace nvr {
         media["mid"] = mid;
         media["type"] = "video";
         media["codec"] = "h264";
+        media["is_private"] = false;
         media["port"] = port;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 

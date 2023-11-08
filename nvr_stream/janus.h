@@ -22,6 +22,7 @@ namespace nvr {
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
         json getStreamList();
+        void cleanup();
 
     private:
         static string generateRandom();
