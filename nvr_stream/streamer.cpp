@@ -101,6 +101,8 @@ namespace nvr {
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
 
+            // decoding/encoding queue
+            appData.queue = gst_element_factory_make("queue", "queue0");
 
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
@@ -137,12 +139,12 @@ namespace nvr {
 
 
             // add everything
-            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.decoder,
+            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.decoder, appData.queue,
                              appData.encoder,
                              appData.payloader, appData.sink, nullptr);
 
             // link everything except source
-            gst_element_link_many(appData.dePayloader, appData.decoder, appData.encoder, appData.payloader,
+            gst_element_link_many(appData.dePayloader, appData.decoder, appData.queue, appData.encoder, appData.payloader,
                                   appData.sink, NULL);
 
         } else {

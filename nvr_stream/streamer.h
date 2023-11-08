@@ -15,6 +15,7 @@ namespace nvr {
         GstElement *rtspSrc;
         GstElement *dePayloader;
         GstElement *decoder;
+        GstElement *queue;
         GstElement *encoder;
         GstElement *payloader;
         GstElement *sink;
