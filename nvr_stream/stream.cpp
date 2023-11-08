@@ -29,7 +29,9 @@ int main(int argc, char *argv[]) {
     auto janus = nvr::Janus();
     auto sessionID = janus.getSessionID();
     auto handlerID = janus.getPluginHandlerID(sessionID);
+    auto streamList = janus.getStreamList();
     spdlog::info("Session ID: {}, Handler ID: {}", sessionID, handlerID);
+    spdlog::info("Stream List: \n{}", streamList.dump(4));
 
     janus.createStream(sessionID, handlerID, "test", 1, 5123);
 

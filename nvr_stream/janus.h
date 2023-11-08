@@ -21,9 +21,9 @@ namespace nvr {
         bool createStream(int64_t sessionID, int64_t handlerID, const string& streamName, int64_t streamID, int64_t port);
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
+        json getStreamList();
 
     private:
-        json getStreamList();
         static string generateRandom();
         int out_sock;
 

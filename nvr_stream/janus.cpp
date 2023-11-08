@@ -22,7 +22,6 @@ namespace nvr {
             exit(1);
         }
 
-        getStreamList();
     }
 
     json Janus::getStreamList() {
