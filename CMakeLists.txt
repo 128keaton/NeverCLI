@@ -15,6 +15,7 @@ find_package(PkgConfig REQUIRED)
 find_package(CURL REQUIRED)
 find_package(spdlog REQUIRED)
 
+
 pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         libavdevice
         libavfilter
@@ -35,7 +36,6 @@ add_executable(never_stream
 )
 
 
-
 include_directories(${CURL_INCLUDE_DIR})
 
 target_link_libraries(never_stream PRIVATE ${CURL_LIBRARIES})
@@ -44,4 +44,31 @@ target_link_libraries(never_stream PRIVATE PkgConfig::LIBAV)
 target_link_libraries(never_stream PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(never_stream PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 
-add_executable(never_service_gen never_service_gen/main.cpp)
+add_executable(never_gstreamer never_gstreamer/stream.cpp never_gstreamer/stream.h)
+
+pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
+pkg_check_modules(GLIB REQUIRED glib-2.0)
+target_include_directories(never_gstreamer PRIVATE ${GLIB_INCLUDE_DIRS})
+include_directories(${GLIB_INCLUDE_DIRS})
+
+set(libraries
+        -lgstreamer-1.0
+
+        pthread
+        ${GLIB_LIBRARIES}
+        ${GLIB_GIO_LIBRARIES}
+        ${GLIB_GOBJECT_LIBRARIES}
+
+)
+
+
+target_link_directories(never_gstreamer PRIVATE  /opt/homebrew/Cellar/glib/2.78.1/lib/ /opt/homebrew/Cellar/gstreamer/1.22.6_1/lib/ /opt/homebrew/Cellar/gobject-introspection/1.78.1/lib/ /opt/homebrew/Cellar/gettext/0.22.3/lib)
+target_link_libraries(never_gstreamer PRIVATE ${libraries})
+target_include_directories(never_gstreamer PRIVATE  /opt/homebrew/include/gstreamer-1.0 /opt/homebrew/lib/glib-2.0/include   /opt/homebrew/Cellar/glib/2.78.1/include /opt/homebrew/Cellar/gstreamer/1.22.6_1/include/  /opt/homebrew/Cellar/gettext/0.22.3/include)
+
+
+
+
+add_executable(never_service_gen never_service_gen/main.cpp
+        never_gstreamer/stream.cpp
+        never_gstreamer/stream.h)
