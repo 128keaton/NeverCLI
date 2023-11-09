@@ -233,6 +233,8 @@ namespace nvr {
         json list = getStreamList();
 
         for (auto &stream: getStreamList()) {
+            logger->info(stream.dump(2));
+
             if (stream.contains("0") && stream.at("0")["id"] == streamID) {
                 logger->warn("Destroying existing stream with ID '{}'", streamID);
                 destroyStream(streamID);
