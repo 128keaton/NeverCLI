@@ -16,13 +16,16 @@ using json = nlohmann::json;
 namespace nvr {
     class Janus {
     public:
-        Janus();
+        Janus() {
+
+        }
 
         bool createStream(int64_t sessionID, int64_t handlerID, const string& streamName, int64_t streamID, int64_t port);
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
         json getStreamList();
         void cleanup();
+        bool connect();
 
     private:
         static string generateRandom();

@@ -59,6 +59,7 @@ namespace nvr {
         GstStateChangeReturn ret;
         GstMessage *msg;
 
+
         const string full_stream_url = string("rtsp://")
                 .append(this->rtsp_username)
                 .append(":")
@@ -228,6 +229,10 @@ namespace nvr {
         GstStructure *new_pad_struct;
         const gchar *new_pad_type;
 
+        auto janus = Janus();
+        bool janus_connected = janus.connect();
+
+
         spdlog::info("Received new pad '{}' from '{}'", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
 
         /* Check the new pad's name */
@@ -254,11 +259,14 @@ namespace nvr {
         } else {
             spdlog::info("Link of type '{}' succeeded", new_pad_type);
 
-            auto janus = Janus();
-            auto sessionID = janus.getSessionID();
-            auto handlerID = janus.getPluginHandlerID(sessionID);
-            janus.createStream(sessionID, handlerID, data->stream_name, data->stream_id, data->rtp_port);
-            spdlog::info("Streaming");
+            if (janus_connected) {
+                auto sessionID = janus.getSessionID();
+                auto handlerID = janus.getPluginHandlerID(sessionID);
+                janus_connected = janus.createStream(sessionID, handlerID, data->stream_name, data->stream_id, data->rtp_port);
+            }
+
+            if (!janus_connected)
+                spdlog::warn("Not streaming because we were not able to connect to Janus");
         }
 
         exit:

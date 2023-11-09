@@ -7,9 +7,10 @@
 using json = nlohmann::json;
 
 namespace nvr {
-    Janus::Janus() {
+    bool Janus::connect() {
         if ((out_sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
-            exit(1);
+            spdlog::error("Could not initialize socket");
+            return false;
         }
 
         struct sockaddr_un serv_addr{};
@@ -18,10 +19,10 @@ namespace nvr {
 
         strcpy(serv_addr.sun_path, "/tmp/nvr");
 
-        if (connect(out_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1) {
-            exit(1);
+        if (::connect(out_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1) {
+            spdlog::error("Could not connect to socket");
+            return false;
         }
-
     }
 
     void Janus::cleanup() {
