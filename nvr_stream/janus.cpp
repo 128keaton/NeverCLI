@@ -132,7 +132,8 @@ namespace nvr {
         string request_str = request.dump();
 
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
-            logger->error("Could not send request:\n{}", request_str);
+            logger->error("Could not send request: {}", request_str);
+            logger->error("Could not send request: {}", request_str);
         }
 
         string raw_response;
@@ -191,7 +192,7 @@ namespace nvr {
             return response_data["streaming"] == string("destroyed");
 
         logger->error("Could not destroy stream with ID '{}'", streamID);
-        logger->error("Destroy response: \n {}", response.dump());
+        logger->error("Destroy response: {}", response.dump());
         return false;
     }
 
@@ -268,7 +269,7 @@ namespace nvr {
             logger->info("Stream '{}' created", streamName);
             streaming = true;
         } else {
-            logger->warn("Not sure, dumping response: \n {}", response.dump());
+            logger->warn("Not sure, dumping response: {}", response.dump());
             streaming = false;
         }
 
