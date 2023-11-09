@@ -69,16 +69,6 @@ namespace nvr {
         GstMessage *msg;
 
 
-        const string full_stream_url = string("rtsp://")
-                .append(this->rtsp_username)
-                .append(":")
-                .append(this->rtsp_password)
-                .append("@")
-                .append(this->ip_address)
-                .append(":554")
-                .append(this->stream_url);
-
-
         gst_init(nullptr, nullptr);
 
         GList *plugins, *p;
@@ -95,15 +85,14 @@ namespace nvr {
 
         gst_plugin_list_free(plugins);
 
-
-        logger->info("Opening connection to '{}'", full_stream_url);
+        logger->info("Opening connection to '{}'", buildStreamURL("HIDDEN"));
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", full_stream_url.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
@@ -298,6 +287,17 @@ namespace nvr {
 
     Streamer::Streamer() {
         this->logger = nullptr;
+    }
+
+    string Streamer::buildStreamURL(const string &password) {
+        string("rtsp://")
+                .append(this->rtsp_username)
+                .append(":")
+                .append(password)
+                .append("@")
+                .append(this->ip_address)
+                .append(":554")
+                .append(this->stream_url);
     }
 }
 

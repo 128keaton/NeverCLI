@@ -52,6 +52,7 @@ namespace nvr {
         string ip_address;
         bool has_vaapi{};
         bool quitting = false;
+        string buildStreamURL(const string &password);
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
     };
 }
