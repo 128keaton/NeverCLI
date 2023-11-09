@@ -28,6 +28,7 @@ extern "C" {
 
 using string = std::string;
 
+// TODO: cleanup this file
 namespace nvr {
     enum StreamType { h265, h264 };
     struct CameraConfig{
@@ -47,14 +48,12 @@ namespace nvr {
     enum FileType { video, image, log };
     string generateOutputFilename(const string& name, const string& output_path, FileType file_type);
     void replaceFirst(string &s, string const &to_replace, string const &with);
-    string getUsername(std::string const &value);
-    string getPassword(std::string const &value);
-    time_t getTime();
     int countClips(const string &output_path, const string &camera_name);
     pid_t readPID(const string &pid_file_name);
     void writePID(pid_t pid, const string &pid_file_name);
     std::shared_ptr<spdlog::logger> buildLogger(const CameraConfig &config);
     int spawnTask(const string &pid_file_name);
+    std::vector<std::string> splitString(const std::string &str, char splitter);
 } // nvr
 
 #endif

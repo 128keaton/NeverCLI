@@ -175,29 +175,22 @@ namespace nvr {
         s.replace(pos, to_replace.length(), with);
     }
 
-    string getUsername(const string &value) {
-        string::size_type pos = value.find(':');
-        if (pos == std::string::npos) {
-            return value;
-        } else {
-            return value.substr(0, pos);
+    std::vector<std::string> splitString(const std::string &str, char splitter) {
+        std::vector<std::string> result;
+        std::string current;
+        for (char i: str) {
+            if (i == splitter) {
+                if (!current.empty()) {
+                    result.push_back(current);
+                    current = "";
+                }
+                continue;
+            }
+            current += i;
         }
-    }
-
-    string getPassword(const string &value) {
-        string::size_type pos = value.find(':');
-        string return_val = pos == string::npos ? value : value.substr(pos + 1, value.length() - pos - 1);
-
-        replaceFirst(return_val, "@", "");
-        return return_val;
-    }
-
-    time_t getTime() {
-        struct timeval tv = {};
-
-        gettimeofday(&tv, nullptr);
-
-        return tv.tv_sec;
+        if (!current.empty())
+            result.push_back(current);
+        return result;
     }
 
     int countClips(const string &output_path, const string &camera_name) {
