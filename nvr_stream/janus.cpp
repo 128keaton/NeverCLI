@@ -166,8 +166,15 @@ namespace nvr {
         json request = buildMessage(body);
         json response = sendAndReceive(request);
 
-        logger->info("Destroy response: \n {}", response.dump(4));
-        return true;
+        json plugin_data = response["plugindata"];
+        json response_data = plugin_data["data"];
+
+        if (response_data.contains("destroyed") && response_data["destroyed"] == streamID)
+            return response_data["streaming"] == string("destroyed");
+
+        logger->error("Could not destroy stream with ID '{}'", streamID);
+        logger->error("Destroy response: \n {}", response.dump(4));
+        return false
     }
 
     bool
