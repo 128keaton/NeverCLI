@@ -11,8 +11,6 @@
 #include "janus.h"
 
 namespace nvr {
-    std::shared_ptr<spdlog::logger> shared_logger;
-    Janus shared_janus;
 
     typedef struct StreamData {
         GstElement *pipeline;
@@ -26,10 +24,13 @@ namespace nvr {
         string stream_name;
         int64_t rtp_port;
         int stream_id;
+        std::shared_ptr<spdlog::logger> logger;
+        Janus janus;
     } StreamData;
 
 
     class Streamer {
+
     public:
         Streamer();
         explicit Streamer(const CameraConfig &config);
