@@ -254,7 +254,6 @@ namespace nvr {
         } else {
             spdlog::info("Link of type '{}' succeeded", new_pad_type);
 
-            sleep(5);
             auto janus = Janus();
             auto sessionID = janus.getSessionID();
             auto handlerID = janus.getPluginHandlerID(sessionID);
