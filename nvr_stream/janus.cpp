@@ -209,7 +209,7 @@ namespace nvr {
         if (response_data.contains("error")) {
             string error = response_data["error"];
             logger->error("Could not create stream: {}", error);
-
+            logger->error(response_data.dump(4));
             streaming = false;
         } else if (response_data.contains("created")) {
             logger->info("Stream '{}' created", streamName);
