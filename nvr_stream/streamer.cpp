@@ -128,21 +128,6 @@ namespace nvr {
             // decoding/encoding queue
             appData.queue = gst_element_factory_make("queue2", nullptr);
 
-            appData.parse = gst_element_factory_make("h265parse", nullptr);
-            g_object_set(G_OBJECT(appData.parse), "config-interval", -1, nullptr);
-
-            appData.bin = gst_element_factory_make("decodebin", nullptr);
-
-            appData.convert1 = gst_element_factory_make("videoconvert", nullptr);
-
-            appData.overlay = gst_element_factory_make("clockoverlay", nullptr);
-            g_object_set(G_OBJECT(appData.overlay), "time-format", "%H:%M:%S %d.%m.%Y", nullptr);
-            g_object_set(G_OBJECT(appData.overlay), "outline-color", -16777216, nullptr);
-            g_object_set(G_OBJECT(appData.overlay), "color", -1, nullptr);
-            g_object_set(G_OBJECT(appData.overlay), "draw-shadow", false, nullptr);
-            g_object_set(G_OBJECT(appData.overlay), "font-desc", "myriad pro bold expanded 16", nullptr);
-
-            appData.convert2 = gst_element_factory_make("videoconvert", nullptr);
 
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
@@ -183,13 +168,8 @@ namespace nvr {
                     GST_BIN(appData.pipeline),
                     appData.rtspSrc,
                     appData.dePayloader,
-
-                    appData.parse,
-                    appData.bin,
-        //            appData.queue,
-                    appData.convert1,
-                    appData.overlay,
-                    appData.convert2,
+                    appData.decoder,
+                    appData.queue,
                     appData.encoder,
                     appData.payloader,
                     appData.sink,
@@ -199,13 +179,8 @@ namespace nvr {
             // link everything except source
             gst_element_link_many(
                     appData.dePayloader,
-
-                    appData.parse,
-                    appData.bin,
-       //             appData.queue,
-                    appData.convert1,
-                    appData.overlay,
-                    appData.convert2,
+                    appData.decoder,
+                    appData.queue,
                     appData.encoder,
                     appData.payloader,
                     appData.sink,
