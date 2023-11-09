@@ -117,6 +117,16 @@ namespace nvr {
             appData.queue = gst_element_factory_make("queue2", "queue0");
 
             appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
+
+            appData.encoder = gst_element_factory_make("x264enc", "enc");
+            g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
+
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
 
@@ -127,14 +137,6 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
                 // h264 encode without vaapi
-                appData.encoder = gst_element_factory_make("x264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             } else {
                 logger->info("Using vaapi for encoding/decoding");
 
@@ -142,10 +144,10 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
 
                 // h264 encode with vaapi
-                appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
+          //      appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
              //   g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 650, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
+            //    g_object_set(G_OBJECT(appData.encoder), "bitrate", 650, nullptr);
+           //     g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 10, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
