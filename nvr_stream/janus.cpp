@@ -4,12 +4,39 @@
 
 #include "janus.h"
 
+#include <utility>
+
 using json = nlohmann::json;
 
 namespace nvr {
+
+    const char *janus_socket = "/tmp/nvr";
+
+    Janus::Janus() {
+        this->logger = spdlog::get("janus");
+    }
+
+    Janus::Janus(std::shared_ptr<spdlog::logger> &logger) {
+        this->logger = logger;
+    }
+
+    bool Janus::isConnected() {
+     return this->connected;
+    }
+
+    bool Janus::isStreaming() {
+        return this->streaming;
+    }
+
+
     bool Janus::connect() {
+        if (connected)
+            return connected;
+
+        logger->info("Connecting to Janus with socket '{}'", janus_socket);
+
         if ((out_sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
-            spdlog::error("Could not initialize socket");
+            logger->error("Could not initialize socket");
             return false;
         }
 
@@ -17,14 +44,15 @@ namespace nvr {
         bzero(&serv_addr, sizeof(serv_addr));
         serv_addr.sun_family = AF_UNIX;
 
-        strcpy(serv_addr.sun_path, "/tmp/nvr");
+        strcpy(serv_addr.sun_path, janus_socket);
 
         if (::connect(out_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1) {
-            spdlog::error("Could not connect to socket");
+            logger->error("Could not connect to Janus");
             return false;
         }
 
-        return true;
+        connected = true;
+        return connected;
     }
 
     void Janus::cleanup() {
@@ -57,6 +85,9 @@ namespace nvr {
 
 
     int64_t Janus::getSessionID() {
+        if (_session_id > 0)
+            return _session_id;
+
         json request;
 
         request["janus"] = "create";
@@ -65,10 +96,14 @@ namespace nvr {
         json response = sendAndReceive(request);
         json data = response["data"];
 
-        return data["id"];
+        _session_id = data["id"];
+        return _session_id;
     }
 
     int64_t Janus::getPluginHandlerID(int64_t sessionID) {
+        if (_handler_id > 0)
+            return _handler_id;
+
         json request;
 
         request["janus"] = "attach";
@@ -79,7 +114,8 @@ namespace nvr {
         json response = sendAndReceive(request);
         json data = response["data"];
 
-        return data["id"];
+        _handler_id = data["id"];
+        return _handler_id;
     }
 
     json Janus::sendAndReceive(const json &request) const {
@@ -87,7 +123,7 @@ namespace nvr {
 
 
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
-            printf("Client: Error on send() call \n");
+            logger->error("Could not send request:\n{}", request_str);
         }
 
         string raw_response;
@@ -103,15 +139,47 @@ namespace nvr {
         return response;
     }
 
-    bool
-    Janus::createStream(int64_t sessionID, int64_t handlerID, const string &streamName, int64_t streamID,
-                        int64_t port) {
+    json Janus::buildMessage(json &body) {
         json request;
+        int64_t session_id;
+        int64_t handler_id;
+
+        session_id =  this->getSessionID();
+        handler_id =  this->getPluginHandlerID(session_id);
+
+        request["janus"] = "message";
+        request["session_id"] = session_id;
+        request["handle_id"] = handler_id;
+        request["transaction"] = generateRandom();
+        request["body"] = std::move(body);
+
+        return request;
+    }
+
+    bool Janus::destroyStream(int64_t streamID) {
+        json body;
+
+        body["request"] = "destroy";
+        body["id"] = streamID;
+        body["permanent"] = true;
+
+        json request = buildMessage(body);
+        json response = sendAndReceive(request);
+
+        logger->info("Destroy response: \n {}", response.dump(4));
+        return true;
+    }
+
+    bool
+    Janus::createStream(const string &streamName, int64_t streamID,int64_t port) {
         json body;
         json mediaItem;
         json media;
 
         string mid = string(streamName).append("-").append(std::to_string(streamID));
+
+        logger->info("Creating Janus stream '{}'", streamName);
+
 
         media["mid"] = mid;
         media["type"] = "video";
@@ -121,7 +189,6 @@ namespace nvr {
         media["rtpmap"] = "H264/90000";
         media["pt"] =  96;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
-
 
         body["request"] = "create";
         body["name"] = streamName;
@@ -133,15 +200,26 @@ namespace nvr {
 
         body["media"] = media;
 
-        request["janus"] = "message";
-        request["session_id"] = sessionID;
-        request["handle_id"] = handlerID;
-        request["transaction"] = generateRandom();
-        request["body"] = body;
+        json request = buildMessage(body);
 
         json response = sendAndReceive(request);
-        spdlog::info("Stream create response\n {}", response.dump());
+        json plugin_data = response["plugindata"];
+        json response_data = plugin_data["data"];
 
-        return true;
+        if (response_data.contains("error")) {
+            string error = response_data["error"];
+            logger->error("Could not create stream: {}", error);
+
+            streaming = false;
+        } else if (response_data.contains("created")) {
+            logger->info("Stream '{}' created", streamName);
+            streaming = true;
+        } else {
+            logger->warn("Not sure, dumping response: \n {}", response.dump());
+            streaming = false;
+        }
+
+
+        return streaming;
     }
 }

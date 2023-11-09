@@ -16,21 +16,27 @@ using json = nlohmann::json;
 namespace nvr {
     class Janus {
     public:
-        Janus() {
-
-        }
-
-        bool createStream(int64_t sessionID, int64_t handlerID, const string& streamName, int64_t streamID, int64_t port);
+        Janus();
+        Janus(std::shared_ptr<spdlog::logger> &logger);
+        bool destroyStream(int64_t streamID);
+        bool createStream(const string& streamName, int64_t streamID, int64_t port);
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
         json getStreamList();
         void cleanup();
         bool connect();
+        bool isConnected();
+        bool isStreaming();
 
     private:
+        bool streaming = false;
+        bool connected = false;
+        int64_t _session_id = -1;
+        int64_t _handler_id = -1;
+        std::shared_ptr<spdlog::logger> logger;
         static string generateRandom();
         int out_sock;
-
+        json buildMessage(json &body);
         [[nodiscard]] json sendAndReceive(const json& request) const;
     };
 }

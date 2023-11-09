@@ -8,8 +8,11 @@
 #include "../common.h"
 #include <gst/gst.h>
 #include <gst/gstpad.h>
-
+#include "janus.h";
 namespace nvr {
+    std::shared_ptr<spdlog::logger> shared_logger;
+    Janus shared_janus;
+
     typedef struct StreamData {
         GstElement *pipeline;
         GstElement *rtspSrc;
@@ -32,6 +35,7 @@ namespace nvr {
         int start();
         void quit();
         bool valid();
+
 
     private:
         GstBus *bus{};

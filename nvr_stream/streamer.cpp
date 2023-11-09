@@ -29,6 +29,7 @@ namespace nvr {
         this->appData.stream_name = this->camera_name;
         this->bus = nullptr;
         this->appData.stream_id = config.stream_id;
+        shared_logger = this->logger;
     }
 
     bool Streamer::valid() {
@@ -36,6 +37,13 @@ namespace nvr {
     }
 
     void Streamer::quit() {
+        if (shared_janus.isConnected() && shared_janus.isStreaming()) {
+            bool did_destroy = shared_janus.destroyStream(this->appData.stream_id);
+
+            if (!did_destroy)
+                logger->warn("Could not destroy Janus stream");
+        }
+
         if (!quitting) {
             quitting = true;
             this->logger->info("Exiting...");
@@ -228,21 +236,21 @@ namespace nvr {
         GstStructure *new_pad_struct;
         const gchar *new_pad_type;
 
-        auto janus = Janus();
-        bool janus_connected = janus.connect();
+        shared_janus = Janus(shared_logger);
+        bool janus_connected = shared_janus.connect();
 
 
         spdlog::info("Received new pad '{}' from '{}'", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
 
         /* Check the new pad's name */
         if (!g_str_has_prefix(GST_PAD_NAME(new_pad), "recv_rtp_src_")) {
-            spdlog::error("Incorrect pad.  Need recv_rtp_src_. Ignoring.");
+            shared_logger->error("Incorrect pad.  Need recv_rtp_src_. Ignoring.");
             goto exit;
         }
 
         /* If our converter is already linked, we have nothing to do here */
         if (gst_pad_is_linked(sink_pad)) {
-            spdlog::error("Sink pad from {} is already linked, ignoring", GST_ELEMENT_NAME(src));
+            shared_logger->error("Sink pad from {} is already linked, ignoring", GST_ELEMENT_NAME(src));
             goto exit;
         }
 
@@ -254,18 +262,16 @@ namespace nvr {
         /* Attempt the link */
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
-            spdlog::error("Type dictated is '{}', but link failed", new_pad_type);
+            shared_logger->error("Type dictated is '{}', but link failed", new_pad_type);
         } else {
-            spdlog::info("Link of type '{}' succeeded", new_pad_type);
+            shared_logger->info("Link of type '{}' succeeded", new_pad_type);
 
-            if (janus_connected) {
-                auto sessionID = janus.getSessionID();
-                auto handlerID = janus.getPluginHandlerID(sessionID);
-                janus_connected = janus.createStream(sessionID, handlerID, data->stream_name, data->stream_id, data->rtp_port);
-            }
+            if (janus_connected)
+                janus_connected = shared_janus.createStream(data->stream_name, data->stream_id, data->rtp_port);
+
 
             if (!janus_connected)
-                spdlog::warn("Not streaming because we were not able to connect to Janus");
+                shared_logger->warn("Not streaming because we were not able to connect to Janus");
         }
 
         exit:
