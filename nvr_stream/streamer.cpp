@@ -115,14 +115,15 @@ namespace nvr {
             // decoding/encoding queue
             appData.queue = gst_element_factory_make("queue2", nullptr);
 
-            // h265 decode without vaapi
-            appData.decoder = gst_element_factory_make("avdec_h265", "dec");
-            g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
-            g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
-
 
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
+
+                // h265 decode without vaapi
+                appData.decoder = gst_element_factory_make("avdec_h265", "dec");
+                g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
+
 
                 // h264 encode without vaapi
                 appData.encoder = gst_element_factory_make("x264enc", "enc");
@@ -137,13 +138,13 @@ namespace nvr {
                 logger->info("Using vaapi for encoding");
 
                 // h265 decode with vaapi
-              //  appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
+                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
-             //   g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1000, nullptr);
-         //       g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 10, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
