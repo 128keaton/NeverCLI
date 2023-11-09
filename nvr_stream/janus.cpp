@@ -23,6 +23,8 @@ namespace nvr {
             spdlog::error("Could not connect to socket");
             return false;
         }
+
+        return true;
     }
 
     void Janus::cleanup() {
