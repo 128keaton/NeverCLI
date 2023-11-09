@@ -21,7 +21,7 @@ namespace nvr {
     }
 
     bool Janus::isConnected() {
-     return this->connected;
+        return this->connected;
     }
 
     bool Janus::isStreaming() {
@@ -144,8 +144,8 @@ namespace nvr {
         int64_t session_id;
         int64_t handler_id;
 
-        session_id =  this->getSessionID();
-        handler_id =  this->getPluginHandlerID(session_id);
+        session_id = this->getSessionID();
+        handler_id = this->getPluginHandlerID(session_id);
 
         request["janus"] = "message";
         request["session_id"] = session_id;
@@ -174,11 +174,10 @@ namespace nvr {
 
         logger->error("Could not destroy stream with ID '{}'", streamID);
         logger->error("Destroy response: \n {}", response.dump(4));
-        return false
+        return false;
     }
 
-    bool
-    Janus::createStream(const string &streamName, int64_t streamID,int64_t port) {
+    bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
         json body;
         json mediaItem;
         json media;
@@ -194,7 +193,7 @@ namespace nvr {
         media["is_private"] = false;
         media["port"] = port;
         media["rtpmap"] = "H264/90000";
-        media["pt"] =  96;
+        media["pt"] = 96;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         body["request"] = "create";
