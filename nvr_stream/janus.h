@@ -34,7 +34,7 @@ namespace nvr {
         int64_t _handler_id = -1;
         std::shared_ptr<spdlog::logger> logger;
         static string generateRandom();
-        int out_sock{} = -1;
+        int out_sock{};
         json buildMessage(json &body);
         static json buildMedia(const string &streamName, int64_t streamID, int64_t port);
         [[nodiscard]] json performRequest(const json& request) const;
