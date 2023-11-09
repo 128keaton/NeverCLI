@@ -111,10 +111,13 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
+            g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
 
             // decoding/encoding queue
             appData.queue = gst_element_factory_make("queue2", "queue0");
+            g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 750000, nullptr);
 
+            appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
 
