@@ -71,8 +71,15 @@ namespace nvr {
 
         json request = buildMessage(body);
         json response = performRequest(request);
+        json plugin_data = response["plugindata"];
+        json response_data = plugin_data["data"];
 
-        return response;
+
+        for (json  el : response_data["list"].items()) {
+            el.dump();
+        }
+
+        return response_data["list"];
     }
 
     string Janus::generateRandom() {
