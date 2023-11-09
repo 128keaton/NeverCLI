@@ -131,7 +131,6 @@ namespace nvr {
     json Janus::performRequest(const json &request) const {
         string request_str = request.dump();
 
-
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
             logger->error("Could not send request:\n{}", request_str);
         }
@@ -192,7 +191,7 @@ namespace nvr {
             return response_data["streaming"] == string("destroyed");
 
         logger->error("Could not destroy stream with ID '{}'", streamID);
-        logger->error("Destroy response: \n {}", response.dump(4));
+        logger->error("Destroy response: \n {}", response.dump());
         return false;
     }
 
@@ -272,7 +271,6 @@ namespace nvr {
             logger->warn("Not sure, dumping response: \n {}", response.dump());
             streaming = false;
         }
-
 
         return streaming;
     }
