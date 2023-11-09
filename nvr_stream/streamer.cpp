@@ -69,9 +69,6 @@ namespace nvr {
         GstMessage *msg;
 
 
-        gst_debug_set_active(TRUE);
-        gst_debug_set_default_threshold(GST_LEVEL_INFO);
-
         const string full_stream_url = string("rtsp://")
                 .append(this->rtsp_username)
                 .append(":")
