@@ -241,7 +241,7 @@ namespace nvr {
         bool janus_connected = data->janus.connect();
 
 
-        spdlog::info("Received new pad '{}' from '{}'", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+        data->logger->info("Received new pad '{}' from '{}'", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
 
         /* Check the new pad's name */
         if (!g_str_has_prefix(GST_PAD_NAME(new_pad), "recv_rtp_src_")) {
