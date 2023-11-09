@@ -65,12 +65,13 @@ namespace nvr {
      * @return
      */
     json Janus::getStreamList() {
-        json request;
+        json body;
 
-        request["janus"] = "list";
-     //   request["transaction"] = generateRandom();
-        request["plugin"] = "janus.plugin.streaming";
+        body["request"] = "list";
+
+        json request = buildMessage(body);
         json response = performRequest(request);
+
         return response;
     }
 
