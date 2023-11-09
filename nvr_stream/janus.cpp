@@ -206,7 +206,10 @@ namespace nvr {
     json Janus::buildMedia(const string &streamName, int64_t streamID, int64_t port) {
         json media;
 
-        string mid = string(streamName).append("-").append(std::to_string(streamID));
+        string mid = string(streamName)
+                .append("-")
+                .append(std::to_string(streamID))
+                .append(std::to_string(getpid()));
 
         media["mid"] = mid;
         media["type"] = "video";
@@ -233,9 +236,7 @@ namespace nvr {
         json list = getStreamList();
 
         for (auto &stream: getStreamList()) {
-            logger->info(stream.dump(2));
-
-            if (stream.contains("0") && stream.at("0")["id"] == streamID) {
+            if (stream.contains("id") && stream["id"] == streamID) {
                 logger->warn("Destroying existing stream with ID '{}'", streamID);
                 destroyStream(streamID);
                 break;
