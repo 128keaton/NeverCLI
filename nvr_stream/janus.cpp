@@ -68,7 +68,7 @@ namespace nvr {
         json request;
 
         request["janus"] = "list";
-        request["transaction"] = generateRandom();
+     //   request["transaction"] = generateRandom();
         request["plugin"] = "janus.plugin.streaming";
         json response = performRequest(request);
         return response;
