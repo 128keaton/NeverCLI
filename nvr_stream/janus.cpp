@@ -75,10 +75,6 @@ namespace nvr {
         json response_data = plugin_data["data"];
 
 
-        for (json  el : response_data["list"].items()) {
-            el.dump();
-        }
-
         return response_data["list"];
     }
 
@@ -234,7 +230,15 @@ namespace nvr {
      */
     bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
 
-        logger->info(getStreamList().dump(4));
+        json list = getStreamList();
+
+        for (auto &stream: getStreamList()) {
+            if (stream.contains("0") && stream.at("0")["id"] == streamID) {
+                logger->warn("Destroying existing stream with ID '{}'", streamID);
+                destroyStream(streamID);
+                break;
+            }
+        }
 
         json body;
 
