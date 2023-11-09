@@ -17,15 +17,15 @@ namespace nvr {
     class Janus {
     public:
         Janus();
-        Janus(std::shared_ptr<spdlog::logger> &logger);
+        explicit Janus(std::shared_ptr<spdlog::logger> &logger);
         bool destroyStream(int64_t streamID);
         bool createStream(const string& streamName, int64_t streamID, int64_t port);
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
         json getStreamList();
         bool connect();
-        bool isConnected() const;
-        bool isStreaming() const;
+        [[nodiscard]] bool isConnected() const;
+        [[nodiscard]] bool isStreaming() const;
 
     private:
         bool streaming = false;
