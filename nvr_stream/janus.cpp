@@ -20,15 +20,19 @@ namespace nvr {
         this->logger = logger;
     }
 
-    bool Janus::isConnected() {
+    bool Janus::isConnected() const {
         return this->connected;
     }
 
-    bool Janus::isStreaming() {
+    bool Janus::isStreaming() const {
         return this->streaming;
     }
 
 
+    /**
+     * Connect to the Janus UDS
+     * @return
+     */
     bool Janus::connect() {
         if (connected)
             return connected;
@@ -55,16 +59,17 @@ namespace nvr {
         return connected;
     }
 
-    void Janus::cleanup() {
-        close(out_sock);
-    }
 
+    /**
+     * Get the list of streams
+     * @return
+     */
     json Janus::getStreamList() {
         json request;
 
         request["janus"] = "list";
         request["transaction"] = generateRandom();
-        json response = sendAndReceive(request);
+        json response = performRequest(request);
         return response;
     }
 
@@ -93,7 +98,7 @@ namespace nvr {
         request["janus"] = "create";
         request["transaction"] = generateRandom();
 
-        json response = sendAndReceive(request);
+        json response = performRequest(request);
         json data = response["data"];
 
         _session_id = data["id"];
@@ -111,14 +116,14 @@ namespace nvr {
         request["plugin"] = "janus.plugin.streaming";
         request["transaction"] = generateRandom();
 
-        json response = sendAndReceive(request);
+        json response = performRequest(request);
         json data = response["data"];
 
         _handler_id = data["id"];
         return _handler_id;
     }
 
-    json Janus::sendAndReceive(const json &request) const {
+    json Janus::performRequest(const json &request) const {
         string request_str = request.dump();
 
 
@@ -139,6 +144,11 @@ namespace nvr {
         return response;
     }
 
+    /**
+     * Build a JSON plugin message
+     * @param body Inner body
+     * @return
+     */
     json Janus::buildMessage(json &body) {
         json request;
         int64_t session_id;
@@ -156,15 +166,19 @@ namespace nvr {
         return request;
     }
 
+    /**
+     * Destroy a Janus stream
+     * @param streamID ID of the stream to destroy
+     * @return
+     */
     bool Janus::destroyStream(int64_t streamID) {
         json body;
 
         body["request"] = "destroy";
         body["id"] = streamID;
-        body["permanent"] = true;
 
         json request = buildMessage(body);
-        json response = sendAndReceive(request);
+        json response = performRequest(request);
 
         json plugin_data = response["plugindata"];
         json response_data = plugin_data["data"];
@@ -177,15 +191,17 @@ namespace nvr {
         return false;
     }
 
-    bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
-        json body;
-        json mediaItem;
+    /**
+     * Create a Media JSON array for the stream
+     * @param streamName Readable stream name with hyphen
+     * @param streamID Numeric stream ID
+     * @param port RTP streaming port
+     * @return
+     */
+    json Janus::buildMedia(const string &streamName, int64_t streamID, int64_t port) {
         json media;
 
         string mid = string(streamName).append("-").append(std::to_string(streamID));
-
-        logger->info("Creating Janus stream '{}'", streamName);
-
 
         media["mid"] = mid;
         media["type"] = "video";
@@ -196,19 +212,34 @@ namespace nvr {
         media["pt"] = 96;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
+        media = json::array({media});
+        return media;
+    }
+
+    /**
+     * Create a stream on Janus
+     * @param streamName Readable stream name with hyphen
+     * @param streamID Numeric stream ID
+     * @param port RTP streaming port
+     * @return true if created
+     */
+    bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
+
+        logger->info(getStreamList().dump(4));
+
+        json body;
+
+        logger->info("Creating Janus stream '{}'", streamName);
+
         body["request"] = "create";
         body["name"] = streamName;
         body["type"] = "rtp";
-        body["permanent"] = true;
         body["id"] = streamID;
-
-        media = json::array({media});
-
-        body["media"] = media;
+        body["media"] = buildMedia(streamName, streamID, port);
 
         json request = buildMessage(body);
 
-        json response = sendAndReceive(request);
+        json response = performRequest(request);
         json plugin_data = response["plugindata"];
         json response_data = plugin_data["data"];
 
