@@ -8,7 +8,8 @@
 #include "../common.h"
 #include <gst/gst.h>
 #include <gst/gstpad.h>
-#include "janus.h";
+#include "janus.h"
+
 namespace nvr {
     std::shared_ptr<spdlog::logger> shared_logger;
     Janus shared_janus;
