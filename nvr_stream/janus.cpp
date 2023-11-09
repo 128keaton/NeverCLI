@@ -240,24 +240,6 @@ namespace nvr {
             if (stream.contains("id") && stream["id"] == streamID) {
                 logger->warn("Destroying existing stream with ID '{}'", streamID);
                 destroyStream(streamID);
-
-                if (stream.contains("media")) {
-                    for (auto &media: stream["media"]) {
-                        if (media.contains("mid")) {
-                            string mid = media["mid"];
-                            auto split_mid = splitString(mid, ':');
-
-                            if (split_mid.empty())
-                                break;
-
-                            pid_t pid = atoi(split_mid[split_mid.size() - 1].c_str());
-
-                            if (pid > 1)
-                                kill(pid, 1);
-                        }
-                    }
-                }
-
                 break;
             }
         }
