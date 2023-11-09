@@ -145,7 +145,7 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
              //   g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 650, nullptr);
-         //       g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "compliance-mode", 1, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 10, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
