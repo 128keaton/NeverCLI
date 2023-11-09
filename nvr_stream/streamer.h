@@ -18,6 +18,11 @@ namespace nvr {
         GstElement *dePayloader;
         GstElement *decoder;
         GstElement *queue;
+        GstElement *parse;
+        GstElement *bin;
+        GstElement *convert1;
+        GstElement *overlay;
+        GstElement *convert2;
         GstElement *encoder;
         GstElement *payloader;
         GstElement *sink;
