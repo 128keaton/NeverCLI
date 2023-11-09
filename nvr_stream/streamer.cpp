@@ -279,12 +279,24 @@ namespace nvr {
         } else {
             data->logger->info("Link of type '{}' succeeded", new_pad_type);
 
-            if (janus_connected)
-                janus_connected = data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port);
+            if (janus_connected) {
+                bool stream_created = data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port);
 
+                if (!stream_created) {
+                    data->logger->warn("Could not create stream with ID '{}', trying to destroy...", data->stream_id);
+                    if (data->janus.destroyStream(data->stream_id)) {
+                        stream_created =  data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port);
+                    }
+                }
 
-            if (!janus_connected)
+                if (stream_created)
+                    data->logger->info("Stream created and live on Janus");
+                else
+                    data->logger->warn("Not streaming because we were not able to create a stream endpoint on Janus");
+
+            } else
                 data->logger->warn("Not streaming because we were not able to connect to Janus");
+
         }
 
         exit:
