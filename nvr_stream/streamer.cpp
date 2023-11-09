@@ -111,7 +111,6 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-            g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
 
             // decoding/encoding queue
             appData.queue = gst_element_factory_make("queue2", nullptr);
@@ -120,7 +119,6 @@ namespace nvr {
             appData.decoder = gst_element_factory_make("avdec_h265", "dec");
             g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
             g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
-            g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
 
             if (!this->has_vaapi) {
