@@ -115,7 +115,6 @@ namespace nvr {
 
             // decoding/encoding queue
             appData.queue = gst_element_factory_make("queue2", "queue0");
-            g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 750000, nullptr);
 
             appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
             if (!this->has_vaapi) {
