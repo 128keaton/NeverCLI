@@ -271,6 +271,7 @@ namespace nvr {
             if (janus_connected)
                 if (data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
+                    data->janus.keepAlive();
                 } else
                     data->logger->warn("Not streaming because we were not able to create a stream endpoint on Janus");
             else
