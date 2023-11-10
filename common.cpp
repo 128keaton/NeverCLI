@@ -9,8 +9,9 @@ using std::ifstream;
 using string = std::string;
 using path = std::filesystem::path;
 using json = nlohmann::json;
-namespace fs = std::filesystem;
+using nvr_logger = std::shared_ptr<spdlog::logger>;
 
+namespace fs = std::filesystem;
 
 namespace nvr {
     CameraConfig getConfig(const char *config_file) {
@@ -27,7 +28,35 @@ namespace nvr {
         }
 
         ifstream config_stream(config_file);
-        json config = json::parse(config_stream);
+
+        json config;
+
+        try {
+           config = json::parse(config_stream);
+        } catch (json::exception &exception) {
+            spdlog::error("Could not parse JSON: {}", exception.what());
+            exit(EXIT_FAILURE);
+        }
+
+        string fields[] = {
+                "splitEvery",
+                "rtpPort",
+                "id",
+                "streamURL",
+                "snapshotURL",
+                "outputPath",
+                "ipAddress",
+                "rtspUsername",
+                "rtspPassword",
+                "type"
+        };
+
+        for (auto field : fields) {
+            if (!config.contains(field)) {
+                spdlog::error("Configuration is missing field", field);
+                exit(EXIT_FAILURE);
+            }
+        }
 
         const long clip_runtime = config["splitEvery"];
         const int rtp_port = config["rtpPort"];
@@ -85,7 +114,7 @@ namespace nvr {
     }
 
 
-    std::shared_ptr<spdlog::logger> buildLogger(const CameraConfig &config) {
+    nvr_logger buildLogger(const CameraConfig &config) {
         string log_file_output = generateOutputFilename(config.stream_name, config.output_path, log);
         try {
             std::vector<spdlog::sink_ptr> sinks;
@@ -169,29 +198,6 @@ namespace nvr {
         return file_path.string();
     }
 
-    void replaceFirst(string &s, string const &to_replace, string const &with) {
-        std::size_t pos = s.find(to_replace);
-        if (pos == string::npos) return;
-        s.replace(pos, to_replace.length(), with);
-    }
-
-    std::vector<std::string> splitString(const std::string &str, char splitter) {
-        std::vector<std::string> result;
-        std::string current;
-        for (char i: str) {
-            if (i == splitter) {
-                if (!current.empty()) {
-                    result.push_back(current);
-                    current = "";
-                }
-                continue;
-            }
-            current += i;
-        }
-        if (!current.empty())
-            result.push_back(current);
-        return result;
-    }
 
     int countClips(const string &output_path, const string &camera_name) {
         fs::path videos_path{output_path};

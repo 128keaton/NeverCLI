@@ -27,11 +27,14 @@ extern "C" {
 #define NEVER_CLI_COMMON_H
 
 using string = std::string;
+using nvr_logger = std::shared_ptr<spdlog::logger>;
 
 // TODO: cleanup this file
 namespace nvr {
     enum StreamType { h265, h264 };
-    struct CameraConfig{
+    enum FileType { video, image, log };
+
+    struct CameraConfig {
         string stream_url;
         string snapshot_url;
         string output_path;
@@ -44,16 +47,11 @@ namespace nvr {
         const long clip_runtime;
         const int rtp_port;
     };
+
     CameraConfig getConfig(const char *config_file);
-    enum FileType { video, image, log };
     string generateOutputFilename(const string& name, const string& output_path, FileType file_type);
-    void replaceFirst(string &s, string const &to_replace, string const &with);
     int countClips(const string &output_path, const string &camera_name);
-    pid_t readPID(const string &pid_file_name);
-    void writePID(pid_t pid, const string &pid_file_name);
-    std::shared_ptr<spdlog::logger> buildLogger(const CameraConfig &config);
-    int spawnTask(const string &pid_file_name);
-    std::vector<std::string> splitString(const std::string &str, char splitter);
+    nvr_logger buildLogger(const CameraConfig &config);
 } // nvr
 
 #endif

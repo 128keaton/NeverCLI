@@ -5,6 +5,7 @@
 #include "janus.h"
 
 using json = nlohmann::json;
+using nvr_logger = std::shared_ptr<spdlog::logger>;
 
 namespace nvr {
 
@@ -14,7 +15,7 @@ namespace nvr {
         this->logger = spdlog::get("janus");
     }
 
-    Janus::Janus(std::shared_ptr<spdlog::logger> &logger) {
+    Janus::Janus(nvr_logger &logger) {
         this->logger = logger;
     }
 

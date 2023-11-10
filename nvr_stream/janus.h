@@ -15,20 +15,24 @@
 #define NEVER_CLI_JANUS_H
 
 using json = nlohmann::json;
+using nvr_logger = std::shared_ptr<spdlog::logger>;
 
 namespace nvr {
     class Janus {
     public:
         Janus();
-        explicit Janus(std::shared_ptr<spdlog::logger> &logger);
-        bool destroyStream(int64_t streamID);
-        bool createStream(const string& streamName, int64_t streamID, int64_t port);
+        explicit Janus(nvr_logger &logger);
+        void keepAlive();
+
         int64_t getPluginHandlerID(int64_t sessionID);
         int64_t getSessionID();
         json getStreamList();
+
+        bool destroyStream(int64_t streamID);
+        bool createStream(const string& streamName, int64_t streamID, int64_t port);
         bool connect();
         bool disconnect();
-        void keepAlive();
+
         [[nodiscard]] bool isConnected() const;
         [[nodiscard]] bool isStreaming() const;
 
@@ -36,15 +40,19 @@ namespace nvr {
         bool sendKeepAlive();
         bool streaming = false;
         bool connected = false;
+
+        nvr_logger logger;
+        int out_sock{};
+
         int64_t _session_id = -1;
         int64_t _handler_id = -1;
         int64_t _stream_id = -1;
-        std::shared_ptr<spdlog::logger> logger;
-        static string generateRandom();
-        int out_sock{};
-        json buildMessage(json &body);
-        static json buildMedia(const string &streamName, int64_t streamID, int64_t port);
+
         [[nodiscard]] json performRequest(const json& request) const;
+        json buildMessage(json &body);
+
+        static string generateRandom();
+        static json buildMedia(const string &streamName, int64_t streamID, int64_t port);
     };
 }
 
