@@ -138,7 +138,8 @@ namespace nvr {
 
         string raw_response;
 
-        char buffer[BUFSIZ];
+        char *buffer = (char*)calloc(BUFSIZ, sizeof(char ));
+
 
 
         while (true) {
@@ -158,6 +159,7 @@ namespace nvr {
                 break;
         }
 
+        free(buffer);
         json response = json::parse(raw_response);
 
         return response;
