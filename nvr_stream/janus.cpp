@@ -139,7 +139,8 @@ namespace nvr {
 
 
 
-        char *buffer = new char [BUFSIZ];
+
+        std::vector<char> buffer(BUFSIZ);
 
         while (true) {
             int bytes = (int)read(out_sock, &buffer, BUFSIZ);
@@ -147,7 +148,9 @@ namespace nvr {
                 break;
 
             printf("bytes: %i\n", bytes);
-            raw_response.append(buffer);
+
+            for(auto c : buffer)
+                raw_response.push_back(c);
 
             spdlog::info(raw_response);
 
