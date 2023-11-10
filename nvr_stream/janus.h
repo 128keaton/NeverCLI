@@ -24,7 +24,6 @@ namespace nvr {
         int64_t getSessionID();
         json getStreamList();
         bool connect();
-        void keepAlive();
         [[nodiscard]] bool isConnected() const;
         [[nodiscard]] bool isStreaming() const;
 
