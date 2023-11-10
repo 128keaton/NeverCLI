@@ -197,33 +197,41 @@ namespace nvr {
 
 
         bus = gst_element_get_bus(appData.pipeline);
-        msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
-                                         (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
-        /* Parse message */
-        if (msg != nullptr) {
-            GError *err;
-            gchar *debug_info;
+        while (true) {
+            msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
+                                             (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS | GST_MESSAGE_ANY));
 
-            switch (GST_MESSAGE_TYPE(msg)) {
-                case GST_MESSAGE_ERROR:
-                    gst_message_parse_error(msg, &err, &debug_info);
-                    logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
-                    logger->error("Debugging information: {}", debug_info ? debug_info : "none");
-                    g_clear_error(&err);
-                    g_free(debug_info);
-                    return_state = EXIT_FAILURE;
-                    break;
-                case GST_MESSAGE_EOS:
-                    logger->info("End-Of-Stream reached.");
-                    return_state = EXIT_SUCCESS;
-                    break;
-                default:
-                    logger->info("Unexpected message received.");
-                    return_state = EXIT_FAILURE;
-                    break;
+            /* Parse message */
+            if (msg != nullptr) {
+                GError *err;
+                gchar *debug_info;
+
+                switch (GST_MESSAGE_TYPE(msg)) {
+                    case GST_MESSAGE_ERROR:
+                        gst_message_parse_error(msg, &err, &debug_info);
+                        logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
+                        logger->error("Debugging information: {}", debug_info ? debug_info : "none");
+                        g_clear_error(&err);
+                        g_free(debug_info);
+                        return_state = EXIT_FAILURE;
+                        break;
+                    case GST_MESSAGE_EOS:
+                        logger->info("End-Of-Stream reached.");
+                        return_state = EXIT_SUCCESS;
+                        break;
+                    default:
+                        logger->info("Unexpected message received: {}", msg->src->name);
+                        return_state = EXIT_SUCCESS;
+                        break;
+                }
+                gst_message_unref(msg);
+            } else {
+                break;
             }
-            gst_message_unref(msg);
+
+            if (return_state == EXIT_FAILURE)
+                break;
         }
 
         /* Free resources */

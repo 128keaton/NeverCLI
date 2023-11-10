@@ -30,7 +30,6 @@ namespace nvr {
         pid_t pid;
         pid = fork();
 
-
         if (pid > 0) {
             clock_t begin = clock();
             while (connected) {
@@ -39,7 +38,6 @@ namespace nvr {
 
                 if (time_spent >= 15) {
                     begin = clock();
-                    logger->error("Timed out waiting for reply from Janus");
 
                     if (!sendKeepAlive())
                         break;
@@ -149,9 +147,6 @@ namespace nvr {
     }
 
     bool Janus::sendKeepAlive() {
-        if (!connected)
-            return false;
-
         json request;
         int64_t session_id;
 
