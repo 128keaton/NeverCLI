@@ -145,9 +145,10 @@ namespace nvr {
             if (bytes <= 0)
                 break;
 
-            raw_response.append(buffer);
+            write(1, buffer, bytes);
         }
 
+        raw_response.append(buffer);
 
         json response = json::parse(raw_response);
 
