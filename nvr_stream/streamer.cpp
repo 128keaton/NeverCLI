@@ -200,7 +200,7 @@ namespace nvr {
 
         while (true) {
             msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
-                                             (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS | GST_MESSAGE_ANY));
+                                             (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
             /* Parse message */
             if (msg != nullptr) {

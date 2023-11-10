@@ -27,23 +27,11 @@ namespace nvr {
     }
 
     void Janus::keepAlive() {
-        pid_t pid;
-        pid = fork();
-
-        if (pid > 0) {
-            clock_t begin = clock();
-            while (connected) {
-                clock_t end = clock();
-                double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
-
-                if (time_spent >= 15) {
-                    begin = clock();
-
-                    if (!sendKeepAlive())
-                        break;
-                }
-            }
-        }
+        auto res = std::async(std::launch::async, [&]{
+            std::this_thread::sleep_for(std::chrono::seconds(15));
+            if (sendKeepAlive())
+                keepAlive();
+        });
     }
 
 

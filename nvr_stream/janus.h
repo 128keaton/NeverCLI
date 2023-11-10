@@ -7,6 +7,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/types.h>
+#include <chrono>
+#include <thread>
+#include <future>
 
 #ifndef NEVER_CLI_JANUS_H
 #define NEVER_CLI_JANUS_H
