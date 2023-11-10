@@ -75,12 +75,12 @@ namespace nvr {
     }
 
     bool Janus::disconnect() {
-        close(out_sock);
-
         if (streaming && _stream_id > 0)
             if (!destroyStream(_stream_id))
                 logger->warn("Could not destroy Janus stream with ID '{}'", _stream_id);
 
+
+        close(out_sock);
 
         connected = false;
         return true;
