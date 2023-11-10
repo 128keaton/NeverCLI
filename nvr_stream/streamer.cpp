@@ -141,7 +141,7 @@ namespace nvr {
             //    g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 21024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
+               // g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
             }
 
 
