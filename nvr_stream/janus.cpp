@@ -148,6 +148,7 @@ namespace nvr {
                 printf("bye\n");
                 break;
             }
+            printf("bytes: %i\n", bytes);
             raw_response.append(buffer);
         }
 
