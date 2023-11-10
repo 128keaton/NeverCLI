@@ -3,7 +3,6 @@
 //
 
 #include "janus.h"
-#include <stdlib.h>
 
 using json = nlohmann::json;
 
@@ -138,18 +137,16 @@ namespace nvr {
         string raw_response;
 
 
-
-
         std::vector<char> buffer(BUFSIZ);
 
         while (true) {
-            int bytes = (int)read(out_sock, &buffer, BUFSIZ);
+            int bytes = (int) read(out_sock, &buffer, BUFSIZ);
             if (bytes <= 0)
                 break;
 
             printf("bytes: %i\n", bytes);
 
-            for(auto c : buffer)
+            for (auto c: buffer)
                 raw_response.push_back(c);
 
             spdlog::info(raw_response);
@@ -161,7 +158,7 @@ namespace nvr {
                 break;
         }
 
-        delete[] buffer;
+
         json response = json::parse(raw_response);
 
         return response;
