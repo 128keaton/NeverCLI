@@ -3,8 +3,7 @@
 //
 
 #include "janus.h"
-
-#include <utility>
+#include <stdlib.h>
 
 using json = nlohmann::json;
 
@@ -138,9 +137,9 @@ namespace nvr {
 
         string raw_response;
 
-        char *buffer = (char*)malloc(sizeof(char*));
 
 
+        char *buffer = static_cast<char *>(malloc(BUFSIZ));
 
         while (true) {
             int bytes = (int)read(out_sock, &buffer, BUFSIZ);
