@@ -27,22 +27,17 @@ namespace nvr {
     }
 
     void Janus::keepAlive() {
-        pid_t pid = -1;
+        pid_t pid;
         pid = fork();
 
-        if (pid == 0) {
-            pid = fork();
-            if (pid == 0)
-                while (connected) {
-                    if (!sendKeepAlive())
-                        break;
+        if (pid > 0) {
+            while (connected) {
+                if (!sendKeepAlive())
+                    break;
 
-                    sleep(25);
-                }
-            exit(0);
+                sleep(25);
+            }
         }
-
-        exit(0);
     }
 
 
