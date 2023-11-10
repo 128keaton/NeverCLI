@@ -32,9 +32,10 @@ namespace nvr {
                 [this]() {
                     auto result = std::async(std::launch::async, [&] {
                         while (connected) {
-                            std::this_thread::sleep_for(std::chrono::seconds(20));
                             if (!sendKeepAlive())
-                                break;
+                                std::this_thread::sleep_for(std::chrono::seconds(1));
+                            else
+                                std::this_thread::sleep_for(std::chrono::seconds(15));
                         }
 
                         return;
@@ -172,8 +173,7 @@ namespace nvr {
         if (response.contains("janus")) {
             logger->flush();
             return response["janus"] == "ack";
-        }
-        else
+        } else
             logger->error("Keep-alive response: {}", response.dump());
 
 
@@ -224,12 +224,13 @@ namespace nvr {
 
         if (!raw_response.ends_with('}')) {
             auto last_pos = raw_response.find_last_of('}');
-            auto initial_size = raw_response.size();
-            raw_response = raw_response.substr(0, last_pos + 1);
-            auto size = raw_response.size();
+            auto initial_raw_response = string(raw_response);
 
-            if (initial_size > size)
-                logger->warn("Removed {} bytes from end of response", (initial_size - size));
+            raw_response = raw_response.substr(0, last_pos + 1);
+
+            if (initial_raw_response.size() > raw_response.size()) {
+                logger->warn("Removed {} bytes from end of response", (initial_raw_response.size() - raw_response.size()));
+            }
         }
 
         if (raw_response.empty() || !raw_response.starts_with('{')) {
