@@ -150,7 +150,11 @@ namespace nvr {
             raw_response.append(buffer);
 
             spdlog::info(raw_response);
-            if (bytes < BUFSIZ)
+
+            auto o_tag_count = std::ranges::count(raw_response, '{');
+            auto c_tag_count = std::ranges::count(raw_response, '}');
+
+            if (abs(o_tag_count) == abs(c_tag_count))
                 break;
         }
 
