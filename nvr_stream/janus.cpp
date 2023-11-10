@@ -154,11 +154,8 @@ namespace nvr {
         request["session_id"] = session_id;
         request["transaction"] = generateRandom();
 
-        string request_str = request.dump();
-        if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
-            logger->error("Could not send request: {}", request_str);
-            return false;
-        }
+        json response = performRequest(request);
+        logger->info(response.dump());
 
         return true;
     }
