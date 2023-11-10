@@ -154,18 +154,12 @@ namespace nvr {
         request["session_id"] = session_id;
         request["transaction"] = generateRandom();
 
+        json response = performRequest(request);
 
-        try {
-            json response = performRequest(request);
-
-            if (response.contains("janus"))
-                return response["janus"] == "ack";
-            else
-                logger->error("Keep-alive response: {}", response.dump());
-        } catch (json::exception &exception) {
-            logger->error("Could not parse JSON: {}", exception.what());
-            return false;
-        }
+        if (response.contains("janus"))
+            return response["janus"] == "ack";
+        else
+            logger->error("Keep-alive response: {}", response.dump());
 
 
         return false;
@@ -208,7 +202,17 @@ namespace nvr {
         }
 
 
-        json response = json::parse(raw_response);
+        try {
+            json response = json::parse(raw_response);
+            return response;
+        } catch (json::exception &exception) {
+            logger->error("Could not parse JSON: {}", exception.what());
+            logger->error("Full response: {}", raw_response);
+        }
+
+
+        json response;
+        response["message"] = "error";
 
         return response;
     }
