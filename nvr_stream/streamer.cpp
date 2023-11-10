@@ -47,11 +47,15 @@ namespace nvr {
             logger->info("Exiting...");
 
             gst_object_unref(bus);
-            if (gst_element_set_state(appData.pipeline, GST_STATE_NULL) == 0) {
-                logger->error("Could not set pipeline state");
-            }
 
-            gst_object_unref(appData.pipeline);
+            GstStateChangeReturn return_state = gst_element_set_state(appData.pipeline, GST_STATE_NULL);
+
+            if (return_state == 0) {
+                logger->error("Could not set pipeline state");
+            } else {
+                logger->info("Pipeline state set to null");
+                gst_object_unref(appData.pipeline);
+            }
         }
     }
 
