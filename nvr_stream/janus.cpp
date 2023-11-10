@@ -146,8 +146,7 @@ namespace nvr {
 
             printf("bytes: %i\n", bytes);
 
-            for (auto c: buffer)
-                raw_response.append(c);
+            raw_response.append(buffer);
 
             spdlog::info(raw_response);
 
