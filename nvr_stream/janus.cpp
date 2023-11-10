@@ -31,7 +31,7 @@ namespace nvr {
                 [this]() {
                     auto result = std::async(std::launch::async, [&] {
                         while (connected) {
-                            std::this_thread::sleep_for(std::chrono::seconds(15));
+                            std::this_thread::sleep_for(std::chrono::seconds(28));
                             if (!sendKeepAlive())
                                 break;
                         }
@@ -155,9 +155,14 @@ namespace nvr {
         request["transaction"] = generateRandom();
 
         json response = performRequest(request);
-        logger->info(response.dump());
 
-        return true;
+        if (response.contains("janus"))
+            return response["janus"] == "ack";
+        else
+            logger->error("Keep-alive response: {}", response.dump());
+
+
+        return false;
     }
 
     json Janus::performRequest(const json &request) const {
