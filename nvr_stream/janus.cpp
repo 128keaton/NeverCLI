@@ -139,7 +139,8 @@ namespace nvr {
 
 
 
-        char *buffer = static_cast<char *>(malloc(BUFSIZ));
+        char *buffer;
+        buffer = (char*) malloc(BUFSIZ);
 
         while (true) {
             int bytes = (int)read(out_sock, &buffer, BUFSIZ);
