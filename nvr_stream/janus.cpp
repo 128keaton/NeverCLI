@@ -189,11 +189,13 @@ namespace nvr {
         char *buffer;
         clock_t begin = clock();
         string raw_response;
+        int total_bytes = 0;
 
         while (true) {
             buffer = (char *) malloc((BUFSIZ + 1) * sizeof(char));
             int bytes = (int) read(out_sock, buffer, BUFSIZ);
-            if (bytes <= 0)
+            total_bytes += bytes;
+            if (bytes <= 0 && total_bytes > 0)
                 break;
 
             raw_response.append(buffer);
@@ -209,7 +211,7 @@ namespace nvr {
             clock_t end = clock();
             double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
 
-            if (time_spent >= 1) {
+            if (time_spent >= 5) {
                 logger->error("Timed out waiting for reply from Janus");
                 break;
             }
