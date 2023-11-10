@@ -230,8 +230,10 @@ namespace nvr {
         json plugin_data = response["plugindata"];
         json response_data = plugin_data["data"];
 
-        if (response_data.contains("destroyed") && response_data["destroyed"] == streamID)
-            return response_data["streaming"] == string("destroyed");
+        if (response_data.contains("destroyed") && response_data["destroyed"] == streamID) {
+            connected = !(response_data["streaming"] == string("destroyed"));
+            return !connected;
+        }
 
         logger->error("Could not destroy stream with ID '{}'", streamID);
         logger->error("Destroy response: {}", response.dump());
