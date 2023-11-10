@@ -137,16 +137,18 @@ namespace nvr {
         string raw_response;
 
 
+        char *buffer;
 
         while (true) {
-            char buffer[BUFSIZ];
-            int bytes = (int) read(out_sock, &buffer, BUFSIZ);
+            buffer = (char *)malloc((BUFSIZ+1)*sizeof(char));
+            int bytes = (int) read(out_sock, buffer, BUFSIZ);
             if (bytes <= 0)
                 break;
 
             printf("bytes: %i\n", bytes);
 
             raw_response.append(buffer);
+            free(buffer);
 
             spdlog::info(raw_response);
 
@@ -156,6 +158,7 @@ namespace nvr {
             if (abs(o_tag_count) == abs(c_tag_count))
                 break;
         }
+
 
 
         json response = json::parse(raw_response);
