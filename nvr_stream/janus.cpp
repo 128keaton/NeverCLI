@@ -138,7 +138,7 @@ namespace nvr {
 
         string raw_response;
 
-        char *buffer = (char*)calloc(BUFSIZ, sizeof(char ));
+        char *buffer = (char*)malloc(sizeof(char*));
 
 
 
