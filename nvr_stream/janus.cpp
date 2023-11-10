@@ -138,15 +138,17 @@ namespace nvr {
 
         string raw_response;
 
-        int dgram_max_size = 0;
-        socklen_t optLen = sizeof(dgram_max_size);
-        ssize_t rec = getsockopt(out_sock, SOL_SOCKET, SO_SNDBUF, &dgram_max_size, &optLen);
+        char buffer[BUFSIZ];
 
-        char buffer[(int)rec];
+        while (true) {
+            ssize_t bytes = read(out_sock, &buffer, BUFSIZ);
+            if (bytes <= 0)
+                break;
 
-        read(out_sock, &buffer, rec - 32);
+            raw_response.append(buffer);
+        }
 
-        raw_response.append(buffer);
+
         json response = json::parse(raw_response);
 
         return response;
