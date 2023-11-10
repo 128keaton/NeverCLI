@@ -131,7 +131,6 @@ namespace nvr {
 
         if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
             logger->error("Could not send request: {}", request_str);
-            logger->error("Could not send request: {}", request_str);
         }
 
         char *buffer;
