@@ -31,7 +31,7 @@ namespace nvr {
                 [this]() {
                     auto result = std::async(std::launch::async, [&] {
                         while (connected) {
-                            std::this_thread::sleep_for(std::chrono::seconds(28));
+                            std::this_thread::sleep_for(std::chrono::seconds(20));
                             if (!sendKeepAlive())
                                 break;
                         }
@@ -72,6 +72,18 @@ namespace nvr {
 
         connected = true;
         return connected;
+    }
+
+    bool Janus::disconnect() {
+        close(out_sock);
+
+        if (streaming && _stream_id > 0)
+            if (!destroyStream(_stream_id))
+                logger->warn("Could not destroy Janus stream with ID '{}'", _stream_id);
+
+
+        connected = false;
+        return true;
     }
 
 
@@ -259,8 +271,8 @@ namespace nvr {
         json response_data = plugin_data["data"];
 
         if (response_data.contains("destroyed") && response_data["destroyed"] == streamID) {
-            connected = !(response_data["streaming"] == string("destroyed"));
-            return !connected;
+            streaming = !(response_data["streaming"] == string("destroyed"));
+            return !streaming;
         }
 
         logger->error("Could not destroy stream with ID '{}'", streamID);
@@ -307,6 +319,7 @@ namespace nvr {
     bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
         json list = getStreamList();
 
+        _stream_id = streamID;
         for (auto &stream: getStreamList()) {
             if (stream.contains("id") && stream["id"] == streamID) {
                 logger->warn("Destroying existing stream with ID '{}'", streamID);

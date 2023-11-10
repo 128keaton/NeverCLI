@@ -39,28 +39,29 @@ namespace nvr {
 
     void Streamer::quit() {
         if (appData.janus.isConnected() && appData.janus.isStreaming()) {
-            bool did_destroy = appData.janus.destroyStream(this->appData.stream_id);
-
-            if (!did_destroy)
-                logger->warn("Could not destroy Janus stream");
+            appData.janus.disconnect();
         }
 
         if (!quitting) {
             quitting = true;
-            this->logger->info("Exiting...");
+            logger->info("Exiting...");
+
+            if (this->appData.pipeline != nullptr) {
+                if (  gst_element_set_state(appData.pipeline, GST_STATE_NULL) == 0) {
+                    logger->error("Could not set pipeline state");
+                }
+
+                gst_object_unref(appData.pipeline);
+                gst_object_unref(appData.rtspSrc);
+                gst_object_unref(appData.sink);
+            }
+
             if (this->bus != nullptr) {
                 gst_object_unref(bus);
             }
 
-            if (this->appData.pipeline != nullptr) {
-                gst_element_set_state(appData.pipeline, GST_STATE_NULL);
-                gst_object_unref(appData.pipeline);
-            }
 
         }
-
-        free(this->bus);
-        free(appData.pipeline);
     }
 
     int Streamer::start() {

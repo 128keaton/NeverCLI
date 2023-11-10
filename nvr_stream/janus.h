@@ -27,6 +27,7 @@ namespace nvr {
         int64_t getSessionID();
         json getStreamList();
         bool connect();
+        bool disconnect();
         void keepAlive();
         [[nodiscard]] bool isConnected() const;
         [[nodiscard]] bool isStreaming() const;
@@ -37,6 +38,7 @@ namespace nvr {
         bool connected = false;
         int64_t _session_id = -1;
         int64_t _handler_id = -1;
+        int64_t _stream_id = -1;
         std::shared_ptr<spdlog::logger> logger;
         static string generateRandom();
         int out_sock{};
