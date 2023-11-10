@@ -126,6 +126,24 @@ namespace nvr {
         return _handler_id;
     }
 
+    bool Janus::sendKeepAlive() {
+        if (!connected)
+            return false;
+
+        json request;
+        int64_t session_id;
+
+        session_id = this->getSessionID();
+
+        request["janus"] = "keepalive";
+        request["session_id"] = session_id;
+        request["transaction"] = generateRandom();
+
+        json response = performRequest(request);
+
+        return response.contains("janus");
+    }
+
     json Janus::performRequest(const json &request) const {
         string request_str = request.dump();
 
@@ -291,6 +309,21 @@ namespace nvr {
             logger->warn("Not sure, dumping response: {}", response.dump());
             streaming = false;
         }
+
+        pid_t pid = -1;
+        pid = fork();
+
+        if (pid == 0) {
+            pid = fork();
+            if (pid == 0)
+                while (connected) {
+                    if (!sendKeepAlive())
+                        break;
+
+                    sleep(25);
+                }
+        }
+
 
         return streaming;
     }

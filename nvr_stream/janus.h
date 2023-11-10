@@ -28,6 +28,7 @@ namespace nvr {
         [[nodiscard]] bool isStreaming() const;
 
     private:
+        bool sendKeepAlive();
         bool streaming = false;
         bool connected = false;
         int64_t _session_id = -1;
