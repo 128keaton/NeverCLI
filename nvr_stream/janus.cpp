@@ -30,12 +30,20 @@ namespace nvr {
         pid_t pid;
         pid = fork();
 
-        if (pid > 0) {
-            while (connected) {
-                if (!sendKeepAlive())
-                    break;
 
-                sleep(5);
+        if (pid > 0) {
+            clock_t begin = clock();
+            while (connected) {
+                clock_t end = clock();
+                double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+
+                if (time_spent >= 15) {
+                    begin = clock();
+                    logger->error("Timed out waiting for reply from Janus");
+
+                    if (!sendKeepAlive())
+                        break;
+                }
             }
             exit(0);
         }
