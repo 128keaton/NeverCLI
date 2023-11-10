@@ -156,8 +156,10 @@ namespace nvr {
 
         json response = performRequest(request);
 
-        if (response.contains("janus"))
+        if (response.contains("janus")) {
+            logger->flush();
             return response["janus"] == "ack";
+        }
         else
             logger->error("Keep-alive response: {}", response.dump());
 
@@ -303,7 +305,6 @@ namespace nvr {
      * @return true if created
      */
     bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
-
         json list = getStreamList();
 
         for (auto &stream: getStreamList()) {
