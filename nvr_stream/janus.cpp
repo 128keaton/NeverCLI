@@ -195,8 +195,11 @@ namespace nvr {
             buffer = (char *) malloc((BUFSIZ + 1) * sizeof(char));
             int bytes = (int) read(out_sock, buffer, BUFSIZ);
             total_bytes += bytes;
-            if (bytes <= 0 && total_bytes > 0)
+
+            if (bytes <= 0 && total_bytes > 0) {
+                free(buffer);
                 break;
+            }
 
             raw_response.append(buffer);
             free(buffer);
@@ -218,14 +221,17 @@ namespace nvr {
         }
 
 
-        try {
-            json response = json::parse(raw_response);
-            return response;
-        } catch (json::exception &exception) {
-            logger->error("Could not parse JSON: {}", exception.what());
-            logger->error("Full response: {}", raw_response);
+        if (raw_response.empty() || !raw_response.starts_with('{') || !raw_response.ends_with('}')) {
+            logger->error("Raw response is not valid JSON: '{}'", raw_response);
+        } else {
+            try {
+                json response = json::parse(raw_response);
+                return response;
+            } catch (json::exception &exception) {
+                logger->error("Could not parse JSON: {}", exception.what());
+                logger->error("Full response: {}", raw_response);
+            }
         }
-
 
         json response;
         response["message"] = "error";
