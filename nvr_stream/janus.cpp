@@ -47,7 +47,6 @@ namespace nvr {
             }
             exit(0);
         }
-        exit(0);
     }
 
 
