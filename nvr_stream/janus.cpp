@@ -189,7 +189,7 @@ namespace nvr {
 
         char *buffer;
         clock_t begin = clock();
-        string raw_response;
+        string raw_response = string();
         int total_bytes = 0;
 
         while (true) {
@@ -222,7 +222,17 @@ namespace nvr {
         }
 
 
-        if (raw_response.empty() || !raw_response.starts_with('{') || !raw_response.ends_with('}')) {
+        if (!raw_response.ends_with('}')) {
+            auto last_pos = raw_response.find_last_of('}');
+            auto initial_size = raw_response.size();
+            raw_response = raw_response.substr(0, last_pos + 1);
+            auto size = raw_response.size();
+
+            if (initial_size > size)
+                logger->warn("Removed {} bytes from end of response", (initial_size - size));
+        }
+
+        if (raw_response.empty() || !raw_response.starts_with('{')) {
             logger->error("Raw response is not valid JSON: '{}'", raw_response);
         } else {
             try {
