@@ -149,6 +149,7 @@ namespace nvr {
             printf("bytes: %i\n", bytes);
             raw_response.append(buffer);
 
+            spdlog::info(raw_response);
             if (bytes < BUFSIZ)
                 break;
         }
