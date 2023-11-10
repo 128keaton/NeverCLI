@@ -27,11 +27,17 @@ namespace nvr {
     }
 
     void Janus::keepAlive() {
-        auto res = std::async(std::launch::async, [&]{
-            std::this_thread::sleep_for(std::chrono::seconds(15));
-            if (sendKeepAlive())
-                keepAlive();
-        });
+        pid_t  pid = fork();
+
+        if (pid > 0) {
+            auto res = std::async(std::launch::async, [&]{
+                while (true) {
+                    std::this_thread::sleep_for(std::chrono::seconds(15));
+                    if (!sendKeepAlive())
+                        break;
+                }
+            });
+        }
     }
 
 
