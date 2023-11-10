@@ -148,11 +148,8 @@ namespace nvr {
                 printf("bye\n");
                 break;
             }
-
-            write(1, buffer, bytes);
+            raw_response.append(buffer);
         }
-
-        raw_response.append(buffer);
 
         json response = json::parse(raw_response);
 
