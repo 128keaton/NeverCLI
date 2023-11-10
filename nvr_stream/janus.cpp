@@ -139,8 +139,7 @@ namespace nvr {
 
 
 
-        char *buffer;
-        buffer = (char*) malloc(BUFSIZ);
+        char *buffer = new char [BUFSIZ];
 
         while (true) {
             int bytes = (int)read(out_sock, &buffer, BUFSIZ);
@@ -159,7 +158,7 @@ namespace nvr {
                 break;
         }
 
-        free(buffer);
+        delete[] buffer;
         json response = json::parse(raw_response);
 
         return response;
