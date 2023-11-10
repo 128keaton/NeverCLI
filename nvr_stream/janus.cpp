@@ -207,9 +207,9 @@ namespace nvr {
         json media;
 
         string mid = string(streamName)
-                .append(":")
+                .append("_")
                 .append(std::to_string(streamID))
-                .append(":")
+                .append("_")
                 .append(std::to_string(getpid()));
 
         media["mid"] = mid;
