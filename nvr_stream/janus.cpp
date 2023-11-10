@@ -143,13 +143,14 @@ namespace nvr {
 
         while (true) {
             int bytes = (int)read(out_sock, &buffer, BUFSIZ);
-            if (bytes <= 0) {
-                bytes = -1;
-                printf("bye\n");
+            if (bytes <= 0)
                 break;
-            }
+
             printf("bytes: %i\n", bytes);
             raw_response.append(buffer);
+
+            if (bytes < BUFSIZ)
+                break;
         }
 
         json response = json::parse(raw_response);
