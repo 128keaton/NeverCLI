@@ -139,8 +139,10 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
             //    g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 21024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-qp", 51, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 32, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "min-qp", 30, nullptr);
                // g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
             }
 
