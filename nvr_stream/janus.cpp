@@ -37,7 +37,9 @@ namespace nvr {
 
                 sleep(25);
             }
+            exit(0);
         }
+            exit(0);
     }
 
 
