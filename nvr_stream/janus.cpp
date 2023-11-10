@@ -35,7 +35,7 @@ namespace nvr {
                 if (!sendKeepAlive())
                     break;
 
-                sleep(25);
+                sleep(5);
             }
             exit(0);
         }
