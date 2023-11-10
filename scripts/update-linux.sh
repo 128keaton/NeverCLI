@@ -14,6 +14,6 @@ sudo cp ./cmake-build-debug/nvr_stream /usr/local/bin/
 
 systemctl --user daemon-reload
 
-cp ./examples/*.service /etc/systemd/user/
+cp ./systemd/*.service /etc/systemd/user/
 
 echo "Done!"
