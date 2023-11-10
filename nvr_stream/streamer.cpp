@@ -290,7 +290,7 @@ namespace nvr {
     }
 
     string Streamer::buildStreamURL(const string &password) {
-        string("rtsp://")
+        return string("rtsp://")
                 .append(this->rtsp_username)
                 .append(":")
                 .append(password)
