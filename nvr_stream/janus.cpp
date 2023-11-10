@@ -140,11 +140,12 @@ namespace nvr {
 
         int dgram_max_size = 0;
         socklen_t optLen = sizeof(dgram_max_size);
-
-        char buffer[2];
         ssize_t rec = getsockopt(out_sock, SOL_SOCKET, SO_SNDBUF, &dgram_max_size, &optLen);
+
+        char buffer[(int)rec];
+
         do {
-            ssize_t result = recv(out_sock, &buffer[rec], sizeof(buffer) - rec, 0);
+            ssize_t result = recv(out_sock, &buffer, sizeof(buffer) - rec, 0);
             if (result <= 0)
                 break;
             else
