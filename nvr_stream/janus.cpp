@@ -142,18 +142,15 @@ namespace nvr {
         socklen_t optLen = sizeof(dgram_max_size);
         int r = getsockopt(out_sock, SOL_SOCKET, SO_SNDBUF, &dgram_max_size, &optLen);
 
-        char buffer[(int)optLen];
+        char buffer[(int) optLen];
         ssize_t rec = 0;
         do {
             ssize_t result = recv(out_sock, &buffer[rec], sizeof(buffer) - rec, 0);
-            if (result == -1)
-                break;
-            else if (result == 0)
+            if (result <= 0)
                 break;
             else
                 rec += result;
-        }
-        while (rec < sizeof(buffer));
+        } while (rec < sizeof(buffer));
 
         raw_response.append(buffer);
         json response = json::parse(raw_response);
