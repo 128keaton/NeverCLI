@@ -164,9 +164,13 @@ namespace nvr {
         request["session_id"] = session_id;
         request["transaction"] = generateRandom();
 
-        json response = performRequest(request);
+        string request_str = request.dump();
+        if (send(out_sock, request_str.data(), request_str.size(), 0) == -1) {
+            logger->error("Could not send request: {}", request_str);
+            return false;
+        }
 
-        return response.contains("janus");
+        return true;
     }
 
     json Janus::performRequest(const json &request) const {
