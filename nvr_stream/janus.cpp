@@ -144,7 +144,7 @@ namespace nvr {
 
         char buffer[(int)rec];
 
-        recv(out_sock, &buffer, rec - 32, 0);
+        read(out_sock, &buffer, rec - 32);
 
         raw_response.append(buffer);
         json response = json::parse(raw_response);
