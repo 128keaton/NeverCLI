@@ -140,10 +140,14 @@ namespace nvr {
 
         char buffer[BUFSIZ];
 
-        while (true) {
-            ssize_t bytes = read(out_sock, &buffer, BUFSIZ);
-            if (bytes <= 0)
+        ssize_t bytes = 0;
+        while (bytes >= 0) {
+            bytes = read(out_sock, &buffer, BUFSIZ);
+            if (bytes <= 0) {
+                bytes = -1;
+                printf("Byrt");
                 break;
+            }
 
             write(1, buffer, bytes);
         }
