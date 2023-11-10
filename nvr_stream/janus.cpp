@@ -26,6 +26,23 @@ namespace nvr {
         return this->streaming;
     }
 
+    void Janus::keepAlive() {
+        pid_t pid = -1;
+        pid = fork();
+
+        if (pid == 0) {
+            pid = fork();
+            if (pid == 0)
+                while (connected) {
+                    if (!sendKeepAlive())
+                        break;
+
+                    sleep(25);
+                }
+            exit(0);
+        }
+    }
+
 
     /**
      * Connect to the Janus UDS
@@ -309,21 +326,6 @@ namespace nvr {
             logger->warn("Not sure, dumping response: {}", response.dump());
             streaming = false;
         }
-
-        pid_t pid = -1;
-        pid = fork();
-
-        if (pid == 0) {
-            pid = fork();
-            if (pid == 0)
-                while (connected) {
-                    if (!sendKeepAlive())
-                        break;
-
-                    sleep(25);
-                }
-        }
-
 
         return streaming;
     }
