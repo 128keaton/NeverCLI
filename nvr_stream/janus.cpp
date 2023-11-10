@@ -27,24 +27,27 @@ namespace nvr {
     }
 
     void Janus::keepAlive() {
-        pid_t  pid = fork();
+        std::thread{
+                [this]() {
+                    auto result = std::async(std::launch::async, [&] {
+                        while (connected) {
+                            std::this_thread::sleep_for(std::chrono::seconds(15));
+                            if (!sendKeepAlive())
+                                break;
+                        }
 
-        if (pid > 0) {
-            auto res = std::async(std::launch::async, [&]{
-                while (true) {
-                    std::this_thread::sleep_for(std::chrono::seconds(15));
-                    if (!sendKeepAlive())
-                        break;
+                        return;
+                    });
+                    result.get();
                 }
-            });
-        }
+        }.detach();
     }
 
 
     /**
      * Connect to the Janus UDS
      * @return
-     */
+    */
     bool Janus::connect() {
         if (connected)
             return connected;
@@ -330,4 +333,5 @@ namespace nvr {
 
         return streaming;
     }
+
 }
