@@ -139,7 +139,7 @@ namespace nvr {
 
 
         while (true) {
-            char *buffer[BUFSIZ];
+            char buffer[BUFSIZ];
             int bytes = (int) read(out_sock, &buffer, BUFSIZ);
             if (bytes <= 0)
                 break;
