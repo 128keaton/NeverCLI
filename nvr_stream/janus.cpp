@@ -138,10 +138,30 @@ namespace nvr {
 
         string raw_response;
 
-        char buf[1024] = {0};
+        char *buffer = nullptr;
+        unsigned long LEN = 200;
+	unsigned long bytes_received = 0;
+	unsigned long cur_size = 0;
+	int status = 0;
 
-        read(out_sock, buf, 1024 - 1);
-        raw_response.append(buf);
+	do {
+		if (bytes_received >= cur_size) {
+			char *tmp;
+		        cur_size += LEN;
+		        tmp = (char*) realloc(buffer, cur_size);
+		        if (nullptr == tmp)
+		          break;
+
+			buffer = tmp;
+		}
+
+		status = read(out_sock,  buffer + bytes_received, LEN);
+
+		if (status > 0)
+			bytes_received += status;
+	} while (status > 0);
+
+        raw_response.append(buffer);
 
 
         json response = json::parse(raw_response);
