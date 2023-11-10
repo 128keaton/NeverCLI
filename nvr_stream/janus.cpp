@@ -138,27 +138,31 @@ namespace nvr {
 
 
         char *buffer;
+        clock_t begin = clock();
 
         while (true) {
-            buffer = (char *)malloc((BUFSIZ+1)*sizeof(char));
+            buffer = (char *) malloc((BUFSIZ + 1) * sizeof(char));
             int bytes = (int) read(out_sock, buffer, BUFSIZ);
             if (bytes <= 0)
                 break;
 
-            printf("bytes: %i\n", bytes);
-
             raw_response.append(buffer);
             free(buffer);
 
-            spdlog::info(raw_response);
 
             auto o_tag_count = std::ranges::count(raw_response, '{');
             auto c_tag_count = std::ranges::count(raw_response, '}');
 
+
             if (abs(o_tag_count) == abs(c_tag_count))
                 break;
+
         }
 
+        clock_t end = clock();
+        double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+
+        spdlog::info("time elapsed: {}", time_spent);
 
 
         json response = json::parse(raw_response);
