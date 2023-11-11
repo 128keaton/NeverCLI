@@ -138,7 +138,7 @@ namespace nvr {
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 24000, nullptr);
 
