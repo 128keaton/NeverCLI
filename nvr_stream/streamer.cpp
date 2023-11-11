@@ -143,10 +143,10 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 20000, nullptr);
 
                 g_object_set(G_OBJECT(appData.encoder), "max-qp", 51, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 45, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "min-qp", 42, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 42, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "min-qp", 35, nullptr);
 
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 10, nullptr);
             }
 
 
