@@ -138,12 +138,12 @@ namespace nvr {
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
-             //   g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
 
-                g_object_set(G_OBJECT(appData.encoder), "max-qp", 48, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 39, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "min-qp", 34, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-qp", 50, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 41, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "min-qp", 38, nullptr);
 
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
             }
