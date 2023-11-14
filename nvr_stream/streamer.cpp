@@ -89,12 +89,14 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
+
 
         if (this->port == 80) {
-            g_object_set(G_OBJECT(appData.rtspSrc), "user-id",this->rtsp_username.c_str(), nullptr);
-            g_object_set(G_OBJECT(appData.rtspSrc), "user-pw",this->rtsp_password.c_str(), nullptr);
+            g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL().c_str(), nullptr);
+    //        g_object_set(G_OBJECT(appData.rtspSrc), "user-id",this->rtsp_username.c_str(), nullptr);
+     //       g_object_set(G_OBJECT(appData.rtspSrc), "user-pw",this->rtsp_password.c_str(), nullptr);
+        } else {
+            g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
         }
 
         // h264 final payloader
@@ -306,6 +308,14 @@ namespace nvr {
     }
 
     string Streamer::buildStreamURL(const string &password) {
+      if (password.empty()) {
+          return string("rtsp://")
+                  .append(this->ip_address)
+                  .append(":")
+                  .append(std::to_string(this->port))
+                  .append(this->stream_url);
+      }
+
         return string("rtsp://")
                 .append(this->rtsp_username)
                 .append(":")
