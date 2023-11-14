@@ -91,6 +91,11 @@ namespace nvr {
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
 
+        if (this->port == 80) {
+            g_object_set(G_OBJECT(appData.rtspSrc), "user-id",this->rtsp_username.c_str(), nullptr);
+            g_object_set(G_OBJECT(appData.rtspSrc), "user-pw",this->rtsp_password.c_str(), nullptr);
+        }
+
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
