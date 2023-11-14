@@ -24,6 +24,7 @@ namespace nvr {
         this->rtsp_password = config.rtsp_password;
         this->rtsp_username = config.rtsp_username;
         this->rtp_port = config.rtp_port;
+        this->port = config.port;
         this->stream_url = config.stream_url;
         this->appData.rtp_port = this->rtp_port;
         this->appData.stream_name = this->camera_name;
@@ -305,7 +306,8 @@ namespace nvr {
                 .append(password)
                 .append("@")
                 .append(this->ip_address)
-                .append(":554")
+                .append(":")
+                .append(std::to_string(this->port))
                 .append(this->stream_url);
     }
 }

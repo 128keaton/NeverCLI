@@ -25,6 +25,7 @@ namespace nvr {
         this->input_codec_context = nullptr;
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
+        this->port = config.port;
         this->logger = buildLogger(config);
     }
 
@@ -64,7 +65,8 @@ namespace nvr {
                 .append(this->rtsp_password)
                 .append("@")
                 .append(this->ip_address)
-                .append(":554")
+                .append(":")
+                .append(std::to_string(this->port))
                 .append(this->stream_url);
 
         this->logger->info("Opening connection to '{}'", full_stream_url);

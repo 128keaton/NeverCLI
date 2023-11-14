@@ -1,13 +1,13 @@
 [Unit]
 Description=Janus WebRTC Gateway
 After=syslog.target network.target
+PartOf=janus.service
 
 [Service]
-User=ubnt
 ExecStart=/usr/local/bin/janus
 TimeoutSec=100
 TimeoutStopSec=300
 
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
