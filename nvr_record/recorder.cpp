@@ -64,8 +64,6 @@ namespace nvr {
         if (this->port == 80) {
             full_stream_url = full_stream_url
                     .append(this->ip_address)
-                    .append(":")
-                    .append(std::to_string(this->port))
                     .append(this->stream_url);
 
         } else {
