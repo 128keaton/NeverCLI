@@ -31,6 +31,12 @@ cmake --build cmake-build-debug
 The binary expects to be passed the path to a JSON file similar to the one under `examples/`
 (replacing the appropriate details)
 
+Also please use `setcap` to allow `nvr_stream` access to the socket:
+
+```shell
+sudo setcap cap_net_admin+ep  /usr/local/bin/nvr_stream
+```
+
 ### systemd
 
 There are two systemd unit templates included, one for streaming and one for recording. 
