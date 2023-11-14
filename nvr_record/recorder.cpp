@@ -10,6 +10,7 @@
 namespace nvr {
     Recorder::Recorder(const CameraConfig &config) {
         av_log_set_level(AV_LOG_QUIET);
+        this->type = config.type;
         this->error_count = 0;
         this->camera_name = config.stream_name;
         this->input_format_context = avformat_alloc_context();
@@ -59,25 +60,10 @@ namespace nvr {
         AVDictionary *params = nullptr;
         av_dict_set(&params, "rtsp_flags", "prefer_tcp", AV_DICT_APPEND);
 
-        string full_stream_url = string("rtsp://");
+        string full_stream_url = buildStreamURL(this->stream_url, this->ip_address, this->port, this->rtsp_password, this->rtsp_username, this->type);
+        string sanitized_stream_url = sanitizeStreamURL(full_stream_url, this->rtsp_password);
 
-        if (this->port == 80) {
-            full_stream_url = full_stream_url
-                    .append(this->ip_address)
-                    .append(this->stream_url);
-
-        } else {
-            full_stream_url = full_stream_url.append(this->rtsp_username)
-                    .append(":")
-                    .append(this->rtsp_password)
-                    .append("@")
-                    .append(this->ip_address)
-                    .append(":")
-                    .append(std::to_string(this->port))
-                    .append(this->stream_url);
-        }
-
-        this->logger->info("Opening connection to '{}'", full_stream_url);
+        this->logger->info("Opening connection to '{}'", sanitized_stream_url);
 
         if (avformat_open_input(&input_format_context, full_stream_url.c_str(), nullptr, &params) != 0)
             return handleError("Cannot open input file", false);

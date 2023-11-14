@@ -32,7 +32,7 @@ namespace nvr {
         json config;
 
         try {
-           config = json::parse(config_stream);
+            config = json::parse(config_stream);
         } catch (json::exception &exception) {
             spdlog::error("Could not parse JSON: {}", exception.what());
             exit(EXIT_FAILURE);
@@ -49,19 +49,26 @@ namespace nvr {
                 "rtspUsername",
                 "rtspPassword",
                 "type",
-                "port",
         };
 
-        for (auto field : fields) {
+        for (auto field: fields) {
             if (!config.contains(field)) {
                 spdlog::error("Configuration is missing field", field);
                 exit(EXIT_FAILURE);
             }
         }
 
+
+        int port;
+
+        if (config.contains("port"))
+            port = config["port"];
+        else
+            port = 554;
+
+
         const long clip_runtime = config["splitEvery"];
         const int rtp_port = config["rtpPort"];
-        const int port = config["port"];
         const int stream_id = config["id"];
         const string stream_url = config["streamURL"];
         const string snapshot_url = config["snapshotURL"];
@@ -217,6 +224,42 @@ namespace nvr {
         }
 
         return clip_count;
+    }
+
+    string buildStreamURL(const string &url, const string &ip_address, const int port, const string &password,
+                          const string &username, const StreamType &codec) {
+        string base = string("rtsp://");
+
+        if (password.empty()) {
+            base = base.append(ip_address);
+        } else {
+            base = base.append(username)
+                    .append(":")
+                    .append(password)
+                    .append("@")
+                    .append(ip_address);
+        }
+
+        if (port == 80) {
+            if (url == "/axis-media/media.amp") {
+                switch (codec) {
+                    case h265:
+                        return base.append(url).append("?videocodec=h265");
+                    case h264:
+                        return base.append(url).append("?videocodec=h264");
+                }
+
+            } else {
+                return base.append(url);
+            }
+        }
+
+
+        return base.append(std::to_string(port)).append(url);
+    }
+
+    string sanitizeStreamURL(const string &stream_url, const string &password) {
+        return std::regex_replace(string(stream_url), std::regex(password), string(password.length(), '*'));
     }
 
 

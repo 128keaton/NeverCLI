@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <curl/curl.h>
+#include <regex>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -31,8 +32,12 @@ using nvr_logger = std::shared_ptr<spdlog::logger>;
 
 // TODO: cleanup this file
 namespace nvr {
-    enum StreamType { h265, h264 };
-    enum FileType { video, image, log };
+    enum StreamType {
+        h265, h264
+    };
+    enum FileType {
+        video, image, log
+    };
 
     struct CameraConfig {
         string stream_url;
@@ -49,9 +54,17 @@ namespace nvr {
         const int port;
     };
 
+    string buildStreamURL(const string &url, const string &ip_address, int port, const string &password,
+                          const string &username, const StreamType &codec);
+
+    string sanitizeStreamURL(const string &stream_url, const string &password);
+
     CameraConfig getConfig(const char *config_file);
-    string generateOutputFilename(const string& name, const string& output_path, FileType file_type);
+
+    string generateOutputFilename(const string &name, const string &output_path, FileType file_type);
+
     int countClips(const string &output_path, const string &camera_name);
+
     nvr_logger buildLogger(const CameraConfig &config);
 } // nvr
 
