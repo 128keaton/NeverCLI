@@ -255,7 +255,7 @@ namespace nvr {
         }
 
 
-        return base.append(std::to_string(port)).append(url);
+        return base.append(":").append(std::to_string(port)).append(url);
     }
 
     string sanitizeStreamURL(const string &stream_url, const string &password) {
