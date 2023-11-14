@@ -311,8 +311,6 @@ namespace nvr {
       if (password.empty()) {
           return string("rtsp://")
                   .append(this->ip_address)
-                  .append(":")
-                  .append(std::to_string(this->port))
                   .append(this->stream_url);
       }
 
