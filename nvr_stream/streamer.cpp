@@ -24,6 +24,7 @@ namespace nvr {
         this->rtsp_password = config.rtsp_password;
         this->rtsp_username = config.rtsp_username;
         this->rtp_port = config.rtp_port;
+        this->port = config.port;
         this->stream_url = config.stream_url;
         this->appData.rtp_port = this->rtp_port;
         this->appData.stream_name = this->camera_name;
@@ -88,7 +89,15 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
+
+
+        if (this->port == 80) {
+            g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL("").c_str(), nullptr);
+    //        g_object_set(G_OBJECT(appData.rtspSrc), "user-id",this->rtsp_username.c_str(), nullptr);
+     //       g_object_set(G_OBJECT(appData.rtspSrc), "user-pw",this->rtsp_password.c_str(), nullptr);
+        } else {
+            g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
+        }
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
@@ -138,12 +147,12 @@ namespace nvr {
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
-             //   g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
 
-                g_object_set(G_OBJECT(appData.encoder), "max-qp", 48, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 39, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "min-qp", 34, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-qp", 50, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 41, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "min-qp", 38, nullptr);
 
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
             }
@@ -299,13 +308,20 @@ namespace nvr {
     }
 
     string Streamer::buildStreamURL(const string &password) {
+      if (password.empty()) {
+          return string("rtsp://")
+                  .append(this->ip_address)
+                  .append(this->stream_url);
+      }
+
         return string("rtsp://")
                 .append(this->rtsp_username)
                 .append(":")
                 .append(password)
                 .append("@")
                 .append(this->ip_address)
-                .append(":554")
+                .append(":")
+                .append(std::to_string(this->port))
                 .append(this->stream_url);
     }
 }

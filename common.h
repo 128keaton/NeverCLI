@@ -46,6 +46,7 @@ namespace nvr {
         int stream_id;
         const long clip_runtime;
         const int rtp_port;
+        const int port;
     };
 
     CameraConfig getConfig(const char *config_file);

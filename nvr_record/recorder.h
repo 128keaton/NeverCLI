@@ -62,6 +62,7 @@ namespace nvr {
         string ip_address;
 
 
+        int port{};
         bool connected = false;
         int input_index = -1;
         long clip_runtime = 0;

@@ -48,7 +48,8 @@ namespace nvr {
                 "ipAddress",
                 "rtspUsername",
                 "rtspPassword",
-                "type"
+                "type",
+                "port",
         };
 
         for (auto field : fields) {
@@ -60,6 +61,7 @@ namespace nvr {
 
         const long clip_runtime = config["splitEvery"];
         const int rtp_port = config["rtpPort"];
+        const int port = config["port"];
         const int stream_id = config["id"];
         const string stream_url = config["streamURL"];
         const string snapshot_url = config["snapshotURL"];
@@ -82,7 +84,8 @@ namespace nvr {
                 type,
                 stream_id,
                 clip_runtime,
-                rtp_port
+                rtp_port,
+                port,
         };
     }
 
