@@ -59,15 +59,25 @@ namespace nvr {
         AVDictionary *params = nullptr;
         av_dict_set(&params, "rtsp_flags", "prefer_tcp", AV_DICT_APPEND);
 
-        const string full_stream_url = string("rtsp://")
-                .append(this->rtsp_username)
-                .append(":")
-                .append(this->rtsp_password)
-                .append("@")
-                .append(this->ip_address)
-                .append(":")
-                .append(std::to_string(this->port))
-                .append(this->stream_url);
+        string full_stream_url = string("rtsp://");
+
+        if (this->port == 80) {
+            full_stream_url = full_stream_url
+                    .append(this->ip_address)
+                    .append(":")
+                    .append(std::to_string(this->port))
+                    .append(this->stream_url);
+
+        } else {
+            full_stream_url = full_stream_url.append(this->rtsp_username)
+                    .append(":")
+                    .append(this->rtsp_password)
+                    .append("@")
+                    .append(this->ip_address)
+                    .append(":")
+                    .append(std::to_string(this->port))
+                    .append(this->stream_url);
+        }
 
         this->logger->info("Opening connection to '{}'", full_stream_url);
 
