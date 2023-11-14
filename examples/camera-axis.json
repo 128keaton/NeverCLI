@@ -1,0 +1,13 @@
+{
+  "streamURL": "/axis-media/media.amp",
+  "snapshotURL": "/jpg/1/image.jpg",
+  "outputPath": "./",
+  "splitEvery": 30,
+  "rtpPort": 5146,
+  "port": 80,
+  "ipAddress": "10.1.5.252",
+  "rtspUsername": "root",
+  "rtspPassword": "VipVipq34",
+  "type": "h265",
+  "id": 10
+}

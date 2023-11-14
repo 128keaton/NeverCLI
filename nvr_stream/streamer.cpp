@@ -82,7 +82,11 @@ namespace nvr {
 
         gst_plugin_list_free(plugins);
 
-        logger->info("Opening connection to '{}'", buildStreamURL("HIDDEN"));
+        string rtsp_stream_location = buildStreamURL(this->stream_url, this->ip_address, this->port,
+                                                     this->rtsp_password, this->rtsp_username, this->type);
+        string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
+
+        logger->info("Opening connection to '{}'", sanitized_stream_location);
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
@@ -91,13 +95,7 @@ namespace nvr {
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
 
 
-        if (this->port == 80) {
-            g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL("").c_str(), nullptr);
-    //        g_object_set(G_OBJECT(appData.rtspSrc), "user-id",this->rtsp_username.c_str(), nullptr);
-     //       g_object_set(G_OBJECT(appData.rtspSrc), "user-pw",this->rtsp_password.c_str(), nullptr);
-        } else {
-            g_object_set(G_OBJECT(appData.rtspSrc), "location", buildStreamURL(this->rtsp_password).c_str(), nullptr);
-        }
+        g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
@@ -307,23 +305,7 @@ namespace nvr {
         this->logger = nullptr;
     }
 
-    string Streamer::buildStreamURL(const string &password) {
-      if (password.empty()) {
-          return string("rtsp://")
-                  .append(this->ip_address)
-                  .append(this->stream_url);
-      }
 
-        return string("rtsp://")
-                .append(this->rtsp_username)
-                .append(":")
-                .append(password)
-                .append("@")
-                .append(this->ip_address)
-                .append(":")
-                .append(std::to_string(this->port))
-                .append(this->stream_url);
-    }
 }
 
 

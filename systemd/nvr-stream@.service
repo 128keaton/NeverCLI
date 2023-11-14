@@ -4,16 +4,12 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/nvr_stream /mnt/nvr/cameras/%i.json
+ExecStart=/usr/local/bin/nvr_stream /nvr/cameras/%i.json
 TimeoutSec=100
 TimeoutStopSec=300
 WorkingDirectory=/nvr
 Restart=always
 RestartSec=2
-CPUWeight=20
-CPUQuota=85%
-IOWeight=20
-MemorySwapMax=0
 
 [Install]
 WantedBy=default.target

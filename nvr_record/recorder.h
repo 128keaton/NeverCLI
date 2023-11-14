@@ -53,6 +53,7 @@ namespace nvr {
         CURL *curl_handle;
         std::shared_ptr<spdlog::logger> logger;
 
+        StreamType type;
         string camera_name;
         string stream_url;
         string snapshot_url;
