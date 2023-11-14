@@ -308,20 +308,6 @@ namespace nvr {
     }
 
     string Streamer::buildStreamURL(const string &password) {
-        if (password.empty()) {
-           if (this->port == 80) {
-               return string("rtsp://")
-                       .append(this->ip_address)
-                       .append(this->stream_url);
-           } else {
-               return string("rtsp://")
-                       .append(this->ip_address)
-                       .append(":")
-                       .append(std::to_string(this->port))
-                       .append(this->stream_url);
-           }
-        }
-
         return string("rtsp://")
                 .append(this->rtsp_username)
                 .append(":")
