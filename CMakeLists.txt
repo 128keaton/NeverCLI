@@ -43,8 +43,6 @@ pkg_check_modules(GSTLIBS REQUIRED
 add_executable(nvr_record nvr_record/record.cpp common.cpp common.h nvr_record/recorder.cpp nvr_record/recorder.h)
 target_link_libraries(nvr_record PRIVATE CURL::libcurl PkgConfig::LIBAV -lm  nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 
-## Target: nvr_service_gen
-add_executable(nvr_service_gen nvr_service_gen/service_gen.cpp)
 
 ## Target: nvr_stream
 add_executable(nvr_stream  common.cpp common.h  nvr_stream/streamer.cpp nvr_stream/stream.cpp nvr_stream/streamer.h
