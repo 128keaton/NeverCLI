@@ -229,7 +229,8 @@ namespace nvr {
             raw_response = raw_response.substr(0, last_pos + 1);
 
             if (initial_raw_response.size() > raw_response.size()) {
-                logger->warn("Removed {} bytes from end of response", (initial_raw_response.size() - raw_response.size()));
+                logger->warn("Removed {} bytes from end of response",
+                             (initial_raw_response.size() - raw_response.size()));
             }
         }
 
@@ -310,13 +311,7 @@ namespace nvr {
     json Janus::buildMedia(const string &streamName, int64_t streamID, int64_t port) {
         json media;
 
-        string mid = string(streamName)
-                .append("_")
-                .append(std::to_string(streamID))
-                .append("_")
-                .append(std::to_string(getpid()));
-
-        media["mid"] = mid;
+        media["mid"] = std::to_string(generateMediaID());
         media["type"] = "video";
         media["codec"] = "h264";
         media["is_private"] = false;
@@ -380,4 +375,19 @@ namespace nvr {
         return streaming;
     }
 
+    int64_t Janus::generateMediaID() {
+        std::random_device rd;
+        std::mt19937_64 gen(rd());
+        std::uniform_int_distribution<unsigned long long> dis;
+
+        int64_t mid = dis(gen) % 9 + 1;
+        int index;
+
+        for (index = 0; index < 15; index++) {
+            mid *= 10;
+            mid += dis(gen) % 10;
+        }
+
+        return mid;
+    }
 }

@@ -10,6 +10,7 @@
 #include <chrono>
 #include <thread>
 #include <future>
+#include <random>
 
 #ifndef NEVER_CLI_JANUS_H
 #define NEVER_CLI_JANUS_H
@@ -52,6 +53,7 @@ namespace nvr {
         json buildMessage(json &body);
 
         static string generateRandom();
+        static int64_t generateMediaID();
         static json buildMedia(const string &streamName, int64_t streamID, int64_t port);
     };
 }
