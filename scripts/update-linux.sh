@@ -14,6 +14,9 @@ systemctl --user stop nvr-record@*
 sudo cp ./cmake-build-debug/nvr_stream /usr/local/bin/
 sudo cp ./cmake-build-debug/nvr_record /usr/local/bin/
 
+## Permit nvr_stream to access network stuff
+sudo setcap cap_net_admin+ep  /usr/local/bin/nvr_stream
+
 ## Restart Janus
 systemctl --user restart janus
 
