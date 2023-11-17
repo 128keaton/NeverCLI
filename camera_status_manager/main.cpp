@@ -44,8 +44,8 @@ std::string request_service(std::string method, std::string unit_name, std::stri
         reference = sd_bus_call_method(bus, "org.freedesktop.systemd1",
                                        "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager",
                                        method.c_str(), &error, &reply, "ss", unit_name.c_str(), mode.c_str());
-    } catch (std::logic_error string_caught) {
-        std::cout << string_caught.what() << std::endl;
+    } catch (std::logic_error *string_caught) {
+        std::cout << string_caught->what() << std::endl;
     }
     if (reference < 0) {
         free_and_destroy(&error, reply, bus);
@@ -92,8 +92,8 @@ std::string request_status(std::string unit_name, std::string camera_id) {
         reference = sd_bus_call_method(bus, "org.freedesktop.systemd1",
                                        "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager",
                                        "ListUnitsByNames", &error, &reply, "as", 1, (char *) unit_name.c_str());
-    } catch (std::logic_error string_caught) {
-        std::cout << string_caught.what() << std::endl;
+    } catch (std::logic_error *string_caught) {
+        std::cout << string_caught->what() << std::endl;
     }
     if (reference < 0) {
         free_and_destroy(&error, reply, bus);
