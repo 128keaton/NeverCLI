@@ -16,4 +16,16 @@ systemctl --user stop nvr-record@*
 ## Restart Janus
 systemctl --user restart janus
 
-echo "Done!"
+## Prompt user to restart
+read -rp "Do you want to (re)start stream/recording tasks? (yes/no) " yn
+
+case $yn in
+	yes ) echo ok, we will proceed;;
+	no ) echo exiting...;
+		exit;;
+	* ) echo invalid response;
+		exit 1;;
+esac
+
+systemctl --user start --all nvr-stream@*
+systemctl --user start --all nvr-record@*
