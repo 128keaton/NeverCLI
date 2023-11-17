@@ -278,7 +278,7 @@ namespace nvr {
             if (url == "/axis-media/media.amp") {
                 switch (codec) {
                     case h265:
-                        return base.append(url).append("?videocodec=h265");
+                        return base.append(url).append("?videocodec=h265&&resolution=1920x1080&compression=60&fps=30&videokeyframeinterval=30");
                     case h264:
                         return base.append(url).append("?videocodec=h264");
                 }
