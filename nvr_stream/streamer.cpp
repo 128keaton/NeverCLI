@@ -150,7 +150,9 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 7, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "quality-level", 5, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 5, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "quality-factor", 32, nullptr);
             }
 
 
