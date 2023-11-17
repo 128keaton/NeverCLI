@@ -27,6 +27,7 @@ namespace nvr {
         this->input_stream = nullptr;
         this->curl_handle = nullptr;
         this->port = config.port;
+        this->snapshot_interval = config.snapshot_interval;
         this->logger = buildLogger(config);
     }
 
@@ -235,6 +236,7 @@ namespace nvr {
 
     int Recorder::record() {
         double duration_counter = 0;
+        double snapshot_duration_counter = 0;
         AVPacket *packet;
 
         // Initialize the AVPacket
@@ -273,6 +275,10 @@ namespace nvr {
 
             // Keeps track of clip duration
             duration_counter += (double) (packet->duration) * av_q2d(input_stream->time_base);
+
+            // Keeps track of time between snapshots
+            snapshot_duration_counter += (double) (packet->duration) * av_q2d(input_stream->time_base);
+
             last_pts = packet->pts;
 
             packet->stream_index = output_stream->id;
@@ -280,11 +286,17 @@ namespace nvr {
 
             av_interleaved_write_frame(output_format_context, packet);
 
+            // Finished writing clip
             if (duration_counter >= (double) this->clip_runtime) {
                 this->logger->info("Finished clip with duration {}, starting new clip", duration_counter);
-                this->takeSnapshot();
                 this->logger->flush();
                 duration_counter = 0.0;
+            }
+
+            // Take snapshot
+            if (snapshot_duration_counter >= (double) this->snapshot_interval) {
+                this->takeSnapshot();
+                snapshot_duration_counter = 0.0;
             }
 
             av_packet_unref(packet);

@@ -41,6 +41,7 @@ namespace nvr {
 
     struct CameraConfig {
         string stream_url;
+        string sub_stream_url;
         string snapshot_url;
         string output_path;
         string stream_name;
@@ -50,6 +51,7 @@ namespace nvr {
         StreamType type;
         int stream_id;
         const long clip_runtime;
+        const long snapshot_interval;
         const int rtp_port;
         const int port;
     };

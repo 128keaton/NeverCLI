@@ -25,13 +25,15 @@ namespace nvr {
         this->rtsp_username = config.rtsp_username;
         this->rtp_port = config.rtp_port;
         this->port = config.port;
-        this->stream_url = config.stream_url;
         this->appData.rtp_port = this->rtp_port;
         this->appData.stream_name = this->camera_name;
         this->bus = nullptr;
         this->appData.stream_id = config.stream_id;
         this->appData.logger = this->logger;
         this->appData.janus = Janus(this->logger);
+
+        // Use substream for streaming
+        this->stream_url = config.sub_stream_url;
     }
 
     bool Streamer::valid() {
@@ -145,13 +147,9 @@ namespace nvr {
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
-
-                g_object_set(G_OBJECT(appData.encoder), "max-qp", 50, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 41, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "min-qp", 38, nullptr);
-
+                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 7, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "quality-level", 5, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
             }
 

@@ -67,6 +67,7 @@ namespace nvr {
         bool connected = false;
         int input_index = -1;
         long clip_runtime = 0;
+        long snapshot_interval = 0;
         int error_count = 0;
 
         int record();
