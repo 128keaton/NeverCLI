@@ -143,7 +143,7 @@ namespace nvr {
 
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true);
+                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
