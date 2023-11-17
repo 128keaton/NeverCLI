@@ -34,6 +34,7 @@ namespace nvr {
 
         // Use substream for streaming
         this->stream_url = config.sub_stream_url;
+        this->quality_config = config.quality_config;
     }
 
     bool Streamer::valid() {
@@ -148,12 +149,14 @@ namespace nvr {
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
+                logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
+
                 g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 7, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "quality-level", 5, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 10, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 5, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "quality-factor", 32, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "quality-level", this->quality_config.quality_level, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", this->quality_config.max_bframes, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", this->quality_config.keyframe_period, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "quality-factor", this->quality_config.quality_factor, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "aud", true, nullptr);
             }

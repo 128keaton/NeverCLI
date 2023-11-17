@@ -51,6 +51,7 @@ namespace nvr {
         string rtsp_username;
         string rtsp_password;
         string ip_address;
+        StreamQualityConfig quality_config;
         bool has_vaapi{};
         bool quitting = false;
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
