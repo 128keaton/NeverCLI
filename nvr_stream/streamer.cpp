@@ -143,6 +143,7 @@ namespace nvr {
 
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
+                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true);
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
@@ -150,9 +151,11 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 7, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "quality-level", 5, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 5, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 10, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 5, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "quality-factor", 32, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "aud", true, nullptr);
             }
 
 
