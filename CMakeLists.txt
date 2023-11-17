@@ -46,7 +46,7 @@ pkg_check_modules(GSTLIBS REQUIRED
 ## Target: nvr_record
 add_executable(nvr_record nvr_record/record.cpp common.cpp common.h nvr_record/recorder.cpp nvr_record/recorder.h)
 target_link_libraries(nvr_record PRIVATE CURL::libcurl PkgConfig::LIBAV -lm nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
-
+install(TARGETS nvr_record DESTINATION bin)
 
 ## Target: nvr_stream
 add_executable(nvr_stream common.cpp common.h nvr_stream/streamer.cpp nvr_stream/stream.cpp nvr_stream/streamer.h
@@ -56,17 +56,19 @@ add_executable(nvr_stream common.cpp common.h nvr_stream/streamer.cpp nvr_stream
 target_link_libraries(nvr_stream PRIVATE gstreamer-1.0 gobject-2.0 glib-2.0 curl nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 target_include_directories(nvr_stream PRIVATE ${GSTLIBS_INCLUDE_DIRS})
 target_link_directories(nvr_stream PRIVATE ${GSTLIBS_LIBRARY_DIRS})
+install(TARGETS nvr_stream DESTINATION bin)
 
 ## Target: nvr_status_manager (Linux only)
 add_executable(nvr_status_manager nvr_status_manager/status_manager.cpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    # Link systemd on Linux only
-    target_link_libraries(nvr_status_manager PRIVATE PkgConfig::SYSTEMD)
-
     #DEP: systemd
     pkg_check_modules(SYSTEMD REQUIRED IMPORTED_TARGET
             libsystemd
     )
 
+    # Link systemd on Linux only
+    target_link_libraries(nvr_status_manager PRIVATE PkgConfig::SYSTEMD)
+
+    install(TARGETS nvr_status_manager DESTINATION bin)
 endif ()

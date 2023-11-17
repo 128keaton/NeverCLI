@@ -7,7 +7,7 @@
 Please run the following to install all required dependencies:
 
 ```shell
-sudo apt-get install pkg-config cmake ffmpeg build-essential \
+sudo apt-get install pkg-config cmake ffmpeg build-essential libsystemd-dev \
                                             libavcodec-dev libavutil-dev libavformat-dev \
                       libcurl4-openssl-dev libavdevice-dev libavfilter-dev \
                       libspdlog-dev gstreamer1.0 libgstreamer1.0-dev \
