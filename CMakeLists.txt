@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
-set(CMAKE_INSTALL_PREFIX "/usr/local/bin")
+set(CMAKE_INSTALL_PREFIX "/usr/local")
 
 message("Built executable binaries will be available in ${EXECUTABLE_OUTPUT_PATH}")
 message("When installed, executable binaries will be available in ${CMAKE_INSTALL_PREFIX}")

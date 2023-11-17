@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Check for sudo
 if [ $EUID != 0 ]; then
     sudo "$0" "$@"
     exit $?
