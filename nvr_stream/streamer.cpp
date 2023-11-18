@@ -96,10 +96,10 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 4000, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 10000, nullptr);
+      //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
+      //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+      //  g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
@@ -155,9 +155,9 @@ namespace nvr {
                 //  g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 15, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 15, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 30, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 28, nullptr);
 
                 //  g_object_set(G_OBJECT(appData.encoder), "quality-level", this->quality_config.quality_level, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "max-bframes", this->quality_config.max_bframes, nullptr);
