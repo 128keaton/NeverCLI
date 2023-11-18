@@ -154,7 +154,7 @@ namespace nvr {
 
                 //  g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "tune", 2, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "quality-level", this->quality_config.quality_level, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "max-bframes", this->quality_config.max_bframes, nullptr);
