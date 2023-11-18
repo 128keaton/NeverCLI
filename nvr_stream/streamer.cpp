@@ -163,8 +163,8 @@ namespace nvr {
                 //  g_object_set(G_OBJECT(appData.encoder), "max-bframes", this->quality_config.max_bframes, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "keyframe-period", this->quality_config.keyframe_period, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "quality-factor", this->quality_config.quality_factor, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "aud", true, nullptr);
+                // g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr);
+                // g_object_set(G_OBJECT(appData.encoder), "aud", true, nullptr);
             }
 
 
