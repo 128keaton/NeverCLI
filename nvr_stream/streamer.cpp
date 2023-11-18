@@ -183,7 +183,6 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                    appData.queue,
                     appData.dePayloader,
                     appData.decoder,
                 //    appData.queue,
