@@ -96,7 +96,8 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 10000, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 0, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr);
       //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
       //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
          g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
