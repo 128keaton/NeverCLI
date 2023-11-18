@@ -119,7 +119,7 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
 
             // decoding/encoding queue
-            appData.queue = gst_element_factory_make("queue2", nullptr);
+            appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
 
 
             if (!this->has_vaapi) {
@@ -172,9 +172,9 @@ namespace nvr {
             gst_bin_add_many(
                     GST_BIN(appData.pipeline),
                     appData.rtspSrc,
+                    appData.queue,
                     appData.dePayloader,
                     appData.decoder,
-                //    appData.queue,
                     appData.encoder,
                     appData.payloader,
                     appData.sink,
@@ -183,6 +183,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
+                    appData.queue,
                     appData.dePayloader,
                     appData.decoder,
                 //    appData.queue,
