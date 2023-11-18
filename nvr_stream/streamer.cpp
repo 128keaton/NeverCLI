@@ -153,9 +153,12 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
 
                 //  g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "tune", 3, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 20, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 20, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 35, nullptr);
+
                 //  g_object_set(G_OBJECT(appData.encoder), "quality-level", this->quality_config.quality_level, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "max-bframes", this->quality_config.max_bframes, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "keyframe-period", this->quality_config.keyframe_period, nullptr);
