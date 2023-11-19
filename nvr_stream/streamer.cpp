@@ -130,7 +130,7 @@ namespace nvr {
                 logger->warn("Not using vaapi for encoding/decoding");
 
                 // h265 decode without vaapi
-                appData.decoder = gst_element_factory_make("avdec_h265", "dec");
+                appData.decoder = gst_element_factory_make("libde265dec", "dec");
                 g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
 
