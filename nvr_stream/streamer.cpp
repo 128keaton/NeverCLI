@@ -77,7 +77,7 @@ namespace nvr {
         for (p = plugins; p; p = p->next) {
             auto *plugin = static_cast<GstPlugin *>(p->data);
             if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
-               // has_vaapi = true;
+                has_vaapi = true;
                 logger->info("Found vaapi plugin");
                 break;
             }
@@ -139,7 +139,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-            //    g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             } else {
@@ -155,7 +155,8 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
 
                // g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-              //  g_object_set(G_OBJECT(appData.encoder), "rate-control", 5, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
               //g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                // g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
               //  g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
