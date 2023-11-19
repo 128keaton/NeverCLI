@@ -139,7 +139,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr);
+            //    g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             } else {
