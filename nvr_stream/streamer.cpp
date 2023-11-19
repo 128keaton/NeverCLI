@@ -97,7 +97,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 15000, nullptr); // 15 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 4000, nullptr); // 15 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
       //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
       //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
@@ -115,14 +115,15 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
+        // decoding/encoding queue
+        appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
+        g_object_set(G_OBJECT(appData.queue), "latency", 4000, nullptr); // 15 seconds
+
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-
-            // decoding/encoding queue
-            appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
 
 
             if (!this->has_vaapi) {
@@ -292,9 +293,9 @@ namespace nvr {
         new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
         new_pad_type = gst_structure_get_name(new_pad_struct);
 
+        data->logger->info("Caps '{}'", gst_caps_to_string(new_pad_caps));
+
         /* Attempt the link */
-
-
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
             data->logger->error("Type dictated is '{}', but link failed", new_pad_type);
