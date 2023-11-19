@@ -97,10 +97,10 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 5000, nullptr); // 15 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 5000, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+        //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
+        //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
          g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
@@ -117,7 +117,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-       // g_object_set(G_OBJECT(appData.queue), "latency", 4000, nullptr); // 15 seconds
+        g_object_set(G_OBJECT(appData.queue), "latency", 5000, nullptr); // 5 seconds
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -135,10 +135,10 @@ namespace nvr {
 
                 // h264 encode without vaapi
                 appData.encoder = gst_element_factory_make("x264enc", "enc");
-           //     g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
-            //    g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
-            //    g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-            //    g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
             //    g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
