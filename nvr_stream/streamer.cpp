@@ -132,8 +132,6 @@ namespace nvr {
                 // h265 decode without vaapi
                 appData.decoder = gst_element_factory_make("libde265dec", "dec");
                 g_object_set(G_OBJECT(appData.decoder), "max-threads", 1, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "lowres", 1, nullptr);
-
 
                 // h264 encode without vaapi
                 appData.encoder = gst_element_factory_make("x264enc", "enc");
@@ -141,7 +139,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             } else {
