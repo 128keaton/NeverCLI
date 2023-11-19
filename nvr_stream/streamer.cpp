@@ -137,9 +137,9 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("x264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "threads", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+            //    g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             } else {
