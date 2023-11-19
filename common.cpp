@@ -274,21 +274,6 @@ namespace nvr {
                     .append(ip_address);
         }
 
-        if (port == 80) {
-            if (url == "/axis-media/media.amp") {
-                switch (codec) {
-                    case h265:
-                        return base.append(url).append("?videocodec=h265&&resolution=1920x1080&compression=40&fps=25");
-                    case h264:
-                        return base.append(url).append("?videocodec=h264");
-                }
-            }
-            else {
-                return base.append(url);
-            }
-        }
-
-
         return base.append(":").append(std::to_string(port)).append(url);
     }
 

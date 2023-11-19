@@ -149,16 +149,16 @@ namespace nvr {
 
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
+                //g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
 
-                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+               // g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
-             //   g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "init-qp", 26, nullptr);
