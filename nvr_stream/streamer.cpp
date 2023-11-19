@@ -157,7 +157,7 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
 
                // g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 5, nullptr);
                 // g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                // g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
               //  g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
