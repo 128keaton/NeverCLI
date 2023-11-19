@@ -93,11 +93,12 @@ namespace nvr {
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
+        g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 0, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 15000, nullptr); // 15 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
       //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
       //  g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
          g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -112,6 +113,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -153,7 +155,7 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
 
-                //  g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
              //   g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
@@ -184,6 +186,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
+                    appData.queue,
                     appData.dePayloader,
                     appData.decoder,
                 //    appData.queue,
@@ -260,7 +263,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
-        GstPad *sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
+        GstPad *sink_pad = gst_element_get_static_pad(data->queue, "sink");
         GstPadLinkReturn ret;
         GstCaps *new_pad_caps = nullptr;
         GstStructure *new_pad_struct;
@@ -290,6 +293,8 @@ namespace nvr {
         new_pad_type = gst_structure_get_name(new_pad_struct);
 
         /* Attempt the link */
+
+
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
             data->logger->error("Type dictated is '{}', but link failed", new_pad_type);
