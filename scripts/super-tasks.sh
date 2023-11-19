@@ -6,8 +6,9 @@ if [ $EUID != 0 ]; then
     exit $?
 fi
 
-## Permit nvr_stream to access network stuff
-setcap cap_net_admin+ep  /usr/local/bin/nvr_stream
 
 ## Install
 cmake --install cmake-build-debug/
+
+## Permit nvr_stream to access network stuff
+setcap cap_net_admin+ep  /usr/local/bin/nvr_stream
