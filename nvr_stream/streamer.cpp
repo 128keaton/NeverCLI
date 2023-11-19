@@ -77,7 +77,7 @@ namespace nvr {
         for (p = plugins; p; p = p->next) {
             auto *plugin = static_cast<GstPlugin *>(p->data);
             if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
-                has_vaapi = true;
+               // has_vaapi = true;
                 logger->info("Found vaapi plugin");
                 break;
             }
@@ -158,7 +158,7 @@ namespace nvr {
 
                // g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
               //  g_object_set(G_OBJECT(appData.encoder), "rate-control", 5, nullptr);
-                // g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+              //g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
                // g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
               //  g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
                g_object_set(G_OBJECT(appData.encoder), "init-qp", 16, nullptr);
