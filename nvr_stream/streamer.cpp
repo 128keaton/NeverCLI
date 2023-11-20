@@ -163,9 +163,9 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // cbr (constant bitrate)
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr); // bitrate (duh)
+              //  g_object_set(G_OBJECT(appData.encoder), "init-qp", 2048, nullptr); // bitrate (duh)
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr); // use cabac entropy
             }
 
