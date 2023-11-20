@@ -103,7 +103,11 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "nat-method", 0, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password, nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
