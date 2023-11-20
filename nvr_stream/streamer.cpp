@@ -114,7 +114,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-      //  g_object_set(G_OBJECT(appData.sink), "max-bitrate", 1024, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "max-bitrate", 4096, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
