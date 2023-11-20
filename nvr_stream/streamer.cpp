@@ -98,7 +98,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-   //     g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // 5 seconds
+       g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
      //   g_object_set(G_OBJECT(appData.rtspSrc), "protocols", "udp", nullptr); // auto
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
@@ -109,18 +109,19 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-      //  g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "max-bitrate", 1024, nullptr);
-     //   g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
+      //  g_object_set(G_OBJECT(appData.sink), "max-bitrate", 1024, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-    //    g_object_set(G_OBJECT(appData.queue), "latency", 200, nullptr);
+        appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
+        g_object_set(G_OBJECT(appData.queue), "latency", 200, nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -173,6 +174,7 @@ namespace nvr {
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
+                appData.queue2,
                 appData.sink,
                 nullptr
             );
@@ -184,6 +186,7 @@ namespace nvr {
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
+                appData.queue2,
                 appData.sink,
                 NULL);
         }
