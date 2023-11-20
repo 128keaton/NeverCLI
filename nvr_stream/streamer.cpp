@@ -166,7 +166,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr); // bitrate (duh)
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
+                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr); // use cabac entropy
             }
 
 
