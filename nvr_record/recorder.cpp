@@ -83,6 +83,7 @@ namespace nvr {
                 // Set the input stream
                 this->input_stream = input_format_context->streams[i];
                 this->input_index = i;
+                this->logger->info("Using stream index '{}'", input_index);
 
                 // Initialize the codec context
                 this->input_codec_context = avcodec_alloc_context3(nullptr);
@@ -93,7 +94,6 @@ namespace nvr {
 
         if (this->input_index < 0)
             return handleError("Cannot find input video stream");
-
 
         this->connected = true;
         return true;
@@ -262,7 +262,7 @@ namespace nvr {
             }
 
             if (packet->stream_index != input_index) {
-                logger->error("Not right index");
+                logger->error("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index, input_index);
                 continue;
             }
 
