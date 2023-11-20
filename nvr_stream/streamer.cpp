@@ -109,7 +109,6 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1600, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
@@ -158,10 +157,10 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-             //   g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-             //   g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 45, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-init", 30, nullptr);
+               g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+               g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1300, nullptr);
             }
 
 
