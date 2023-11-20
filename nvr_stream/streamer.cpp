@@ -94,16 +94,13 @@ namespace nvr {
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
-        // g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
+        g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 3400, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 4000, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
         g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "nat-method", 0, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username, nullptr);
@@ -122,7 +119,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 3400, nullptr);
+        g_object_set(G_OBJECT(appData.queue), "latency", 4000, nullptr);
 
         // rtprtxqueue
         appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
@@ -163,9 +160,9 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // cbr (constant bitrate)
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto
-              //  g_object_set(G_OBJECT(appData.encoder), "init-qp", 2048, nullptr); // bitrate (duh)
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr); // use cabac entropy
             }
 
