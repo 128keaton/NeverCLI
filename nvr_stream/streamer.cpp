@@ -159,8 +159,8 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 4, nullptr); // max-bframes (not i-frames)
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 25, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr); // max-bframes (not i-frames)
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
 
             }
