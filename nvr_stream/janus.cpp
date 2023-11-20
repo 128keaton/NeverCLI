@@ -318,7 +318,7 @@ namespace nvr {
         media["port"] = port;
         media["rtpmap"] = "H264/90000";
         media["pt"] = 96;
-        media["bitrate"] = 4096;
+        media["bitrate"] = 1024;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         media = json::array({media});
