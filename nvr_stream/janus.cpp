@@ -319,6 +319,7 @@ namespace nvr {
         media["rtpmap"] = "H264/90000";
         media["pt"] = 96;
         media["bitrate"] = 1024;
+        media["threads"] = 2;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         media = json::array({media});
@@ -352,6 +353,7 @@ namespace nvr {
         body["name"] = streamName;
         body["type"] = "rtp";
         body["id"] = streamID;
+        body["threads"] = 2;
         body["media"] = buildMedia(streamName, streamID, port);
 
         json request = buildMessage(body);
