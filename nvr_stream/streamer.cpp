@@ -97,8 +97,8 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 10, nullptr); // buffer 5 seconds
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 1000, nullptr); // buffer 1 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
         //  g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
@@ -118,7 +118,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 10, nullptr); // buffer 5 seconds
+        g_object_set(G_OBJECT(appData.queue), "latency", 1000, nullptr); // buffer 1 second
 
         // rtprtxqueue
         appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
