@@ -157,12 +157,6 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 15, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 15, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 30, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 28, nullptr);
             }
 
 
