@@ -122,8 +122,11 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
         g_object_set(G_OBJECT(appData.queue), "latency", 3400, nullptr);
+
+        // rtprtxqueue
+        appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
+        g_object_set(G_OBJECT(appData.queue2), "max-size-packets", 0, nullptr); //unlimited
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -160,11 +163,10 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 45, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 512, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
             }
 
 
