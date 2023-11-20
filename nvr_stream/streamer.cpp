@@ -109,14 +109,14 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-     //   g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
+       // g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
       //  g_object_set(G_OBJECT(appData.sink), "max-bitrate", 1024, nullptr);
-     //   g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -160,7 +160,7 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
              //   g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-           //     g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
             }
 
