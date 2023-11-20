@@ -98,7 +98,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // 5 seconds
+   //     g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
      //   g_object_set(G_OBJECT(appData.rtspSrc), "protocols", "udp", nullptr); // auto
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
@@ -120,7 +120,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 200, nullptr);
+    //    g_object_set(G_OBJECT(appData.queue), "latency", 200, nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
