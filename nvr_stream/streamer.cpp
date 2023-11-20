@@ -98,7 +98,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 2000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 5000, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
@@ -118,7 +118,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 2000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.queue), "latency", 5000, nullptr); // 5 seconds
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -149,17 +149,16 @@ namespace nvr {
 
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-                //g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-
-                //  g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                //  g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1174, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr);
             }
 
 
