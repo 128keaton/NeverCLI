@@ -109,7 +109,7 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1360, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
