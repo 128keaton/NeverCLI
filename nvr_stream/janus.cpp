@@ -352,7 +352,7 @@ namespace nvr {
         body["name"] = streamName;
         body["type"] = "rtp";
         body["id"] = streamID;
-        body["threads"] = 4;
+        body["threads"] = 2;
         body["media"] = buildMedia(streamName, streamID, port);
 
         json request = buildMessage(body);
