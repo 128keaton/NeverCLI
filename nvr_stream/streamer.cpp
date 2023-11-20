@@ -100,7 +100,7 @@ namespace nvr {
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", 2000, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
-        g_object_set(G_OBJECT(appData.rtspSrc), "protocols", "tcp", nullptr); // auto
+        g_object_set(G_OBJECT(appData.rtspSrc), "protocols", "udp", nullptr); // auto
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -109,14 +109,14 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-   //     g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 45000, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "max-bitrate", 1024, nullptr);
-       // g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
