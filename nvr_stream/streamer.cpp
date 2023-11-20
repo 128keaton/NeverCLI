@@ -94,7 +94,7 @@ namespace nvr {
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
-        g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
+        //g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
@@ -162,7 +162,6 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
-
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
 
             }
