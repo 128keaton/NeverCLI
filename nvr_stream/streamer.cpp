@@ -118,7 +118,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 20000, nullptr); // buffer 20 seconds
+        g_object_set(G_OBJECT(appData.queue), "latency", 1000, nullptr); // buffer 1 second
 
         // rtprtxqueue
         appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
