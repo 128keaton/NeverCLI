@@ -97,8 +97,8 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 2000, nullptr); // 5 seconds
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
+       // g_object_set(G_OBJECT(appData.rtspSrc), "latency", 2000, nullptr); // 5 seconds
+        //g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-time-source", 1, nullptr);
         //g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
          g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -106,14 +106,14 @@ namespace nvr {
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         //g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
-        //g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         //g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 1, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "sync", true, nullptr);
+
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -154,20 +154,15 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
 
-               // g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr);
-              //g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
-               // g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
-              //  g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
-               g_object_set(G_OBJECT(appData.encoder), "init-qp", 20, nullptr);
-
-                //  g_object_set(G_OBJECT(appData.encoder), "quality-level", this->quality_config.quality_level, nullptr);
-                //  g_object_set(G_OBJECT(appData.encoder), "max-bframes", this->quality_config.max_bframes, nullptr);
-                //  g_object_set(G_OBJECT(appData.encoder), "keyframe-period", this->quality_config.keyframe_period, nullptr);
-                //  g_object_set(G_OBJECT(appData.encoder), "quality-factor", this->quality_config.quality_factor, nullptr);
-                // g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr);
-                // g_object_set(G_OBJECT(appData.encoder), "aud", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 15, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 15, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 30, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 4, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 4, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 28, nullptr);
             }
 
 
