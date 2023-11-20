@@ -162,10 +162,9 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto
+
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
-                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr); // use cabac entropy
-                g_object_set(G_OBJECT(appData.encoder), "quality-level", 5, nullptr); // use shit quality
+
             }
 
 
