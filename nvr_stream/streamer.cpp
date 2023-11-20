@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 
 namespace nvr {
-    Streamer::Streamer(const CameraConfig&config) {
+    Streamer::Streamer(const CameraConfig &config) {
         this->has_vaapi = false;
         this->type = config.type;
         this->logger = nvr::buildLogger(config);
@@ -56,8 +56,7 @@ namespace nvr {
 
             if (return_state == 0) {
                 logger->error("Could not set pipeline state");
-            }
-            else {
+            } else {
                 logger->info("Pipeline state set to null");
                 gst_object_unref(appData.pipeline);
             }
@@ -67,7 +66,7 @@ namespace nvr {
     int Streamer::start() {
         int return_state = 0;
         GstStateChangeReturn ret;
-        GstMessage* msg;
+        GstMessage *msg;
 
 
         gst_init(nullptr, nullptr);
@@ -76,7 +75,7 @@ namespace nvr {
 
         plugins = gst_registry_get_plugin_list(gst_registry_get());
         for (p = plugins; p; p = p->next) {
-            auto* plugin = static_cast<GstPlugin *>(p->data);
+            auto *plugin = static_cast<GstPlugin *>(p->data);
             if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
                 has_vaapi = true;
                 logger->info("Found vaapi plugin");
@@ -100,7 +99,7 @@ namespace nvr {
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", 5000, nullptr); // buffer 5 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 3, nullptr); // auto
-      //  g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
+        //  g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
@@ -148,8 +147,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
-            }
-            else {
+            } else {
                 logger->info("Using vaapi for encoding");
 
                 // h265 decode with vaapi
@@ -161,6 +159,8 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 15, nullptr); // max-bframes (not i-frames)
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
 
             }
@@ -168,30 +168,29 @@ namespace nvr {
 
             // add everything
             gst_bin_add_many(
-                GST_BIN(appData.pipeline),
-                appData.rtspSrc,
-                appData.queue,
-                appData.dePayloader,
-                appData.decoder,
-                appData.encoder,
-                appData.payloader,
-                appData.queue2,
-                appData.sink,
-                nullptr
+                    GST_BIN(appData.pipeline),
+                    appData.rtspSrc,
+                    appData.queue,
+                    appData.dePayloader,
+                    appData.decoder,
+                    appData.encoder,
+                    appData.payloader,
+                    appData.queue2,
+                    appData.sink,
+                    nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-                appData.queue,
-                appData.dePayloader,
-                appData.decoder,
-                appData.encoder,
-                appData.payloader,
-                appData.queue2,
-                appData.sink,
-                NULL);
-        }
-        else {
+                    appData.queue,
+                    appData.dePayloader,
+                    appData.decoder,
+                    appData.encoder,
+                    appData.payloader,
+                    appData.queue2,
+                    appData.sink,
+                    NULL);
+        } else {
             logger->info("Starting h264->h264 pipeline on port {}", rtp_port);
 
             // h264 de-payload
@@ -219,12 +218,12 @@ namespace nvr {
 
         while (true) {
             msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
-                                             (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+                                             (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
             /* Parse message */
             if (msg != nullptr) {
-                GError* err;
-                gchar* debug_info;
+                GError *err;
+                gchar *debug_info;
 
                 switch (GST_MESSAGE_TYPE(msg)) {
                     case GST_MESSAGE_ERROR:
@@ -245,8 +244,7 @@ namespace nvr {
                         break;
                 }
                 gst_message_unref(msg);
-            }
-            else {
+            } else {
                 break;
             }
 
@@ -259,12 +257,12 @@ namespace nvr {
         return return_state;
     }
 
-    void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->queue, "sink");
+    void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
+        GstPad *sink_pad = gst_element_get_static_pad(data->queue, "sink");
         GstPadLinkReturn ret;
-        GstCaps* new_pad_caps = nullptr;
-        GstStructure* new_pad_struct;
-        const gchar* new_pad_type;
+        GstCaps *new_pad_caps = nullptr;
+        GstStructure *new_pad_struct;
+        const gchar *new_pad_type;
 
 
         bool janus_connected = data->janus.connect();
@@ -295,22 +293,20 @@ namespace nvr {
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
             data->logger->error("Type dictated is '{}', but link failed", new_pad_type);
-        }
-        else {
+        } else {
             data->logger->info("Link of type '{}' succeeded", new_pad_type);
 
             if (janus_connected)
                 if (data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
                     data->janus.keepAlive();
-                }
-                else
+                } else
                     data->logger->warn("Not streaming because we were not able to create a stream endpoint on Janus");
             else
                 data->logger->warn("Not streaming because we were not able to connect to Janus");
         }
 
-    exit:
+        exit:
         if (new_pad_caps != nullptr)
             gst_caps_unref(new_pad_caps);
 
