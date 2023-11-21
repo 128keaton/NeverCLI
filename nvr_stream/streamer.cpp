@@ -131,8 +131,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 0 ms
 
         // queue delays
-        int64_t max_delay = 10000000000; // 10 second MAX_DELAY
-        int64_t min_delay = 5000000000; // 5 second MIN_DELAY
+        int64_t max_delay = 60000000000; // 10 second MAX_DELAY
+        int64_t min_delay = 10000000000; // 10 second MIN_DELAY
         int64_t delay = 5000000000; // 5 second DELAY
 
         // initial queue
