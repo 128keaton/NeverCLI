@@ -208,10 +208,11 @@ namespace nvr {
                 appData.initialQueue,
                 appData.parser,
                 appData.decoder,
-                appData.initialQueue,
                 appData.encoder,
                 appData.finalQueue,
                 appData.payloader,
+                appData.initialBufferQueue,
+                 appData.finalBufferQueue,
                 appData.sink,
                 nullptr
             );
