@@ -293,9 +293,11 @@ namespace nvr {
                 break;
             case GST_MESSAGE_TAG:
                 GstTagList *tag_list;
+                gchar *raw_tag_list;
                 gst_message_parse_tag(msg, &tag_list);
+                raw_tag_list =  gst_tag_list_to_string(tag_list);
 
-                data->logger->info("Tag: {}", tag_list);
+                data->logger->info("Tag: {}", string(raw_tag_list));
                 break;
             default:
                 /* Unhandled message */
