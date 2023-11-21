@@ -358,14 +358,11 @@ namespace nvr {
                         break;
                 }
 
-                data->logger->info("Progress: (%s) %s", code, text);
+                data->logger->info("Progress: ({}) {}", code, text);
                 g_free(code);
                 g_free(text);
 
-                if (!in_progress) {
-                    gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
-                    gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
-                }
+
 
             default:
                 /* Unhandled message */
