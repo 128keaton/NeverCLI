@@ -134,14 +134,13 @@ namespace nvr {
         // queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
-        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", 5000000000, nullptr); // 5 seconds
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 0, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 20000000000, nullptr); // 20 seconds, i.e. MAX_DELAY
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 5000000000, nullptr); // 5 seconds
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 10000000000, nullptr); // 10 seconds i.e. DELAY
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 5000000000, nullptr); // 5 seconds i.e. SMALL_DELAY
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
@@ -192,12 +191,12 @@ namespace nvr {
                 appData.rtspSrc,
                 appData.buffer,
                 appData.dePayloader,
-                appData.parser,
                 appData.initialQueue,
+                appData.finalQueue,
+                appData.parser,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
                 appData.sink,
                 nullptr
             );
@@ -206,12 +205,12 @@ namespace nvr {
             gst_element_link_many(
                 appData.buffer,
                 appData.dePayloader,
-                appData.parser,
                 appData.initialQueue,
+                appData.finalQueue,
+                appData.parser,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
                 appData.sink,
                 NULL);
         }
