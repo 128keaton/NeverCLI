@@ -97,19 +97,19 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 6000, nullptr); // buffer 6 seconds
+      //  g_object_set(G_OBJECT(appData.rtspSrc), "latency", 6000, nullptr); // buffer 6 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
+      //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
         //  g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
+      //  g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
+       // g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
 
         // h265 parser
@@ -121,11 +121,11 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
+       // g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        //g_object_set(G_OBJECT(appData.queue), "latency", 600, nullptr);
+        g_object_set(G_OBJECT(appData.buffer), "rfc7273-use-system-clock", true, nullptr);
         g_object_set(G_OBJECT(appData.buffer), "mode", 2, nullptr); // high/low watermark
         //g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
         //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
