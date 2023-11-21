@@ -125,6 +125,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
+        g_object_set(G_OBJECT(appData.queue), "ts-offset", 500000000, nullptr); // 5 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -137,7 +138,6 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 0, nullptr); // never fill
         g_object_set(G_OBJECT(appData.queue), "max-size-time", 0, nullptr); // never fill
         g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 0, nullptr); // never fill
-        g_object_set(G_OBJECT(appData.queue), "min-threshold-time", 60000000000, nullptr); // 60 seconds
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
