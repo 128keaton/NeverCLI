@@ -93,9 +93,9 @@ namespace nvr {
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
         // queue delays
-        int64_t max_delay = 60000000000; // 60 second MAX_DELAY
-        int64_t min_delay = 5000000000; // 5 second MIN_DELAY
-        int64_t delay = 1000000000; // 1 second DELAY
+        int64_t max_delay = 120000000000; // 2-minute delay MAX_DELAY
+        int64_t min_delay = 10000000000; // 10-second MIN_DELAY
+        int64_t delay =     5000000000; // 5-second DELAY
 
         gint config_interval = -1;
 
@@ -138,22 +138,18 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 500 ms
 
 
-        appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 0, nullptr);
+        appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
+        g_object_set(G_OBJECT(appData.initialQueue), "ring-buffer-max-size", 2097152, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 2097152, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "use-buffering", true, nullptr);
 
-        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", 0, nullptr);
+        appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
+        g_object_set(G_OBJECT(appData.finalQueue), "ring-buffer-max-size", 2097152, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 2097152, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", true, nullptr);
 
-
-        // initial buffer queue
-        appData.initialBufferQueue = gst_element_factory_make("queue", "initial_buf_queue");
-        g_object_set(G_OBJECT(appData.initialBufferQueue), "max-size-time", max_delay, nullptr);
-        g_object_set(G_OBJECT(appData.initialBufferQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialBufferQueue), "max-size-buffers", 0, nullptr);
 
 
         // final buffer queue
@@ -168,7 +164,8 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-
+            g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
+            g_object_set(G_OBJECT(appData.dePayloader), "max-reorder", 200, nullptr);
 
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
@@ -373,8 +370,6 @@ namespace nvr {
                 break;
             default:
                 /* Unhandled message */
-                data->logger->info("Unknown message {} received from element {}", msg->type,
-                                   GST_OBJECT_NAME(msg->src));
                 break;
         }
     }
