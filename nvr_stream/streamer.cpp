@@ -175,7 +175,7 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr); // bitrate (duh)
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr); // bitrate (duh)
             }
 
 
@@ -278,7 +278,7 @@ namespace nvr {
                 //   if (data->is_live) break;
 
                 gst_message_parse_buffering(msg, &percent);
-                g_print("Buffering (%3d%%)\r", percent);
+                data->logger->info("Buffering (%3d%%)\r", percent);
                 /* Wait until buffering is complete before start/resume playing */
                 if (percent < 100)
                     gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
@@ -290,6 +290,9 @@ namespace nvr {
                 /* Get a new clock */
                 gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
                 gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
+                break;
+            case GST_MESSAGE_SEGMENT_START:
+                data->logger->info("Segment started");
                 break;
             default:
                 /* Unhandled message */
