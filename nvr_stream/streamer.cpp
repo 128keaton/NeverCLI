@@ -112,6 +112,11 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
 
+        // h265 parser
+        appData.parser = gst_element_factory_make("h265parse", nullptr);
+        g_object_set(G_OBJECT(appData.sink), "config-interval", "-1", nullptr); // send with every IDR frame
+
+
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
@@ -119,15 +124,15 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
-        appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 600, nullptr);
-        g_object_set(G_OBJECT(appData.queue), "mode", 2, nullptr); // high/low watermark
-        g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
-        g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
+        appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
+        //g_object_set(G_OBJECT(appData.queue), "latency", 600, nullptr);
+        g_object_set(G_OBJECT(appData.buffer), "mode", 2, nullptr); // high/low watermark
+        //g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
+        //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
         // rtprtxqueue
-        appData.queue2 = gst_element_factory_make("rtprtxqueue", nullptr);
-        g_object_set(G_OBJECT(appData.queue2), "max-size-packets", 0, nullptr); //unlimited
+        appData.queue = gst_element_factory_make("rtprtxqueue", nullptr);
+        g_object_set(G_OBJECT(appData.queue), "max-size-packets", 0, nullptr); //unlimited
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -174,24 +179,26 @@ namespace nvr {
             gst_bin_add_many(
                     GST_BIN(appData.pipeline),
                     appData.rtspSrc,
-                    appData.queue,
+                    appData.buffer,
                     appData.dePayloader,
+                    appData.parser,
                     appData.decoder,
                     appData.encoder,
                     appData.payloader,
-                    appData.queue2,
+                    appData.queue,
                     appData.sink,
                     nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-                    appData.queue,
+                    appData.buffer,
                     appData.dePayloader,
+                    appData.parser,
                     appData.decoder,
                     appData.encoder,
                     appData.payloader,
-                    appData.queue2,
+                    appData.queue,
                     appData.sink,
                     NULL);
         } else {
@@ -262,7 +269,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
-        GstPad *sink_pad = gst_element_get_static_pad(data->queue, "sink");
+        GstPad *sink_pad = gst_element_get_static_pad(data->buffer, "sink");
         GstPadLinkReturn ret;
         GstCaps *new_pad_caps = nullptr;
         GstStructure *new_pad_struct;

@@ -16,11 +16,12 @@ namespace nvr {
         GstElement *pipeline;
         GstElement *rtspSrc;
         GstElement *dePayloader;
+        GstElement *parser;
         GstElement *decoder;
-        GstElement *queue;
+        GstElement *buffer;
         GstElement *encoder;
         GstElement *payloader;
-        GstElement *queue2;
+        GstElement *queue;
         GstElement *sink;
         string stream_name;
         int64_t rtp_port;
