@@ -94,7 +94,7 @@ namespace nvr {
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
-        //g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
+        g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
