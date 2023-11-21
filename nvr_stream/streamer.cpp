@@ -174,8 +174,8 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
-                //g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 4096, nullptr); // bitrate (duh)
             }
 
 
@@ -230,7 +230,6 @@ namespace nvr {
         }
 
 
-
         bus = gst_element_get_bus(appData.pipeline);
 
         main_loop = g_main_loop_new(nullptr, FALSE);
@@ -240,7 +239,7 @@ namespace nvr {
         g_main_loop_run(main_loop);
 
         /* Free resources */
-        g_main_loop_unref (main_loop);
+        g_main_loop_unref(main_loop);
 
         /* Free resources */
         quit();
@@ -267,7 +266,8 @@ namespace nvr {
             }
             case GST_MESSAGE_EOS:
                 /* end-of-stream */
-                    data->logger->info("End-Of-Stream reached.");
+
+                data->logger->info("End-Of-Stream reached.");
                 gst_element_set_state(data->pipeline, GST_STATE_READY);
                 g_main_loop_quit(data->loop);
                 break;
@@ -275,7 +275,7 @@ namespace nvr {
                 gint percent = 0;
 
                 /* If the stream is live, we do not care about buffering. */
-             //   if (data->is_live) break;
+                //   if (data->is_live) break;
 
                 gst_message_parse_buffering(msg, &percent);
                 g_print("Buffering (%3d%%)\r", percent);
@@ -293,6 +293,8 @@ namespace nvr {
                 break;
             default:
                 /* Unhandled message */
+                data->logger->error("Unknown message {} received from element {}", msg->type,
+                                    GST_OBJECT_NAME(msg->src));
                 break;
         }
     }
