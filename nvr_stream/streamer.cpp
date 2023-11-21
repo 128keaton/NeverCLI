@@ -130,17 +130,22 @@ namespace nvr {
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 0 ms
 
+        // queue delays
+        int64_t max_delay = 10000000000; // 10 second MAX_DELAY
+        int64_t min_delay = 5000000000; // 5 second MIN_DELAY
+        int64_t delay = 5000000000; // 5 second DELAY
+
         // initial queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 5000000000, nullptr); // 5 seconds i.e. MAX_DELAY
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
         // final queue, should act as a "buffer"
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 10000000, nullptr); // 1 seconds i.e. DELAY
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", 1000000, nullptr); // 1ms i.e. SMALL_DELAY
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
@@ -302,12 +307,6 @@ namespace nvr {
                 gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
                 break;
             case GST_MESSAGE_TAG:
-                GstTagList *tag_list;
-                gchar *raw_tag_list;
-                gst_message_parse_tag(msg, &tag_list);
-                raw_tag_list =  gst_tag_list_to_string(tag_list);
-
-                data->logger->info("Tag: {}", string(raw_tag_list));
                 break;
             default:
                 /* Unhandled message */
