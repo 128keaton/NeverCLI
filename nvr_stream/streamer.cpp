@@ -97,7 +97,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 400, nullptr); // buffer 400 ms
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // buffer 200 ms
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
       //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
@@ -109,8 +109,10 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-       // g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1324, nullptr);
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
@@ -121,7 +123,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-       // g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
 
         // decoding/encoding queue
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -133,7 +135,7 @@ namespace nvr {
         // rtprtxqueue
         appData.queue = gst_element_factory_make("rtprtxqueue", nullptr);
         g_object_set(G_OBJECT(appData.queue), "max-size-packets", 0, nullptr); //unlimited
-        g_object_set(G_OBJECT(appData.queue), "max-size-time", 400, nullptr); // 400ms
+        g_object_set(G_OBJECT(appData.queue), "max-size-time", 200, nullptr); // 400ms
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
