@@ -133,7 +133,7 @@ namespace nvr {
         // queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 20000000000, nullptr); // 20 seconds, i.e. MAX_DELAY
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 1000000000, nullptr); // 1 seconds, i.e. MAX_DELAY
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
@@ -191,7 +191,7 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.initialQueue,
-                appData.finalQueue,
+        //        appData.finalQueue,
                 appData.parser,
                 appData.decoder,
                 appData.encoder,
@@ -205,7 +205,7 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.initialQueue,
-                appData.finalQueue,
+       //         appData.finalQueue,
                 appData.parser,
                 appData.decoder,
                 appData.encoder,
