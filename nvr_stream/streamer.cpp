@@ -97,7 +97,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-      //  g_object_set(G_OBJECT(appData.rtspSrc), "latency", 6000, nullptr); // buffer 6 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 400, nullptr); // buffer 400 ms
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
       //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
@@ -126,13 +126,14 @@ namespace nvr {
         // decoding/encoding queue
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
         g_object_set(G_OBJECT(appData.buffer), "rfc7273-use-system-clock", true, nullptr);
-      //  g_object_set(G_OBJECT(appData.buffer), "mode", 2, nullptr); // high/low watermark
+        g_object_set(G_OBJECT(appData.buffer), "mode", 0, nullptr); // RTP timestamps
         //g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
         //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
         // rtprtxqueue
         appData.queue = gst_element_factory_make("rtprtxqueue", nullptr);
         g_object_set(G_OBJECT(appData.queue), "max-size-packets", 0, nullptr); //unlimited
+        g_object_set(G_OBJECT(appData.queue), "max-size-time", 400, nullptr); // 400ms
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
