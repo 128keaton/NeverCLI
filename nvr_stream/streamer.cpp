@@ -123,7 +123,8 @@ namespace nvr {
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
-        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr); // send with every IDR frame
+        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
+        // send with every IDR frame
 
 
         // udp output sink
@@ -213,7 +214,7 @@ namespace nvr {
                 appData.finalQueue,
                 appData.payloader,
                 appData.initialBufferQueue,
-                 appData.finalBufferQueue,
+                appData.finalBufferQueue,
                 appData.sink,
                 nullptr
             );
@@ -336,6 +337,36 @@ namespace nvr {
             case GST_MESSAGE_STREAM_START:
                 data->logger->info("Stream started");
                 break;
+            case GST_MESSAGE_PROGRESS:
+                GstProgressType type;
+                gchar *code, *text;
+                bool in_progress;
+
+                gst_message_parse_progress(msg, &type, &code, &text);
+
+                switch (type) {
+                    case GST_PROGRESS_TYPE_START:
+                    case GST_PROGRESS_TYPE_CONTINUE:
+                        in_progress = TRUE;
+                        break;
+                    case GST_PROGRESS_TYPE_COMPLETE:
+                    case GST_PROGRESS_TYPE_CANCELED:
+                    case GST_PROGRESS_TYPE_ERROR:
+                        in_progress = FALSE;
+                        break;
+                    default:
+                        break;
+                }
+
+                data->logger->info("Progress: (%s) %s", code, text);
+                g_free(code);
+                g_free(text);
+
+                if (!in_progress) {
+                    gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
+                    gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
+                }
+
             default:
                 /* Unhandled message */
                 data->logger->info("Unknown message {} received from element {}", msg->type,
