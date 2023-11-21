@@ -186,9 +186,10 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
+                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 50, nullptr); // quality from 0-100
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
             }
 
 
@@ -199,8 +200,8 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.parser,
-                appData.initialQueue,
                 appData.decoder,
+                appData.initialQueue,
                 appData.encoder,
                 appData.finalQueue,
                 appData.payloader,
@@ -213,8 +214,8 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.parser,
-                appData.initialQueue,
                 appData.decoder,
+                appData.initialQueue,
                 appData.encoder,
                 appData.finalQueue,
                 appData.payloader,
@@ -375,7 +376,7 @@ namespace nvr {
             if (janus_connected)
                 if (data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
-                  //  data->janus.keepAlive();
+                    data->janus.keepAlive();
                 }
                 else
                     data->logger->warn("Not streaming because we were not able to create a stream endpoint on Janus");
