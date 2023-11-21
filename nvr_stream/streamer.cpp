@@ -213,30 +213,26 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                appData.buffer,
+           //     appData.buffer,
                 appData.dePayloader,
-                appData.initialQueue,
                 appData.parser,
                 appData.decoder,
                 appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
                 appData.sink,
                 nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-                appData.buffer,
+          //      appData.buffer,
                 appData.dePayloader,
-                appData.initialQueue,
                 appData.parser,
                 appData.decoder,
                 appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
                 appData.sink,
                 NULL);
         }
@@ -380,7 +376,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->buffer, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
