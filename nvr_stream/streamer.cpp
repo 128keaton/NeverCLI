@@ -97,13 +97,15 @@ namespace nvr {
         int64_t min_delay = 10000000000; // 10 second MIN_DELAY
         int64_t delay = 20000000000; // 20 second DELAY
 
+        gint config_interval = -1;
+
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-     //   g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 2, nullptr); // buffer
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 2, nullptr); // buffer
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -114,7 +116,7 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", min_delay, nullptr); // 5 seconds
@@ -193,9 +195,9 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 60, nullptr); // quality from 0-100
-          //      g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 25, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
             }
 
 
