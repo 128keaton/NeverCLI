@@ -135,9 +135,7 @@ namespace nvr {
 
         // queue
         appData.queue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 0, nullptr); // never fill
-        g_object_set(G_OBJECT(appData.queue), "max-size-time", 0, nullptr); // never fill
-        g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 0, nullptr); // never fill
+        g_object_set(G_OBJECT(appData.queue), "leaky", 2, nullptr); // downstream
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
