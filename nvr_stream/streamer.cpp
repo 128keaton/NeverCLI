@@ -94,8 +94,8 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = 60000000000; // 60 second MAX_DELAY
-        int64_t min_delay = 30000000000; // 30 second MIN_DELAY
-        int64_t delay = 5000000000; // 5 second DELAY
+        int64_t min_delay = 5000000000; // 5 second MIN_DELAY
+        int64_t delay = 1000000000; // 1 second DELAY
 
         gint config_interval = -1;
 
