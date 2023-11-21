@@ -308,17 +308,13 @@ namespace nvr {
                 break;
             case GST_MESSAGE_TAG:
             case GST_MESSAGE_STATE_CHANGED:
+            case GST_MESSAGE_STREAM_STATUS:
                 break;
             case GST_MESSAGE_LATENCY:
                 if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
                     data->logger->error("Could not reconfigure latency");
                 else
                     data->logger->info("Reconfigured latency");
-                break;
-            case GST_MESSAGE_STREAM_STATUS:
-                GstStreamStatusType* type;
-                gst_message_parse_stream_status(msg, type, &data->rtspSrc);
-                data->logger->info("Stream status {}", type);
                 break;
             case GST_MESSAGE_STREAM_START:
                 data->logger->info("Stream started");
