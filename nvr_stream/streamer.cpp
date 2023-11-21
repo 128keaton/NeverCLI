@@ -134,9 +134,10 @@ namespace nvr {
 
         // queue
         appData.queue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 5000000, nullptr); // 5 seconds
-        g_object_set(G_OBJECT(appData.queue), "max-size-time", 5000000000, nullptr); // 5 seconds
-        g_object_set(G_OBJECT(appData.queue), "min-threshold-time", 5000000000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 0, nullptr); // never fill
+        g_object_set(G_OBJECT(appData.queue), "max-size-time", 0, nullptr); // never fill
+        g_object_set(G_OBJECT(appData.queue), "max-size-bytes", 0, nullptr); // never fill
+        g_object_set(G_OBJECT(appData.queue), "min-threshold-time", 60000000000, nullptr); // 60 seconds
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
