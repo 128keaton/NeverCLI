@@ -197,7 +197,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 25, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
+             //   g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
             }
 
 
