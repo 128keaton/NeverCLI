@@ -103,13 +103,12 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 8000, nullptr); // buffer 8 seconds
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 2, nullptr); // buffer
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "debug", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 2, nullptr); // buffer
+        g_object_set(G_OBJECT(appData.rtspSrc), "add-reference-timestamp-meta", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
@@ -200,9 +199,9 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.parser,
+                appData.initialQueue,
                 appData.decoder,
                 appData.encoder,
-                appData.initialQueue,
                 appData.finalQueue,
                 appData.payloader,
                 appData.sink,
@@ -214,9 +213,9 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.parser,
+                appData.initialQueue,
                 appData.decoder,
                 appData.encoder,
-                appData.initialQueue,
                 appData.finalQueue,
                 appData.payloader,
                 appData.sink,
