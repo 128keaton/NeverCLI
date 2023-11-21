@@ -190,7 +190,7 @@ namespace nvr {
                 appData.rtspSrc,
                 appData.buffer,
                 appData.dePayloader,
-                appData.initialQueue,
+               appData.initialQueue,
         //        appData.finalQueue,
                 appData.parser,
                 appData.decoder,
@@ -234,6 +234,8 @@ namespace nvr {
             logger->error("Unable to set pipeline's state to PLAYING");
             gst_object_unref(appData.pipeline);
             return -1;
+        } else if (ret == GST_STATE_CHANGE_NO_PREROLL) {
+            appData.is_live = TRUE;
         }
 
 
@@ -282,7 +284,7 @@ namespace nvr {
                 gint percent = 0;
 
                 /* If the stream is live, we do not care about buffering. */
-                //   if (data->is_live) break;
+                if (data->is_live) break;
 
                 gst_message_parse_buffering(msg, &percent);
                 data->logger->info("Buffering (%3d%%)\r", percent);

@@ -30,6 +30,7 @@ namespace nvr {
         std::shared_ptr<spdlog::logger> logger;
         Janus janus;
         GMainLoop *loop;
+        gboolean is_live;
     } StreamData;
 
 
