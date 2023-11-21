@@ -139,7 +139,15 @@ namespace nvr {
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 0, nullptr);
+
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", 0, nullptr);
+
 
         // initial buffer queue
         appData.initialBufferQueue = gst_element_factory_make("queue", "initial_buf_queue");
@@ -210,11 +218,10 @@ namespace nvr {
                 appData.initialQueue,
                 appData.parser,
                 appData.decoder,
+                appData.finalBufferQueue,
                 appData.encoder,
                 appData.finalQueue,
                 appData.payloader,
-                appData.initialBufferQueue,
-                appData.finalBufferQueue,
                 appData.sink,
                 nullptr
             );
@@ -226,11 +233,10 @@ namespace nvr {
                 appData.initialQueue,
                 appData.parser,
                 appData.decoder,
+                appData.finalBufferQueue,
                 appData.encoder,
                 appData.finalQueue,
                 appData.payloader,
-                appData.initialBufferQueue,
-                appData.finalBufferQueue,
                 appData.sink,
                 NULL);
         }
@@ -329,6 +335,7 @@ namespace nvr {
             case GST_MESSAGE_ASYNC_DONE:
             case GST_MESSAGE_NEED_CONTEXT:
             case GST_MESSAGE_HAVE_CONTEXT:
+            case GST_MESSAGE_NEW_CLOCK:
                 break;
             case GST_MESSAGE_LATENCY:
                 if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
