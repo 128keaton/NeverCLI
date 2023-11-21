@@ -135,13 +135,13 @@ namespace nvr {
         // queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
-        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", 30000000000, nullptr); // 30 seconds
+        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", 5000000000, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 30000000000, nullptr); // 30 seconds
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 5000000000, nullptr); // 5 seconds
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
