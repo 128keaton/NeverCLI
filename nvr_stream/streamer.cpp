@@ -113,7 +113,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1324, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1600, nullptr);
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
@@ -175,7 +175,7 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr); // bitrate (duh)
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
             }
 
 
@@ -291,8 +291,11 @@ namespace nvr {
                 gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
                 gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
                 break;
-            case GST_MESSAGE_SEGMENT_START:
-                data->logger->info("Segment started");
+            case GST_MESSAGE_TAG:
+                GstTagList *tag_list;
+                gst_message_parse_tag(msg, &tag_list);
+
+                data->logger->info("Tag: {}", tag_list);
                 break;
             default:
                 /* Unhandled message */
