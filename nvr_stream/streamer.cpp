@@ -112,6 +112,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        g_object_set(G_OBJECT(appData.parser), "timestamp-offset", 6000000000, nullptr); // 60 seconds
+
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
@@ -122,23 +124,23 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-    //    g_object_set(G_OBJECT(appData.sink), "ts-offset", 3000000000, nullptr); // 30 seconds
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", 6000000000, nullptr); // 60 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 0 ms
 
-        // queue
+        // initial queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 5000000000, nullptr); // 5 seconds i.e. SMALL_DELAY
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 5000000000, nullptr); // 5 seconds i.e. MAX_DELAY
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
+        // final queue, should act as a "buffer"
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 10000000000, nullptr); // 10 seconds i.e. DELAY
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 5000000000, nullptr); // 5 seconds i.e. SMALL_DELAY
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 10000000, nullptr); // 1 seconds i.e. DELAY
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 1000000, nullptr); // 1ms i.e. SMALL_DELAY
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
