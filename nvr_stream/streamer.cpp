@@ -136,22 +136,22 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 500 ms
 
 
-        appData.initialQueue = gst_element_factory_make("queue", nullptr);
-        appData.finalQueue = gst_element_factory_make("queue", nullptr);
+        appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
+        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
 
         // initial buffer queue
-        appData.initialBufferQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
+        appData.initialBufferQueue = gst_element_factory_make("queue", "initial_buf_queue");
+        g_object_set(G_OBJECT(appData.initialBufferQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.initialBufferQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.initialBufferQueue), "max-size-buffers", 0, nullptr);
 
 
         // final buffer queue
-        appData.finalBufferQueue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
+        appData.finalBufferQueue = gst_element_factory_make("queue", "final_buf_queue");
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", 0, nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
