@@ -114,7 +114,7 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "config-interval", 1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", min_delay, nullptr); // 5 seconds
