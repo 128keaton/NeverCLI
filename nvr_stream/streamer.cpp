@@ -327,6 +327,8 @@ namespace nvr {
             case GST_MESSAGE_STREAM_STATUS:
             case GST_MESSAGE_ELEMENT:
             case GST_MESSAGE_ASYNC_DONE:
+            case GST_MESSAGE_NEED_CONTEXT:
+            case GST_MESSAGE_HAVE_CONTEXT:
                 break;
             case GST_MESSAGE_LATENCY:
                 if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
@@ -361,9 +363,7 @@ namespace nvr {
                 data->logger->info("Progress: ({}) {}", code, text);
                 g_free(code);
                 g_free(text);
-
-
-
+                break;
             default:
                 /* Unhandled message */
                 data->logger->info("Unknown message {} received from element {}", msg->type,
