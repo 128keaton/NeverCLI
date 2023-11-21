@@ -131,8 +131,8 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = 60000000000; // 60 second MAX_DELAY
-        int64_t min_delay = 5000000000; // 5 second MIN_DELAY
-        int64_t delay = 10000000000; // 10 second DELAY
+        int64_t min_delay = 10000000000; // 10 second MIN_DELAY
+        int64_t delay = 20000000000; // 20 second DELAY
 
         // initial queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
@@ -239,7 +239,8 @@ namespace nvr {
             logger->error("Unable to set pipeline's state to PLAYING");
             gst_object_unref(appData.pipeline);
             return -1;
-        } else if (ret == GST_STATE_CHANGE_NO_PREROLL) {
+        }
+        else if (ret == GST_STATE_CHANGE_NO_PREROLL) {
             appData.is_live = TRUE;
         }
 
@@ -306,11 +307,26 @@ namespace nvr {
                 gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
                 break;
             case GST_MESSAGE_TAG:
+            case GST_MESSAGE_STATE_CHANGED:
+                break;
+            case GST_MESSAGE_LATENCY:
+                if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
+                    data->logger->error("Could not reconfigure latency");
+                else
+                    data->logger->info("Reconfigured latency");
+                break;
+            case GST_MESSAGE_STREAM_STATUS:
+                GstStreamStatusType* type;
+                gst_message_parse_stream_status(msg, type, &data->rtspSrc);
+                data->logger->info("Stream status {}", type);
+                break;
+            case GST_MESSAGE_STREAM_START:
+                data->logger->info("Stream started");
                 break;
             default:
                 /* Unhandled message */
-                data->logger->error("Unknown message {} received from element {}", msg->type,
-                                    GST_OBJECT_NAME(msg->src));
+                data->logger->info("Unknown message {} received from element {}", msg->type,
+                                   GST_OBJECT_NAME(msg->src));
                 break;
         }
     }
