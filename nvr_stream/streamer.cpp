@@ -128,7 +128,7 @@ namespace nvr {
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.buffer), "mode", 2, nullptr); // RTP timestamps
+     //   g_object_set(G_OBJECT(appData.buffer), "mode", 2, nullptr); // RTP timestamps
         //g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
         //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
