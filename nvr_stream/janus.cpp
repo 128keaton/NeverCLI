@@ -319,6 +319,9 @@ namespace nvr {
         media["rtpmap"] = "H264/90000";
         media["pt"] = 96;
         media["bitrate"] = 4096;
+        media["bufferkf"] = true;
+        media["collision"] = 1000; // collision
+        media["threads"] = 2; // not sure where this is expected
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         media = json::array({media});
@@ -352,7 +355,7 @@ namespace nvr {
         body["name"] = streamName;
         body["type"] = "rtp";
         body["id"] = streamID;
-        body["threads"] = 4;
+        body["threads"] = 2; // not sure where this is expected
         body["media"] = buildMedia(streamName, streamID, port);
 
         json request = buildMessage(body);
