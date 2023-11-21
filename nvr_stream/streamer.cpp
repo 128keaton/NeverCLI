@@ -161,8 +161,8 @@ namespace nvr {
                 logger->info("Using vaapi for encoding");
 
                 // h265 decode with vaapi
-                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
+                appData.decoder = gst_element_factory_make("vaapidecodebin", "dec");
+                g_object_set(G_OBJECT(appData.decoder), "max-size-buffers", 4, nullptr);
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
