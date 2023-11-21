@@ -94,8 +94,8 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = 60000000000; // 60 second MAX_DELAY
-        int64_t min_delay = 10000000000; // 10 second MIN_DELAY
-        int64_t delay = 20000000000; // 20 second DELAY
+        int64_t min_delay = 30000000000; // 30 second MIN_DELAY
+        int64_t delay = 5000000000; // 5 second DELAY
 
         gint config_interval = -1;
 
@@ -213,7 +213,7 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-           //     appData.buffer,
+                appData.buffer,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -226,7 +226,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-          //      appData.buffer,
+                appData.buffer,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -376,7 +376,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->buffer, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
