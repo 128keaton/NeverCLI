@@ -113,7 +113,6 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr);
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
