@@ -105,7 +105,6 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 2, nullptr); // buffer
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -197,7 +196,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 25, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
-             //   g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
             }
 
 
@@ -309,7 +308,7 @@ namespace nvr {
                 if (data->is_live) break;
 
                 gst_message_parse_buffering(msg, &percent);
-                data->logger->info("Buffering (%3d%%)\r", percent);
+                data->logger->info("Buffering ({}%)", percent);
                 /* Wait until buffering is complete before start/resume playing */
                 if (percent < 100)
                     gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
