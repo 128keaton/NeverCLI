@@ -21,7 +21,8 @@ namespace nvr {
         GstElement *buffer;
         GstElement *encoder;
         GstElement *payloader;
-        GstElement *queue;
+        GstElement *initialQueue;
+        GstElement *finalQueue;
         GstElement *sink;
         string stream_name;
         int64_t rtp_port;

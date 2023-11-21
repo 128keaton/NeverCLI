@@ -125,7 +125,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
-        g_object_set(G_OBJECT(appData.queue), "ts-offset", 500000000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", 500000000, nullptr); // 5 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -134,8 +134,10 @@ namespace nvr {
         //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
         // queue
-        appData.queue = gst_element_factory_make("queue", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "leaky", 2, nullptr); // downstream
+        appData.initialQueue = gst_element_factory_make("queue", nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
+
+        appData.finalQueue = gst_element_factory_make("queue", nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -185,10 +187,11 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.parser,
+                appData.initialQueue,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-                appData.queue,
+                appData.finalQueue,
                 appData.sink,
                 nullptr
             );
@@ -198,10 +201,11 @@ namespace nvr {
                 appData.buffer,
                 appData.dePayloader,
                 appData.parser,
+                appData.initialQueue,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-                appData.queue,
+                appData.finalQueue,
                 appData.sink,
                 NULL);
         }
