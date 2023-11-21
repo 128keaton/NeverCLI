@@ -120,7 +120,7 @@ namespace nvr {
 
         // decoding/encoding queue
         appData.queue = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.queue), "latency", 25000, nullptr);
+        g_object_set(G_OBJECT(appData.queue), "latency", 600, nullptr);
         g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
         g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
