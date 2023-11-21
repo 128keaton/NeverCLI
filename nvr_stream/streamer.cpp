@@ -98,7 +98,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // buffer 200 ms
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 100, nullptr); // latency 100ms
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
@@ -125,19 +125,21 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", 500000000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", 3000000000, nullptr); // 30 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-     //   g_object_set(G_OBJECT(appData.buffer), "mode", 2, nullptr); // RTP timestamps
+        g_object_set(G_OBJECT(appData.buffer), "latency", 100, nullptr); // 100 ms
         //g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
         //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
         // queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
+        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", 30000000000, nullptr); // 30 seconds
 
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 30000000000, nullptr); // 30 seconds
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
