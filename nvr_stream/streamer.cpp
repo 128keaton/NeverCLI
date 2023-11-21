@@ -122,7 +122,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", 3000000000, nullptr); // 30 seconds
+    //    g_object_set(G_OBJECT(appData.sink), "ts-offset", 3000000000, nullptr); // 30 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -131,6 +131,9 @@ namespace nvr {
         // queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "leaky", 2, nullptr); // downstream
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 5000000000, nullptr); // 5 seconds i.e. SMALL_DELAY
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
