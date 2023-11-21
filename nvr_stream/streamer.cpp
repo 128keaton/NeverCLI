@@ -98,13 +98,13 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 100, nullptr); // latency 100ms
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 0, nullptr); // latency 0ms
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
-        //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
-        //  g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
+        g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-        //  g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
@@ -123,14 +123,13 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.sink), "ts-offset", 3000000000, nullptr); // 30 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.buffer), "latency", 100, nullptr); // 100 ms
-        //g_object_set(G_OBJECT(appData.queue), "faststart-min-packets", 25, nullptr);
-        //g_object_set(G_OBJECT(appData.queue), "max-misorder-time", 1500, nullptr); // 1.5 seconds
+        g_object_set(G_OBJECT(appData.buffer), "latency", 0, nullptr); // 0 ms
+        g_object_set(G_OBJECT(appData.buffer), "faststart-min-packets", 25, nullptr);
+        g_object_set(G_OBJECT(appData.buffer), "max-misorder-time", 1500, nullptr); // 1.5 seconds
 
         // queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
