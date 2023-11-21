@@ -92,17 +92,24 @@ namespace nvr {
 
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
+        // queue delays
+        int64_t max_delay = 60000000000; // 60 second MAX_DELAY
+        int64_t min_delay = 10000000000; // 10 second MIN_DELAY
+        int64_t delay = 20000000000; // 20 second DELAY
+
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 4000, nullptr); // buffer 4 seoncds
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 8000, nullptr); // buffer 8 seconds
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "debug", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 2, nullptr); // buffer
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
@@ -111,7 +118,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.parser), "timestamp-offset", 500000000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.parser), "timestamp-offset", delay, nullptr); // 5 seconds
 
 
         // h265 parser
@@ -123,16 +130,13 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", 500000000, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr); // 5 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 500 ms
 
-        // queue delays
-        int64_t max_delay = 60000000000; // 60 second MAX_DELAY
-        int64_t min_delay = 10000000000; // 10 second MIN_DELAY
-        int64_t delay = 20000000000; // 20 second DELAY
+
 
         // initial queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
@@ -309,6 +313,8 @@ namespace nvr {
             case GST_MESSAGE_TAG:
             case GST_MESSAGE_STATE_CHANGED:
             case GST_MESSAGE_STREAM_STATUS:
+            case GST_MESSAGE_ELEMENT:
+            case GST_MESSAGE_ASYNC_DONE:
                 break;
             case GST_MESSAGE_LATENCY:
                 if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
