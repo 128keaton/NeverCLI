@@ -124,7 +124,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", 6000000000, nullptr); // 60 seconds
+     //   g_object_set(G_OBJECT(appData.sink), "ts-offset", 6000000000, nullptr); // 60 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -140,9 +140,9 @@ namespace nvr {
         // final queue, should act as a "buffer"
         appData.finalQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", 10000000, nullptr); // 1 seconds i.e. DELAY
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", 1000000, nullptr); // 1ms i.e. SMALL_DELAY
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", 1000000, nullptr); // 1ms i.e. SMALL_DELAY
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -180,7 +180,7 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
+            //    g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
             }
 
@@ -194,6 +194,8 @@ namespace nvr {
                 appData.parser,
                 appData.decoder,
                 appData.encoder,
+                appData.initialQueue,
+                appData.finalQueue,
                 appData.payloader,
                 appData.sink,
                 nullptr
@@ -206,6 +208,8 @@ namespace nvr {
                 appData.parser,
                 appData.decoder,
                 appData.encoder,
+                appData.initialQueue,
+                appData.finalQueue,
                 appData.payloader,
                 appData.sink,
                 NULL);
