@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 
 namespace nvr {
-    Streamer::Streamer(const CameraConfig &config) {
+    Streamer::Streamer(const CameraConfig&config) {
         this->has_vaapi = false;
         this->type = config.type;
         this->logger = nvr::buildLogger(config);
@@ -56,7 +56,8 @@ namespace nvr {
 
             if (return_state == 0) {
                 logger->error("Could not set pipeline state");
-            } else {
+            }
+            else {
                 logger->info("Pipeline state set to null");
                 gst_object_unref(appData.pipeline);
             }
@@ -64,9 +65,9 @@ namespace nvr {
     }
 
     int Streamer::start() {
-        int return_state = 0;
+        GMainLoop* main_loop;
         GstStateChangeReturn ret;
-        GstMessage *msg;
+        GstMessage* msg;
 
 
         gst_init(nullptr, nullptr);
@@ -75,7 +76,7 @@ namespace nvr {
 
         plugins = gst_registry_get_plugin_list(gst_registry_get());
         for (p = plugins; p; p = p->next) {
-            auto *plugin = static_cast<GstPlugin *>(p->data);
+            auto* plugin = static_cast<GstPlugin *>(p->data);
             if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
                 has_vaapi = true;
                 logger->info("Found vaapi plugin");
@@ -100,10 +101,10 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // buffer 200 ms
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
-      //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
+        //  g_object_set(G_OBJECT(appData.rtspSrc), "buffer-mode", 0, nullptr); // use RTP
         //  g_object_set(G_OBJECT(appData.rtspSrc), "protocols", 0x00000004, nullptr); // tcp
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-      //  g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
+        //  g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
@@ -160,7 +161,8 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
-            } else {
+            }
+            else {
                 logger->info("Using vaapi for encoding");
 
                 // h265 decode with vaapi
@@ -173,38 +175,38 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
                 //g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
-
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
             }
 
 
             // add everything
             gst_bin_add_many(
-                    GST_BIN(appData.pipeline),
-                    appData.rtspSrc,
-                    appData.buffer,
-                    appData.dePayloader,
-                    appData.parser,
-                    appData.decoder,
-                    appData.encoder,
-                    appData.payloader,
-                    appData.queue,
-                    appData.sink,
-                    nullptr
+                GST_BIN(appData.pipeline),
+                appData.rtspSrc,
+                appData.buffer,
+                appData.dePayloader,
+                appData.parser,
+                appData.decoder,
+                appData.encoder,
+                appData.payloader,
+                appData.queue,
+                appData.sink,
+                nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-                    appData.buffer,
-                    appData.dePayloader,
-                    appData.parser,
-                    appData.decoder,
-                    appData.encoder,
-                    appData.payloader,
-                    appData.queue,
-                    appData.sink,
-                    NULL);
-        } else {
+                appData.buffer,
+                appData.dePayloader,
+                appData.parser,
+                appData.decoder,
+                appData.encoder,
+                appData.payloader,
+                appData.queue,
+                appData.sink,
+                NULL);
+        }
+        else {
             logger->info("Starting h264->h264 pipeline on port {}", rtp_port);
 
             // h264 de-payload
@@ -228,55 +230,79 @@ namespace nvr {
         }
 
 
+
         bus = gst_element_get_bus(appData.pipeline);
 
-        while (true) {
-            msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,
-                                             (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+        main_loop = g_main_loop_new(nullptr, FALSE);
+        appData.loop = main_loop;
+        gst_bus_add_signal_watch(bus);
+        g_signal_connect(bus, "message", G_CALLBACK(callbackMessage), &appData);
+        g_main_loop_run(main_loop);
 
-            /* Parse message */
-            if (msg != nullptr) {
-                GError *err;
-                gchar *debug_info;
-
-                switch (GST_MESSAGE_TYPE(msg)) {
-                    case GST_MESSAGE_ERROR:
-                        gst_message_parse_error(msg, &err, &debug_info);
-                        logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
-                        logger->error("Debugging information: {}", debug_info ? debug_info : "none");
-                        g_clear_error(&err);
-                        g_free(debug_info);
-                        return_state = EXIT_FAILURE;
-                        break;
-                    case GST_MESSAGE_EOS:
-                        logger->info("End-Of-Stream reached.");
-                        return_state = EXIT_SUCCESS;
-                        break;
-                    default:
-                        logger->info("Unexpected message received: {}", msg->src->name);
-                        return_state = EXIT_SUCCESS;
-                        break;
-                }
-                gst_message_unref(msg);
-            } else {
-                break;
-            }
-
-            if (return_state == EXIT_FAILURE)
-                break;
-        }
+        /* Free resources */
+        g_main_loop_unref (main_loop);
 
         /* Free resources */
         quit();
-        return return_state;
+        return 0;
     }
 
-    void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
-        GstPad *sink_pad = gst_element_get_static_pad(data->buffer, "sink");
+    void Streamer::callbackMessage(GstBus* bus, GstMessage* msg, StreamData* data) {
+        switch (GST_MESSAGE_TYPE(msg)) {
+            case GST_MESSAGE_ERROR: {
+                GError* err;
+                gchar* debug;
+
+                gst_message_parse_error(msg, &err, &debug);
+
+                data->logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
+                data->logger->error("Debugging information: {}", debug ? debug : "none");
+
+                g_error_free(err);
+                g_free(debug);
+
+                gst_element_set_state(data->pipeline, GST_STATE_READY);
+                g_main_loop_quit(data->loop);
+                break;
+            }
+            case GST_MESSAGE_EOS:
+                /* end-of-stream */
+                    data->logger->info("End-Of-Stream reached.");
+                gst_element_set_state(data->pipeline, GST_STATE_READY);
+                g_main_loop_quit(data->loop);
+                break;
+            case GST_MESSAGE_BUFFERING: {
+                gint percent = 0;
+
+                /* If the stream is live, we do not care about buffering. */
+             //   if (data->is_live) break;
+
+                gst_message_parse_buffering(msg, &percent);
+                g_print("Buffering (%3d%%)\r", percent);
+                /* Wait until buffering is complete before start/resume playing */
+                if (percent < 100)
+                    gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
+                else
+                    gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
+                break;
+            }
+            case GST_MESSAGE_CLOCK_LOST:
+                /* Get a new clock */
+                gst_element_set_state(data->pipeline, GST_STATE_PAUSED);
+                gst_element_set_state(data->pipeline, GST_STATE_PLAYING);
+                break;
+            default:
+                /* Unhandled message */
+                break;
+        }
+    }
+
+    void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
+        GstPad* sink_pad = gst_element_get_static_pad(data->buffer, "sink");
         GstPadLinkReturn ret;
-        GstCaps *new_pad_caps = nullptr;
-        GstStructure *new_pad_struct;
-        const gchar *new_pad_type;
+        GstCaps* new_pad_caps = nullptr;
+        GstStructure* new_pad_struct;
+        const gchar* new_pad_type;
 
 
         bool janus_connected = data->janus.connect();
@@ -307,20 +333,22 @@ namespace nvr {
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
             data->logger->error("Type dictated is '{}', but link failed", new_pad_type);
-        } else {
+        }
+        else {
             data->logger->info("Link of type '{}' succeeded", new_pad_type);
 
             if (janus_connected)
                 if (data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
                     data->janus.keepAlive();
-                } else
+                }
+                else
                     data->logger->warn("Not streaming because we were not able to create a stream endpoint on Janus");
             else
                 data->logger->warn("Not streaming because we were not able to connect to Janus");
         }
 
-        exit:
+    exit:
         if (new_pad_caps != nullptr)
             gst_caps_unref(new_pad_caps);
 
