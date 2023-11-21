@@ -25,6 +25,9 @@ namespace nvr {
         this->rtsp_username = config.rtsp_username;
         this->rtp_port = config.rtp_port;
         this->port = config.port;
+
+        memset (&this->appData, 0, sizeof (this->appData));
+
         this->appData.rtp_port = this->rtp_port;
         this->appData.stream_name = this->camera_name;
         this->bus = nullptr;
@@ -146,7 +149,7 @@ namespace nvr {
         appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 2097152, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", true, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", false, nullptr);
 
 
 
