@@ -98,12 +98,11 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 5000, nullptr); // latency 0ms
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 4000, nullptr); // buffer 4 seoncds
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2500000, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
@@ -112,7 +111,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.parser), "timestamp-offset", 6000000000, nullptr); // 60 seconds
+        g_object_set(G_OBJECT(appData.parser), "timestamp-offset", 500000000, nullptr); // 5 seconds
 
 
         // h265 parser
@@ -124,16 +123,16 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-     //   g_object_set(G_OBJECT(appData.sink), "ts-offset", 6000000000, nullptr); // 60 seconds
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", 500000000, nullptr); // 5 seconds
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 0 ms
+        g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 500 ms
 
         // queue delays
-        int64_t max_delay = 60000000000; // 10 second MAX_DELAY
-        int64_t min_delay = 10000000000; // 10 second MIN_DELAY
-        int64_t delay = 5000000000; // 5 second DELAY
+        int64_t max_delay = 60000000000; // 60 second MAX_DELAY
+        int64_t min_delay = 5000000000; // 5 second MIN_DELAY
+        int64_t delay = 10000000000; // 10 second DELAY
 
         // initial queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
@@ -185,7 +184,7 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr (constant bitrate)
-            //    g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr); // bitrate (duh)
             }
 
