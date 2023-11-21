@@ -136,16 +136,18 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 500 ms
 
 
-
-        // initial queue
         appData.initialQueue = gst_element_factory_make("queue", nullptr);
+        appData.finalQueue = gst_element_factory_make("queue", nullptr);
+
+        // initial buffer queue
+        appData.initialBufferQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
-        // final queue, should act as a "buffer"
-        appData.finalQueue = gst_element_factory_make("queue", nullptr);
+        // final buffer queue
+        appData.finalBufferQueue = gst_element_factory_make("queue", nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
@@ -191,9 +193,9 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 50, nullptr); // quality from 0-100
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 60, nullptr); // quality from 0-100
+          //      g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
             }
 
 
@@ -203,6 +205,7 @@ namespace nvr {
                 appData.rtspSrc,
                 appData.buffer,
                 appData.dePayloader,
+                appData.initialQueue,
                 appData.parser,
                 appData.decoder,
                 appData.initialQueue,
@@ -217,12 +220,14 @@ namespace nvr {
             gst_element_link_many(
                 appData.buffer,
                 appData.dePayloader,
+                appData.initialQueue,
                 appData.parser,
                 appData.decoder,
-                appData.initialQueue,
                 appData.encoder,
                 appData.finalQueue,
                 appData.payloader,
+                appData.initialBufferQueue,
+                appData.finalBufferQueue,
                 appData.sink,
                 NULL);
         }
