@@ -18,7 +18,6 @@ namespace nvr {
         GstElement *dePayloader;
         GstElement *parser;
         GstElement *decoder;
-        GstElement *buffer;
         GstElement *encoder;
         GstElement *payloader;
         GstElement *initialQueue;

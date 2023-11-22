@@ -99,7 +99,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(26);
-        int64_t latency = 0; // 2.5-second latency
+        int64_t latency = 100; // 100ms latency
         gint config_interval = -1;
 
         // initialize pipeline
@@ -135,11 +135,8 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
+      //  g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
 
-        // rtpjitterbuffer
-        appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.buffer), "latency", latency, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
@@ -213,7 +210,6 @@ namespace nvr {
             gst_bin_add_many(
                     GST_BIN(appData.pipeline),
                     appData.rtspSrc,
-                    appData.buffer,
                     appData.dePayloader,
                     appData.parser,
                     appData.decoder,
@@ -227,7 +223,6 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                    appData.buffer,
                     appData.dePayloader,
                     appData.parser,
                     appData.decoder,
@@ -359,7 +354,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
-        GstPad *sink_pad = gst_element_get_static_pad(data->buffer, "sink");
+        GstPad *sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
         GstCaps *new_pad_caps = nullptr;
         GstStructure *new_pad_struct;
