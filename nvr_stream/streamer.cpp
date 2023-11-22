@@ -140,15 +140,15 @@ namespace nvr {
 
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
    //     g_object_set(G_OBJECT(appData.initialQueue), "ring-buffer-max-size", max_buff_size, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 1000, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size, nullptr);
- //       g_object_set(G_OBJECT(appData.finalQueue), "ring-buffer-max-size", max_buff_size, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "ring-buffer-max-size", max_bytes_size * 2, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 1000, nullptr);
 
 
