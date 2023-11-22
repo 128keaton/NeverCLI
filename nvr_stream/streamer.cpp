@@ -95,9 +95,9 @@ namespace nvr {
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
         // queue delays
-        int64_t max_delay = toNanoseconds(120); // 2-minute delay MAX_DELAY
+        int64_t max_delay = toNanoseconds(60); // 1-minute delay MAX_DELAY
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
-        int64_t delay = toNanoseconds(10); // 10-second DELAY
+        int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_buff_size = 2097152;
         int64_t latency = 2500; // 2.5-second latency
         gint config_interval = -1;
@@ -148,8 +148,8 @@ namespace nvr {
 
 
         appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
-  //      g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buff_size, nullptr);
-   //     g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buff_size, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", true, nullptr);
 
 
