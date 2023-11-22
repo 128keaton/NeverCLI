@@ -197,11 +197,11 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // 30 (duh)
                 g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr); // max 2 bframes (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
-             //   g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr); // use cabac entropy
-                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
+                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 0, nullptr); // min size for cpb-length
             }
 
 
