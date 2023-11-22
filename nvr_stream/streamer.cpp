@@ -146,8 +146,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers, nullptr);
 
-        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time",  delay, nullptr);
+        appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
+    //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time",  delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
