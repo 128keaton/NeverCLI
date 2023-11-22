@@ -99,7 +99,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(26);
-        int64_t latency = 100; // 100ms latency
+        int64_t latency = 4000; // 4-second latency
         int64_t max_buffers = 1024;
         gint config_interval = -1;
 
@@ -198,7 +198,6 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // 30 (duh)
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr); // max 2 bframes (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
                 g_object_set(G_OBJECT(appData.encoder), "cpb-length", 0, nullptr); // min size for cpb-length
