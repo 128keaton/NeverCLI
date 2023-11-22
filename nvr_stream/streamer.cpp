@@ -99,7 +99,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
-        int64_t latency = 4000; // 4-second latency
+        int64_t latency = 0; // ZERO latency
         int64_t max_buffers = 1024;
         gint config_interval = -1;
 
@@ -138,7 +138,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-       // g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
