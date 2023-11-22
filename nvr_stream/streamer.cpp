@@ -123,7 +123,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", min_delay + delay, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay + min_delay + delay, nullptr);
 
 
         // h265 parser
@@ -198,9 +198,9 @@ namespace nvr {
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 2, nullptr); // max 2 bframes (duh)
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 9, nullptr); // max 2 bframes (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
+             //   g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr); // use cabac entropy
                 g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
             }
 
