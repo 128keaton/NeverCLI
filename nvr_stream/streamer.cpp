@@ -96,11 +96,11 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = toNanoseconds(60); // 1-minute delay MAX_DELAY
-        int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
+        int64_t min_delay = toNanoseconds(5); // 5-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
         int64_t latency = 5000; // 5-second latency
-        int64_t max_buffers = 1024;
+        int64_t max_buffers = 4096;
         gint config_interval = -1;
 
         this->logger->info("Using max_delay: {}", max_delay);
@@ -146,8 +146,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers, nullptr);
 
-        appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
-    //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time",  delay, nullptr);
+        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time",  min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
