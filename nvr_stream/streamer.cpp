@@ -122,7 +122,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
 
 
         // h265 parser
@@ -135,7 +135,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -157,7 +157,7 @@ namespace nvr {
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue", "final_buf_queue");
         g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", 0, nullptr);
 
