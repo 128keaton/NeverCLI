@@ -153,7 +153,6 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.finalQueue), "ring-buffer-max-size", max_buff_size, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 1000, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", true, nullptr);
 
 
 
