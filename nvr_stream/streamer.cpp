@@ -99,7 +99,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(26);
-        int64_t latency = 2500; // 2.5-second latency
+        int64_t latency = 0; // 2.5-second latency
         gint config_interval = -1;
 
         // initialize pipeline
@@ -139,7 +139,7 @@ namespace nvr {
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.buffer), "latency", latency, nullptr); // 500 ms
+        g_object_set(G_OBJECT(appData.buffer), "latency", latency, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
