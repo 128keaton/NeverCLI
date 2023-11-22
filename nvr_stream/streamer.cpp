@@ -103,6 +103,8 @@ namespace nvr {
         int64_t max_buffers = 1024;
         gint config_interval = -1;
 
+        this->logger->info("Using max_delay: {}", max_delay);
+
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
@@ -123,7 +125,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1300, nullptr); // -100 mtu
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
         g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
 
 
