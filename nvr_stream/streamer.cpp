@@ -98,7 +98,7 @@ namespace nvr {
         int64_t max_delay = toNanoseconds(60); // 1-minute delay MAX_DELAY
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
-        int64_t max_bytes_size = toBytes(26);
+        int64_t max_bytes_size = toBytes(120);
         int64_t latency = 4000; // 4-second latency
         int64_t max_buffers = 1024;
         gint config_interval = -1;
