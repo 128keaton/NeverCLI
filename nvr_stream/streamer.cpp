@@ -203,7 +203,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // 30 (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
-                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 0, nullptr); // min size for cpb-length
+                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 20, nullptr); // min size for cpb-length
             }
 
 
