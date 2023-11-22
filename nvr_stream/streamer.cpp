@@ -98,7 +98,8 @@ namespace nvr {
         int64_t max_delay = toNanoseconds(120); // 2-minute delay MAX_DELAY
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(10); // 10-second DELAY
-
+        int64_t max_buff_size = 2097152;
+        int64_t latency = 2500; // 2.5-second latency
         gint config_interval = -1;
 
         // initialize pipeline
@@ -107,7 +108,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 200, nullptr); // 200ms latency
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -121,7 +122,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", min_delay, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
         // h265 parser
@@ -134,20 +135,20 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr); // 5 seconds
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
 
         // rtpjitterbuffer
         appData.buffer = gst_element_factory_make("rtpjitterbuffer", nullptr);
-        g_object_set(G_OBJECT(appData.buffer), "latency", 500, nullptr); // 500 ms
+        g_object_set(G_OBJECT(appData.buffer), "latency", latency, nullptr); // 500 ms
 
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 2097152, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buff_size, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "use-buffering", false, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 2097152, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buff_size, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", false, nullptr);
 
@@ -156,7 +157,7 @@ namespace nvr {
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue", "final_buf_queue");
         g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", 0, nullptr);
 
@@ -307,7 +308,7 @@ namespace nvr {
                 gint percent = 0;
 
                 /* If the stream is live, we do not care about buffering. */
-                if (data->is_live) break;
+             //   if (data->is_live) break;
 
                 gst_message_parse_buffering(msg, &percent);
                 data->logger->info("Buffering ({}%)", percent);
@@ -344,23 +345,8 @@ namespace nvr {
             case GST_MESSAGE_PROGRESS:
                 GstProgressType type;
                 gchar *code, *text;
-                bool in_progress;
 
                 gst_message_parse_progress(msg, &type, &code, &text);
-
-                switch (type) {
-                    case GST_PROGRESS_TYPE_START:
-                    case GST_PROGRESS_TYPE_CONTINUE:
-                        in_progress = TRUE;
-                        break;
-                    case GST_PROGRESS_TYPE_COMPLETE:
-                    case GST_PROGRESS_TYPE_CANCELED:
-                    case GST_PROGRESS_TYPE_ERROR:
-                        in_progress = FALSE;
-                        break;
-                    default:
-                        break;
-                }
 
                 data->logger->info("Progress: ({}) {}", code, text);
                 g_free(code);
