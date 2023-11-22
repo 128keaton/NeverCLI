@@ -98,7 +98,7 @@ namespace nvr {
         int64_t max_delay = toNanoseconds(60); // 1-minute delay MAX_DELAY
         int64_t min_delay = toNanoseconds(15); // 15-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
-        int64_t max_buff_size = 2097152;
+        int64_t max_buff_size = toBytes(26);
         int64_t latency = 2500; // 2.5-second latency
         gint config_interval = -1;
 
@@ -143,13 +143,16 @@ namespace nvr {
 
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
-     //   g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buff_size, nullptr);
-      //  g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
-
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_buff_size, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "ring-buffer-max-size", max_buff_size, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 1000, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buff_size, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_buff_size, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "ring-buffer-max-size", max_buff_size, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 1000, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "use-buffering", true, nullptr);
 
 
@@ -416,6 +419,10 @@ namespace nvr {
 
     int64_t Streamer::toNanoseconds(int64_t seconds) {
         return seconds * 1000000000;
+    }
+
+    int64_t Streamer::toBytes(int64_t megabytes) {
+        return megabytes * 1024 * 1024;
     }
 
     Streamer::Streamer() {
