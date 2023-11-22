@@ -142,12 +142,12 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
-        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay + delay, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers, nullptr);
 
-        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
+        appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
@@ -155,7 +155,7 @@ namespace nvr {
 
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue", "final_buf_queue");
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time",  max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
