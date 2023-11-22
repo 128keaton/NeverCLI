@@ -141,12 +141,13 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
-        appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
+        appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
+        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay + delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers, nullptr);
 
-        appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
+        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
@@ -200,10 +201,10 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 30, nullptr); // 30 (duh)
-                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // 30 (duh)
+                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 50, nullptr); // quality from 0-100
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
-                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 20, nullptr); // min size for cpb-length
+                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
             }
 
 
