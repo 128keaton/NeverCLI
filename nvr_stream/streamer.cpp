@@ -100,6 +100,7 @@ namespace nvr {
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(26);
         int64_t latency = 100; // 100ms latency
+        int64_t max_buffers = 1024;
         gint config_interval = -1;
 
         // initialize pipeline
@@ -134,29 +135,28 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay + min_delay + delay, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
-
 
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 1000, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue2", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 1000, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
 
 
 
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue", "final_buf_queue");
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", 1000, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time",  max_delay * 2, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
+        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
@@ -164,14 +164,13 @@ namespace nvr {
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
-            g_object_set(G_OBJECT(appData.dePayloader), "max-reorder", 200, nullptr);
+
 
             if (!this->has_vaapi) {
                 logger->warn("Not using vaapi for encoding/decoding");
 
                 // h265 decode without vaapi
                 appData.decoder = gst_element_factory_make("libde265dec", "dec");
-                //   g_object_set(G_OBJECT(appData.decoder), "max-threads", 2, nullptr);
 
                 // h264 encode without vaapi
                 appData.encoder = gst_element_factory_make("x264enc", "enc");
@@ -198,9 +197,9 @@ namespace nvr {
 
                 logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 25, nullptr); // auto (duh)
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // auto (duh)
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 55, nullptr); // quality from 0-100
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
             }
 
 
