@@ -126,7 +126,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
-        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
+      //  g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
 
 
         // h265 parser
@@ -138,7 +138,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
+       // g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
