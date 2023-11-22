@@ -213,8 +213,8 @@ namespace nvr {
             gst_bin_add_many(
                     GST_BIN(appData.pipeline),
                     appData.rtspSrc,
-                    appData.initialQueue,
                     appData.buffer,
+                    appData.initialQueue,
                     appData.dePayloader,
                     appData.parser,
                     appData.decoder,
@@ -228,8 +228,8 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                    appData.initialQueue,
                     appData.buffer,
+                    appData.initialQueue,
                     appData.dePayloader,
                     appData.parser,
                     appData.decoder,
@@ -361,7 +361,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
-        GstPad *sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
+        GstPad *sink_pad = gst_element_get_static_pad(data->buffer, "sink");
         GstPadLinkReturn ret;
         GstCaps *new_pad_caps = nullptr;
         GstStructure *new_pad_struct;
