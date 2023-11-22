@@ -190,11 +190,10 @@ namespace nvr {
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapidecodebin", "dec");
                 g_object_set(G_OBJECT(appData.decoder), "max-size-buffers", max_buffers, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "max-size-bytes", max_bytes_size, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "max-size-time", max_delay, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "max-size-bytes", max_bytes_size * 2, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "max-size-time", max_delay * 2, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "disable-vpp", true, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "message-forward", true, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "deinterlace-method", 4, nullptr);
 
                 // h264 encode with vaapi
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
