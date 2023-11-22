@@ -122,20 +122,20 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
+   //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
 
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
-        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-        // send with every IDR frame
+        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr); // send with every IDR frame
 
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-      //  g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
 
 
