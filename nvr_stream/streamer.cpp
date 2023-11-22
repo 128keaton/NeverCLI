@@ -95,9 +95,9 @@ namespace nvr {
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
         // queue delays
-        int64_t max_delay = toNanoseconds(60); // 1-minute delay MAX_DELAY
+        int64_t max_delay = toNanoseconds(120); // 2-minute delay MAX_DELAY
         int64_t min_delay = toNanoseconds(10); // 10-second MIN_DELAY
-        int64_t delay = toNanoseconds(20); // 20-second DELAY
+        int64_t delay = toNanoseconds(30); // 30-second DELAY
         int64_t max_bytes_size = toBytes(120);
         int64_t latency = 8000; // 8-second latency
         int64_t max_buffers = 4096;
