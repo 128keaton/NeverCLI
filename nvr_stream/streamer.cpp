@@ -123,7 +123,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay + min_delay + delay, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1300, nullptr); // -100 mtu
+        g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", max_delay, nullptr);
 
 
         // h265 parser
@@ -135,9 +136,8 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay + min_delay + delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", max_delay, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
-
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
@@ -150,13 +150,14 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
 
 
-
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue", "final_buf_queue");
         g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time",  max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
+
+
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
