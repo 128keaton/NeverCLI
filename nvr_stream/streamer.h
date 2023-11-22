@@ -60,6 +60,7 @@ namespace nvr {
         StreamQualityConfig quality_config;
         bool has_vaapi{};
         bool quitting = false;
+        static int64_t toNanoseconds(int64_t seconds);
         static void callbackMessage (GstBus *bus, GstMessage *msg, StreamData *data);
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
     };
