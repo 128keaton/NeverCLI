@@ -1,11 +1,8 @@
 
-
-/**
- * @file libavcodec encoding video API usage example
- * @example encode_video.c
- *
- * Generate synthetic video data and encode it to an output file.
- */
+/* 
+ By Teddy Silvance on 11/19/23.
+ Encode camera snapshots into mp4 video using H.264 codec
+*/
 extern "C"{
 	#include <stdio.h>
 	#include <stdlib.h>
@@ -18,11 +15,13 @@ extern "C"{
 	#include <libavutil/imgutils.h>
 }
 
+#include <filesystem>
+#include <iostream>
+#include <string>
 static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
                    FILE *outfile)
 {
     int ret;
-
     /* send the frame to the encoder */
     if (frame)
         printf("Send frame %3"PRId64"\n", frame->pts);
@@ -32,7 +31,6 @@ static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
         fprintf(stderr, "Error sending a frame for encoding\n");
         exit(1);
     }
-
     while (ret >= 0) {
         ret = avcodec_receive_packet(enc_ctx, pkt);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
@@ -50,26 +48,40 @@ static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
 
 int main(int argc, char **argv)
 {
-    const char *filename, *codec_name;
+    const char *output_filename = "camera-1.mp4";
+    int days;
     const AVCodec *codec;
     AVCodecContext *c= NULL;
-    int i, ret, x, y;
+    int i, ret;
     FILE *f;
     AVFrame *frame;
     AVPacket *pkt;
     uint8_t endcode[] = { 0, 0, 1, 0xb7 };
 
-    if (argc <= 2) {
-        fprintf(stderr, "Usage: %s <output file> <codec name>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON>\n", argv[0]);
         exit(0);
     }
-    filename = argv[1];
-    codec_name = argv[2];
-
+    days = atoi(argv[1]);
+    if(days == 0){
+      fprintf(stderr, "%s is not an integer\n", argv[1]);
+      exit(1);
+    }
+    std::filesystem::path json_file_path = argv[2];
+    if(!exists(json_file_path)){
+      fprintf(stderr, "Could not find %s. File does not exist.\n", argv[2]);
+      exit(1);
+    }
+    std::filesystem::path snapshot_path = std::filesystem::path("/nvr/snapshots/") / (std::string(json_file_path).substr(std::string(json_file_path).find("camera-"),
+      std::string(json_file_path).find(".json")-std::string(json_file_path).find("camera-")) + std::string("/"));
+    //std::cout<<std::string(snapshot_path)<<std::endl;
+    if(!exists(snapshot_path)){
+      fprintf(stderr, "Could not find %s. Path does not exist.", std::string(snapshot_path).c_str());
+    }
     /* find the mpeg1video encoder */
-    codec = avcodec_find_encoder_by_name(codec_name);
+    codec = avcodec_find_encoder_by_name("libx264");
     if (!codec) {
-        fprintf(stderr, "Codec '%s' not found\n", codec_name);
+        fprintf(stderr, "Codec '%s' not found\n", "libx264");
         exit(1);
     }
 
@@ -85,9 +97,11 @@ int main(int argc, char **argv)
 
     /* put sample parameters */
     c->bit_rate = 400000;
+    c->qmin = 16;
+    c->qmax = 20;
     /* resolution must be a multiple of two */
-    c->width = 352;
-    c->height = 288;
+    c->width = 1920;
+    c->height = 1080;
     /* frames per second */
     c->time_base = (AVRational){1, 25};
     c->framerate = (AVRational){25, 1};
@@ -98,7 +112,7 @@ int main(int argc, char **argv)
      * then gop_size is ignored and the output of encoder
      * will always be I frame irrespective to gop_size
      */
-    c->gop_size = 10;
+    c->gop_size = 25;
     c->max_b_frames = 1;
     c->pix_fmt = AV_PIX_FMT_YUV420P;
 
@@ -112,9 +126,9 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    f = fopen(filename, "wb");
+    f = fopen(output_filename, "wb");
     if (!f) {
-        fprintf(stderr, "Could not open %s\n", filename);
+        fprintf(stderr, "Could not open %s\n", output_filename);
         exit(1);
     }
 
@@ -133,50 +147,21 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    /* encode 1 second of video */
-    for (i = 0; i < 25; i++) {
+    /*loop through the snapshots*/
+    i = 0;
+    for (const auto & entry: std::filesystem::directory_iterator(snapshot_path)) {
+    //for (i=0; i< 25; i++) {
         fflush(stdout);
 
-        /* Make sure the frame data is writable.
-           On the first round, the frame is fresh from av_frame_get_buffer()
-           and therefore we know it is writable.
-           But on the next rounds, encode() will have called
-           avcodec_send_frame(), and the codec may have kept a reference to
-           the frame in its internal structures, that makes the frame
-           unwritable.
-           av_frame_make_writable() checks that and allocates a new buffer
-           for the frame only if necessary.
-         */
+        /*make the frame data is writable by allocating a new buffer for the frame*/
         ret = av_frame_make_writable(frame);
         if (ret < 0)
             exit(1);
-
-        /* Prepare a dummy image.
-           In real code, this is where you would have your own logic for
-           filling the frame. FFmpeg does not care what you put in the
-           frame.
-         */
-        /* 
-        // Y
-        for (y = 0; y < c->height; y++) {
-            for (x = 0; x < c->width; x++) {
-                frame->data[0][y * frame->linesize[0] + x] = x + y + i * 3;
-            }
-        }
-
-        // Cb and Cr
-        for (y = 0; y < c->height/2; y++) {
-            for (x = 0; x < c->width/2; x++) {
-                frame->data[1][y * frame->linesize[1] + x] = 128 + y + i * 2;
-                frame->data[2][y * frame->linesize[2] + x] = 64 + x + i * 5;
-            }
-        }
-	*/
+	/*prepare image*/
 	AVFormatContext *input_format_context;
-	input_format_context = avformat_alloc_context();
-	//AVDictionary * input_image_dict;
-	if(avformat_open_input(&input_format_context, "image1.jpeg", NULL, NULL) != 0){
-	  fprintf(stderr, "Unable to open image1.jpeg\n");
+	input_format_context = avformat_alloc_context();	
+	if(avformat_open_input(&input_format_context, std::string(entry.path()).c_str(), NULL, NULL) != 0){
+	  //fprintf(stderr, "Unable to open %s\n", std::string(entry.path()).c_str());
 	  exit(1);
 	}
 	if(avformat_find_stream_info(input_format_context, NULL) < 0){
@@ -264,16 +249,20 @@ int main(int argc, char **argv)
 	}
 	//printf("Created SwsContext successfully");
 	avformat_close_input(&input_format_context);
-        frame->pts = i;
+
         /*scale image*/
 	sws_scale(sws_context, decoded_frame->data, decoded_frame->linesize, 0, decoded_frame->height, frame->data, frame->linesize);
 	sws_freeContext(sws_context);
         /* encode the image */
+        //encoded_packet->pts = i*40*90;
+        frame->pts = i;
+        //std::cout<<encoded_packet->pts<<std::endl;
         encode(c, frame, encoded_packet, f);
         av_packet_free(&encoded_packet);
 	avcodec_close(input_codec_context);
 	avformat_close_input(&input_format_context);
         avformat_free_context(input_format_context);
+        i++;
     }
 
     /* flush the encoder */
