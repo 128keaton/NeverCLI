@@ -80,11 +80,23 @@ namespace nvr {
         plugins = gst_registry_get_plugin_list(gst_registry_get());
         for (p = plugins; p; p = p->next) {
             auto* plugin = static_cast<GstPlugin *>(p->data);
+            // Check for vaapi
             if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
                 has_vaapi = gst_registry_check_feature_version(gst_registry_get(), "vaapidecodebin", 1, 22, 6);
 
                 if (has_vaapi) {
                     logger->info("Found vaapi plugin");
+                    break;
+                }
+
+            }
+
+            // Check for nvcodec
+            if (strcmp(gst_plugin_get_name(plugin), "nvcodec") == 0) {
+                has_nvidia = gst_registry_check_feature_version(gst_registry_get(), "nvh265dec", 1, 22, 4);
+
+                if (has_nvidia) {
+                    logger->info("Found nvcodec plugin");
                     break;
                 }
             }
@@ -174,8 +186,8 @@ namespace nvr {
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
 
-            if (!this->has_vaapi) {
-                logger->warn("Not using vaapi for encoding/decoding");
+            if (!this->has_vaapi && !this->has_nvidia) {
+                logger->warn("Not using vaapi/nvidia for encoding/decoding");
 
                 // h265 decode without vaapi
                 appData.decoder = gst_element_factory_make("libde265dec", "dec");
@@ -189,8 +201,12 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
-            }
-            else {
+            } else if (this->has_nvidia) {
+                logger->info("Using nvidia hardware acceleration");
+                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
+                appData.encoder = gst_element_factory_make("nvh264enc", "enc");
+                g_object_set(G_OBJECT(appData.encoder), "zerolatency", true, nullptr);
+            } else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
 
                 // h265 decode with vaapi

@@ -41,15 +41,23 @@ Running the update script at `scripts/update-linux.sh` will update the repo, bui
 copy the binaries to `/usr/local/bin` and set the permissions.
 
 
+
+
+### Recording
+
+The recording/snapshot daemon is expected to live on the _remote_ NVR (meaning the box that is deployed with the site/tower)
+
+You can run the daemon by calling `nvr_record /path/to/camera/json`
+
+
 ### systemd
 
-There are two systemd unit templates included, one for streaming and one for recording. 
+There are two systemd unit templates included, one for streaming and one for recording.
 
 To start recording:
 ```shell
 systemd --user enable --now nvr-record@camera-1
 ```
-This assumes you have a directory at root called `nvr`, 
-this also assumes you have copied your compiled binary into `/usr/local/bin`, 
+This assumes you have a directory at root called `nvr`,
+this also assumes you have copied your compiled binary into `/usr/local/bin`,
 and this assumes `/nvr/cameras/` has a file named `camera-1.json`
-

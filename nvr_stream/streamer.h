@@ -57,7 +57,8 @@ namespace nvr {
         string rtsp_password;
         string ip_address;
         StreamQualityConfig quality_config;
-        bool has_vaapi{};
+        bool has_vaapi = false;
+        bool has_nvidia = false;
         bool quitting = false;
         static int64_t toNanoseconds(int64_t seconds);
         static int64_t toBytes(int64_t megabytes);
