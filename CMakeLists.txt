@@ -59,6 +59,10 @@ install(TARGETS nvr_stream DESTINATION bin)
 ## Target: nvr_status_manager (Linux only)
 add_executable(nvr_status_manager nvr_status_manager/status_manager.cpp)
 
+add_executable(nvr_timelapse nvr_timelapse/timelapse.cpp  common.cpp common.h)
+target_link_libraries(nvr_timelapse PRIVATE CURL::libcurl PkgConfig::LIBAV -lm nlohmann_json::nlohmann_json spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+install(TARGETS nvr_timelapse DESTINATION bin)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     #DEP: systemd
     pkg_check_modules(SYSTEMD REQUIRED IMPORTED_TARGET

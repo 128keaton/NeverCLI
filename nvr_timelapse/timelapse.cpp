@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     int i, ret;
     FILE *f;
     AVFrame *frame;
-    AVPacket *pkt;
+    //AVPacket *pkt;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
     /*validate args*/
@@ -81,12 +81,13 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    /*create timelapse directory if does not exist*/
+    /*create timelapse file*/
     string timelapse_file_str = generateOutputFilename(camera_name, string("/nvr"), nvr::timelapse);
+    std::cout<<timelapse_file_str<<std::endl;
     f = fopen(timelapse_file_str.c_str(), "wb");
     if (!f) {
         fprintf(stderr, "Could not open %s\n", timelapse_file_str.c_str());
-        exit(1);
+        //exit(1);
     }
     /* find the mpeg1video encoder */
     codec = avcodec_find_encoder_by_name("libx264");
@@ -101,9 +102,9 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    pkt = av_packet_alloc();
-    if (!pkt)
-        exit(1);
+    //pkt = av_packet_alloc();
+    //if (!pkt)
+    //    exit(1);
 
     /* put sample parameters */
     c->bit_rate = 400000;
@@ -158,8 +159,9 @@ int main(int argc, char **argv) {
         /*prepare image*/
         AVFormatContext *input_format_context;
         input_format_context = avformat_alloc_context();
+        std::cout<<std::string(entry.path())<<std::endl;
         if (avformat_open_input(&input_format_context, std::string(entry.path()).c_str(), NULL, NULL) != 0) {
-            //fprintf(stderr, "Unable to open %s\n", std::string(entry.path()).c_str());
+            fprintf(stderr, "Unable to open %s\n", std::string(entry.path()).c_str());
             exit(1);
         }
         if (avformat_find_stream_info(input_format_context, NULL) < 0) {
@@ -247,8 +249,9 @@ int main(int argc, char **argv) {
         sws_scale(sws_context, decoded_frame->data, decoded_frame->linesize, 0, decoded_frame->height, frame->data,
                   frame->linesize);
         sws_freeContext(sws_context);
-        /* encode the image */
+        /*assign presentation time stamp to frame*/
         frame->pts = i;
+        /* encode the image */
         encode(c, frame, encoded_packet, f);
         av_packet_free(&encoded_packet);
         avcodec_close(input_codec_context);
@@ -258,7 +261,7 @@ int main(int argc, char **argv) {
     }
 
     /* flush the encoder */
-    encode(c, NULL, pkt, f);
+    //encode(c, NULL, NULL, f);
 
     /* Add sequence end code to have a real MPEG file*/
     if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
@@ -267,6 +270,6 @@ int main(int argc, char **argv) {
 
     avcodec_free_context(&c);
     av_frame_free(&frame);
-    av_packet_free(&pkt);
+    //av_packet_free(&pkt);
     return 0;
 }
