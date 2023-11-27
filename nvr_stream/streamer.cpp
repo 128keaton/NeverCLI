@@ -203,15 +203,21 @@ namespace nvr {
             } else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
+                g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
+
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
                 g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
                 g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
+                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 32, nullptr); // cbr
                 g_object_set(G_OBJECT(appData.encoder), "zerolatency", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
-
+                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
 
             } else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
