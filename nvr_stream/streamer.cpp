@@ -361,12 +361,7 @@ namespace nvr {
             case GST_MESSAGE_NEED_CONTEXT:
             case GST_MESSAGE_HAVE_CONTEXT:
             case GST_MESSAGE_NEW_CLOCK:
-                break;
             case GST_MESSAGE_LATENCY:
-                if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
-                    data->logger->error("Could not reconfigure latency");
-                else
-                    data->logger->info("Reconfigured latency");
                 break;
             case GST_MESSAGE_STREAM_START:
                 data->logger->info("Stream started");
