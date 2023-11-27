@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(10); // 10-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
-        int64_t latency = 8000; // 8-second latency
+        int64_t latency = 2000; // 2-second latency
         int64_t max_buffers = 4096;
         gint config_interval = -1;
 
@@ -130,18 +130,18 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-        //     g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        //     g_object_set(G_OBJECT(appData.rtspSrc), "add-reference-timestamp-meta", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "add-reference-timestamp-meta", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-              g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-             g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-       // g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
-            g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+        g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        // g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
+        //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
         // h265 parser
@@ -170,7 +170,7 @@ namespace nvr {
 
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
-    //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
+        //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
@@ -203,22 +203,22 @@ namespace nvr {
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-            //    g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
+                //    g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
-           //     g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
-            //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
-         //       g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                //     g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
+                //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
+                //       g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
-      //          g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
-         //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
+                //          g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
+                //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
                 //       g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
-            //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-              //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-          //      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
-           //     g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
-            //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
+                //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
+                //      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                //     g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
@@ -324,10 +324,10 @@ namespace nvr {
                 gst_message_parse_error(msg, &err, &debug);
 
 
-
                 if (strcmp(err->message, "Could not read from resource.") == 0) {
                     data->logger->warn("Could not read from resource, retrying");
-                } else {
+                }
+                else {
                     data->logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
                     data->logger->error("Debugging information: {}", debug ? debug : "none");
 
