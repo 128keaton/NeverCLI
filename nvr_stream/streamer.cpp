@@ -138,10 +138,10 @@ namespace nvr {
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-        //      g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-        //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
-        //    g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
+              g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+             g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+       // g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
+            g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
         // h265 parser
@@ -207,14 +207,14 @@ namespace nvr {
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
+           //     g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
             //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
          //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
                 //       g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+            //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
               //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
           //      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
            //     g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
@@ -323,14 +323,22 @@ namespace nvr {
 
                 gst_message_parse_error(msg, &err, &debug);
 
-                data->logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
-                data->logger->error("Debugging information: {}", debug ? debug : "none");
+
+
+                if (strcmp(err->message, "Could not read from resource.") == 0) {
+                    data->logger->warn("Could not read from resource, retrying");
+                } else {
+                    data->logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
+                    data->logger->error("Debugging information: {}", debug ? debug : "none");
+
+
+                    gst_element_set_state(data->pipeline, GST_STATE_READY);
+                    g_main_loop_quit(data->loop);
+                }
 
                 g_error_free(err);
                 g_free(debug);
 
-                gst_element_set_state(data->pipeline, GST_STATE_READY);
-                g_main_loop_quit(data->loop);
                 break;
             }
             case GST_MESSAGE_EOS:
