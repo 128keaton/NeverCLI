@@ -111,7 +111,7 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = toNanoseconds(120); // 2-minute delay MAX_DELAY
-        int64_t min_delay = toNanoseconds(5); // 5-second MIN_DELAY
+        int64_t min_delay = toNanoseconds(30); // 30-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
         int64_t latency = 0; // 5-second latency
@@ -126,7 +126,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
+    ..    g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -212,13 +212,13 @@ namespace nvr {
                        g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                           g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
-                //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
-                       g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
+                       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                    //   g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-                //      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
-                //     g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
-                //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
+                      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                     g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
