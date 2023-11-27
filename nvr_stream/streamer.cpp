@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5); // 5-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
-        int64_t latency = 5000; // 5-second latency
+        int64_t latency = 0; // 5-second latency
         int64_t max_buffers = 4096;
         gint config_interval = -1;
 
@@ -153,7 +153,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        //      g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
@@ -213,7 +213,7 @@ namespace nvr {
                 //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                           g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
                 //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
-                //       g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
+                       g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
                 //      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
