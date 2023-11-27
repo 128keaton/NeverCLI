@@ -170,7 +170,7 @@ namespace nvr {
 
         // final buffer queue
         appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
+    //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
@@ -212,7 +212,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
-                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
+         //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", -1, nullptr);
                 //       g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
               //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
