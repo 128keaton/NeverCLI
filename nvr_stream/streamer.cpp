@@ -148,7 +148,6 @@ namespace nvr {
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
         g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-        // send with every IDR frame
 
 
         // udp output sink
