@@ -170,7 +170,7 @@ namespace nvr {
 
         // final buffer queue
         //  appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
-        appData.finalBufferQueue = gst_element_factory_make("videoconvert", "video_convert");
+        appData.finalBufferQueue = gst_element_factory_make("typefind", "type_finder");
 
         //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
         //     g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
@@ -243,6 +243,7 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
+                appData.finalBufferQueue,
                 appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
@@ -257,6 +258,7 @@ namespace nvr {
             // link everything except source
             gst_element_link_many(
             appData.rtspSrc,
+            appData.finalBufferQueue,
                 appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
@@ -300,7 +302,7 @@ namespace nvr {
                 NULL);
         }
 
-    //    g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
+        g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
 
         ret = gst_element_set_state(appData.pipeline, GST_STATE_PLAYING);
         if (ret == GST_STATE_CHANGE_FAILURE) {
@@ -412,7 +414,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->finalBufferQueue, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
