@@ -209,7 +209,7 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
                 g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
-          //      g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
          //       g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
@@ -217,7 +217,7 @@ namespace nvr {
        //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
        //         g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
        //         g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-       //         g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+              g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
