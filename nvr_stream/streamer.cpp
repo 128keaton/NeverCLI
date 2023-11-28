@@ -116,7 +116,7 @@ namespace nvr {
         int64_t max_bytes_size = toBytes(120);
         int64_t latency = 2000; // 2-second latency
         int64_t max_buffers = 4096;
-        gint config_interval = -1;
+        gint config_interval = 1;
 
         this->logger->info("Using max_delay: {}", max_delay);
 
@@ -137,10 +137,10 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-        //   g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
+           g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         //     g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-        //    g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        // g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
+            g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+         g_object_set(G_OBJECT(appData.payloader), "mtu", 1300, nullptr); // -150 mtu
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
@@ -248,7 +248,7 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                //        appData.initialQueue,
+                        appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -262,7 +262,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                //          appData.initialQueue,
+                          appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -399,7 +399,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
