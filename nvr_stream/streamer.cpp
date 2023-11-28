@@ -114,10 +114,10 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = 0;
-        int64_t min_delay = toNanoseconds(15);
+        int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 200;
+        int64_t latency = 5000;
         int64_t max_buffers = 0;
         gint config_interval = -1;
 
@@ -134,7 +134,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 2147483647, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 1073741823, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
@@ -155,7 +155,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
-        //  g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
@@ -166,7 +166,7 @@ namespace nvr {
 
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
+ //       g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120), nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
