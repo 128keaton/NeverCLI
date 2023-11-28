@@ -102,12 +102,15 @@ namespace nvr {
         }
 
         gst_plugin_list_free(plugins);
+        string rtsp_stream_location = buildStreamURL(this->stream_url, this->ip_address, this->port,
+                                                     this->rtsp_password, this->rtsp_username, this->type);
+        string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
-        string rtsp_stream_location = string("srt://").append(this->ip_address).append(":").append(std::to_string(this->port)).append(this->stream_url);
+    //    string rtsp_stream_location = string("srt://").append(this->ip_address).append(":").append(std::to_string(this->port)).append(this->stream_url);
 
       //  string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
-        logger->info("Opening connection to '{}'", rtsp_stream_location);
+        logger->info("Opening connection to '{}'", sanitized_stream_location);
 
         // queue delays
         int64_t max_delay = 0;
@@ -125,20 +128,20 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("srtsrc", "src");
- /*       g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
-     //   g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
-       // g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "keep-listening", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "authentication", false, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "wait-for-connection", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "uri", rtsp_stream_location.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
+  //      g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr);
+  //      g_object_set(G_OBJECT(appData.rtspSrc), "keep-listening", true, nullptr);
+  //      g_object_set(G_OBJECT(appData.rtspSrc), "authentication", false, nullptr);
+  //      g_object_set(G_OBJECT(appData.rtspSrc), "wait-for-connection", true, nullptr);
+  //      g_object_set(G_OBJECT(appData.rtspSrc), "uri", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
@@ -256,7 +259,6 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-            appData.rtspSrc,
                 appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
