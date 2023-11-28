@@ -138,7 +138,7 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-     //   g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
     //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
    //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
        // g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr); // -150 mtu
@@ -147,7 +147,7 @@ namespace nvr {
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
-     //   g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
+        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
      //   g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
 
         // udp output sink
@@ -214,7 +214,7 @@ namespace nvr {
 
           //      g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
            ////     g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
-               g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr);
+               g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
             //   g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", 250, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 5, nullptr); // cbr
          //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
