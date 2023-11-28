@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 4000;
+        int64_t latency = 2000;
         int64_t max_buffers = 0;
         gint config_interval = -1;
 
@@ -141,7 +141,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
     //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
    //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr)
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr);
+       // g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr);
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
@@ -219,7 +219,6 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 5, nullptr); // cbr
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
           //      g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "zerolatency", true, nullptr);
 
             }
             else if (this->has_vaapi && !this->has_nvidia) {
