@@ -153,6 +153,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
         //   g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
@@ -207,9 +208,9 @@ namespace nvr {
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
-                //     g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
+                g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
                 g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1048, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1536, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
