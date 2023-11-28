@@ -200,7 +200,7 @@ namespace nvr {
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);q
+                g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 3, nullptr);
