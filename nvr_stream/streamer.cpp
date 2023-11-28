@@ -148,7 +148,7 @@ namespace nvr {
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
         g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-        g_object_set(GST_BIN(appData.parser), "disable-passthrough", true, nullptr);
+        g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
