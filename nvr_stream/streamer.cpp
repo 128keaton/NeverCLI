@@ -152,9 +152,9 @@ namespace nvr {
         appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        //    g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        //     g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
-        //      g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
         // final buffer queue
@@ -261,7 +261,7 @@ namespace nvr {
 
             // h264 parser
             appData.parser = gst_element_factory_make("h264parse", nullptr);
-            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
+           // g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h264 de-payload
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
@@ -274,7 +274,8 @@ namespace nvr {
                              appData.sink, nullptr);
 
             // link everything except source
-            gst_element_link_many(appData.initialQueue, appData.dePayloader, appData.parser, appData.payloader, appData.finalQueue, appData.sink, NULL);
+            gst_element_link_many(appData.initialQueue, appData.dePayloader, appData.parser, appData.payloader,
+                                  appData.finalQueue, appData.sink, NULL);
         }
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
