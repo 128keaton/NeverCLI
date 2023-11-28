@@ -114,9 +114,9 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(15);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 5000;
+        int64_t latency = 0;
         int64_t max_buffers = 0;
-        gint config_interval = 5;
+        gint config_interval = 1;
 
         this->logger->info("Using max_delay: {}", max_delay);
 
@@ -139,7 +139,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
         g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1000, nullptr); // -150 mtu
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr); // -150 mtu
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
