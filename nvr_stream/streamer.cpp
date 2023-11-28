@@ -199,10 +199,14 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-                //   g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
-                //  g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);
-                // g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr);
-                // g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);q
+                g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 3, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 32, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "const-quality", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
@@ -261,7 +265,7 @@ namespace nvr {
 
             // h264 parser
             appData.parser = gst_element_factory_make("h264parse", nullptr);
-           // g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
+            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h264 de-payload
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
