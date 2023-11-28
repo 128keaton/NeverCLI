@@ -200,12 +200,10 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 3, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
