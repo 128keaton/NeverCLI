@@ -154,17 +154,17 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
-           g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
-     //   g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
+        //   g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers * 2, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-      //  g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
+        //  g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers * 2, nullptr);
@@ -217,7 +217,7 @@ namespace nvr {
                 //         g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
                 //         g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                //         g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
