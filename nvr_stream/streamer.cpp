@@ -233,7 +233,7 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                appData.initialQueue,
+     //           appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -247,7 +247,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                appData.initialQueue,
+        //        appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -269,14 +269,14 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
 
             // add everything
-            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.initialQueue, appData.dePayloader,
+            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader,
                              appData.parser,
                              appData.payloader,
                              appData.finalQueue,
                              appData.sink, nullptr);
 
             // link everything except source
-            gst_element_link_many(appData.initialQueue, appData.dePayloader, appData.parser, appData.payloader,
+            gst_element_link_many(appData.dePayloader, appData.parser, appData.payloader,
                                   appData.finalQueue, appData.sink, NULL);
         }
 
@@ -392,7 +392,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
