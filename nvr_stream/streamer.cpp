@@ -141,11 +141,6 @@ namespace nvr {
         //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
 
 
-        // h265 parser
-        appData.parser = gst_element_factory_make("h265parse", nullptr);
-        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-        //   g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
-
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
@@ -174,6 +169,10 @@ namespace nvr {
 
         if (this->type == h265) {
             logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
+
+            // h265 parser
+            appData.parser = gst_element_factory_make("h265parse", nullptr);
+            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
@@ -259,6 +258,10 @@ namespace nvr {
         }
         else {
             logger->info("Starting h264->h264 pipeline on port {}", rtp_port);
+
+            // h264 parser
+            appData.parser = gst_element_factory_make("h264parse", nullptr);
+            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h264 de-payload
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
