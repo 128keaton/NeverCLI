@@ -181,7 +181,7 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-                g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
+              //  g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
 
             if (!this->has_vaapi && !this->has_nvidia) {
