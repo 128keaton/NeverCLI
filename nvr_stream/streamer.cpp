@@ -211,7 +211,7 @@ namespace nvr {
 
           //      g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
                 g_object_set(G_OBJECT(appData.encoder), "gop-size", 20, nullptr);
-               g_object_set(G_OBJECT(appData.encoder), "bitrate", 950, nullptr);
+               g_object_set(G_OBJECT(appData.encoder), "bitrate", 1950, nullptr);
                g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 5, nullptr); // cbr
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
