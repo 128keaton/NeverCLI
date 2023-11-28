@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(30); // 30-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
-        int64_t latency = 2000; // 2-second latency
+        int64_t latency = 8000; // 2-second latency
         int64_t max_buffers = 4096;
         gint config_interval = 1;
 
@@ -137,10 +137,10 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-           g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         //     g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-            g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-         g_object_set(G_OBJECT(appData.payloader), "mtu", 1300, nullptr); // -150 mtu
+        g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1300, nullptr); // -150 mtu
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
@@ -211,13 +211,13 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
                 g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-         //       g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
+                //       g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
-       //         g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
-       //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
-       //         g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-       //         g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-              g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                //         g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
+                //         g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                //         g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
@@ -248,28 +248,28 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                        appData.initialQueue,
+                appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
                 //            appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-                //           appData.finalQueue,
+                appData.finalQueue,
                 appData.sink,
                 nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-                          appData.initialQueue,
+                appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
                 //             appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-                //           appData.finalQueue,
+                appData.finalQueue,
                 appData.sink,
                 NULL);
         }
