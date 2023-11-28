@@ -125,7 +125,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
+ //       g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -206,9 +206,9 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
+             //   g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+          //      g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
+             //   g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
