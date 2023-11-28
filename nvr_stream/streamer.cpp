@@ -127,7 +127,7 @@ namespace nvr {
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
-        appData.rtspSrc = gst_element_factory_make("srtsrc", "src");
+        appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
