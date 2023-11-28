@@ -111,7 +111,7 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = 0;
-        int64_t min_delay = toNanoseconds(5);
+        int64_t min_delay = toNanoseconds(15);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
         int64_t latency = 0;
@@ -146,7 +146,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
+      //  g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
@@ -237,7 +237,7 @@ namespace nvr {
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                appData.finalBufferQueue,
+
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -251,7 +251,7 @@ namespace nvr {
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                appData.finalBufferQueue,
+
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
