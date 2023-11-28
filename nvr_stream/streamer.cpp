@@ -147,7 +147,7 @@ namespace nvr {
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
-      //  g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
+        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
 
         // udp output sink
@@ -206,15 +206,15 @@ namespace nvr {
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-                g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
+              //  g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
                 g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
            //     g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-           //     g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
+           /    g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", 250, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 5, nullptr); // cbr
          //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
