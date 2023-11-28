@@ -172,11 +172,13 @@ namespace nvr {
 
 
         // final buffer queue
-        appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
+      //  appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
+      appData.finalBufferQueue =  gst_element_factory_make("videoconvert", "video_convert");
+
         //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
+   //     g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
+     //   g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
+     //   g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
 
 
         if (this->type == h265) {
@@ -184,7 +186,7 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-            //    g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
+                g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
 
             if (!this->has_vaapi && !this->has_nvidia) {
@@ -268,7 +270,7 @@ namespace nvr {
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                //             appData.finalBufferQueue,
+                             appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
