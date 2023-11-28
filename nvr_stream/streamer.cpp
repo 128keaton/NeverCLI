@@ -137,7 +137,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "keep-listening", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "authentication", false, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "wait-for-connection", false, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "wait-for-connection", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "uri", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
@@ -256,6 +256,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
+            appData.rtspSrc,
                 appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
