@@ -164,7 +164,7 @@ namespace nvr {
 
         // final buffer queue
         //  appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
-         appData.finalBufferQueue =  gst_element_factory_make("videoconvert", "video_convert");
+        appData.finalBufferQueue = gst_element_factory_make("videoconvert", "video_convert");
 
         //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
         //     g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
@@ -201,10 +201,10 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-             //   g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
-              //  g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);
-               // g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr);
-               // g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                //   g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                //  g_object_set(G_OBJECT(appData.encoder), "gop-size", 0, nullptr);
+                // g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr);
+                // g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
@@ -233,11 +233,11 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                     appData.initialQueue,
+                appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                         appData.finalBufferQueue,
+                appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -247,11 +247,11 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                          appData.initialQueue,
+                appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                          appData.finalBufferQueue,
+                appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -265,11 +265,12 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
 
             // add everything
-            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.dePayloader, appData.payloader,
+            gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.initialQueue, appData.dePayloader,
+                             appData.payloader,
                              appData.sink, nullptr);
 
             // link everything except source
-            gst_element_link_many(appData.dePayloader, appData.payloader, appData.sink, NULL);
+            gst_element_link_many(appData.initialQueue, appData.dePayloader, appData.payloader, appData.sink, NULL);
         }
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
