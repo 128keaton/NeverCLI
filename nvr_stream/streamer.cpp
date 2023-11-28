@@ -111,7 +111,7 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = toNanoseconds(120); // 2-minute delay MAX_DELAY
-        int64_t min_delay = toNanoseconds(30); // 30-second MIN_DELAY
+        int64_t min_delay = toNanoseconds(15); // 30-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
         int64_t latency = 8000; // 2-second latency
@@ -157,16 +157,17 @@ namespace nvr {
         //   g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
-        appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
+        appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", max_delay * 2, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", max_buffers * 2, nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers * 2, nullptr);
 
 
         // final buffer queue
