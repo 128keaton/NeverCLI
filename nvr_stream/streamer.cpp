@@ -209,11 +209,11 @@ namespace nvr {
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
+                g_object_set(G_OBJECT(appData.encoder), "preset", 7, nullptr); // low-latency-hp
             //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 20, nullptr);
-               g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
+             //  g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
          //      g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
+                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 3, nullptr); // cbr
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
 
 
