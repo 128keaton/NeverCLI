@@ -18,6 +18,7 @@ extern "C" {
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <iterator>
 #include "../common.h"
 
 static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
@@ -83,7 +84,7 @@ int main(int argc, char **argv) {
 
     /*create timelapse file*/
     string timelapse_file_str = generateOutputFilename(camera_name, string("/nvr"), nvr::timelapse);
-    std::cout<<timelapse_file_str<<std::endl;
+    //std::cout<<timelapse_file_str<<std::endl;
     f = fopen(timelapse_file_str.c_str(), "wb");
     if (!f) {
         fprintf(stderr, "Could not open %s\n", timelapse_file_str.c_str());
@@ -102,9 +103,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    //pkt = av_packet_alloc();
-    //if (!pkt)
-    //    exit(1);
 
     /* put sample parameters */
     c->bit_rate = 400000;
@@ -146,9 +144,14 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+    /*sort files in the directory in ascending order*/
+    std::vector<std::filesystem::path> files_in_directory;
+    copy(std::filesystem::directory_iterator(snapshot_directory), std::filesystem::directory_iterator(), // directory_iterator::value_type
+         std::back_inserter(files_in_directory));
+    sort(files_in_directory.begin(), files_in_directory.end());
     /*loop through the snapshots*/
     i = 0;
-    for (const auto &entry: std::filesystem::directory_iterator(snapshot_directory)) {
+    for (const auto &filename: files_in_directory) {
         //for (i=0; i< 25; i++) {
         fflush(stdout);
 
@@ -159,9 +162,8 @@ int main(int argc, char **argv) {
         /*prepare image*/
         AVFormatContext *input_format_context;
         input_format_context = avformat_alloc_context();
-        std::cout<<std::string(entry.path())<<std::endl;
-        if (avformat_open_input(&input_format_context, std::string(entry.path()).c_str(), NULL, NULL) != 0) {
-            fprintf(stderr, "Unable to open %s\n", std::string(entry.path()).c_str());
+        if (avformat_open_input(&input_format_context, std::string(filename).c_str(), NULL, NULL) != 0) {
+            fprintf(stderr, "Unable to open %s\n", std::string(filename).c_str());
             exit(1);
         }
         if (avformat_find_stream_info(input_format_context, NULL) < 0) {
