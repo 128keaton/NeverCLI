@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 9000;
+        int64_t latency = 0;
         int64_t max_buffers = 0;
         gint config_interval = -1;
 
@@ -152,6 +152,7 @@ namespace nvr {
         appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
