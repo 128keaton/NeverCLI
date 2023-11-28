@@ -114,9 +114,9 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 0;
+        int64_t latency = 4000;
         int64_t max_buffers = 0;
-        gint config_interval = 25;
+        gint config_interval = -1;
 
         this->logger->info("Using max_delay: {}", max_delay);
 
@@ -140,15 +140,15 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
     //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-   //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-       // g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr); // -150 mtu
+   //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr)
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr);
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
         g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-     //   g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
+        g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
@@ -156,7 +156,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
-        // g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "true", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
         //   g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
@@ -213,17 +213,18 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
           //      g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
-           ////     g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "gop-size", -1, nullptr);
                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1500, nullptr);
             //   g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", 250, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 5, nullptr); // cbr
-         //       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
           //      g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-             //   g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-         //       g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
-                //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
-                //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "zerolatency", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
