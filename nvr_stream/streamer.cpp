@@ -202,7 +202,7 @@ namespace nvr {
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "gop-size", -1, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "gop-size", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
