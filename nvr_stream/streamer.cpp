@@ -114,9 +114,9 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 4000;
+        int64_t latency = 0;
         int64_t max_buffers = 0;
-        gint config_interval = -1;
+        gint config_interval = 25;
 
         this->logger->info("Using max_delay: {}", max_delay);
 
