@@ -177,7 +177,6 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-            g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
 
             if (!this->has_vaapi && !this->has_nvidia) {
@@ -266,11 +265,15 @@ namespace nvr {
 
             // add everything
             gst_bin_add_many(GST_BIN(appData.pipeline), appData.rtspSrc, appData.initialQueue, appData.dePayloader,
+                             appData.parser,
+                             appData.finalBufferQueue,
                              appData.payloader,
+                             appData.finalQueue,
                              appData.sink, nullptr);
 
             // link everything except source
-            gst_element_link_many(appData.initialQueue, appData.dePayloader, appData.payloader, appData.sink, NULL);
+            gst_element_link_many(appData.initialQueue, appData.dePayloader, appData.parser, appData.finalBufferQueue,
+                                  appData.payloader, appData.finalQueue, appData.sink, NULL);
         }
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
