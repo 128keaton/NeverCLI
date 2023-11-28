@@ -156,7 +156,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "true", false, nullptr);
+
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
         //   g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
@@ -217,14 +217,10 @@ namespace nvr {
                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1500, nullptr);
             //   g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", 250, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 5, nullptr); // cbr
-                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
           //      g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "zerolatency", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
-                        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
-                    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
+
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
