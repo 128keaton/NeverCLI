@@ -202,11 +202,11 @@ namespace nvr {
             }
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
-                appData.decoder = gst_element_factory_make("libde265dec", "dec");
+                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
           //      g_object_set(G_OBJECT(appData.decoder), "output-corrupt", false, nullptr);
            //     g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
-                appData.encoder = gst_element_factory_make("x265enc", "enc");
+                appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
           //      g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
             //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 20, nullptr);
