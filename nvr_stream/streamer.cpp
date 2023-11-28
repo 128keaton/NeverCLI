@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 4000;
+        int64_t latency = 2000;
         int64_t max_buffers = 0;
         gint config_interval = -1;
 
@@ -138,7 +138,7 @@ namespace nvr {
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+    //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
 
 
         // h265 parser
@@ -154,12 +154,12 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
 
 
-        appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
+       appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
+    //    g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
+   //     g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
+  //      g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
         // final buffer queue
@@ -201,7 +201,7 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
                 //     g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-point-flags", 1, nullptr);
                 //       g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr);
+          //      g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr);
                 //     g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
@@ -240,7 +240,7 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                appData.initialQueue,
+           //     appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -254,7 +254,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-                appData.initialQueue,
+      //          appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
@@ -391,7 +391,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
