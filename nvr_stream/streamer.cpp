@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(30); // 30-second MIN_DELAY
         int64_t delay = toNanoseconds(20); // 20-second DELAY
         int64_t max_bytes_size = toBytes(120);
-        int64_t latency = 0; // 5-second latency
+        int64_t latency = 5000; // 5-second latency
         int64_t max_buffers = 4096;
         gint config_interval = -1;
 
@@ -212,13 +212,13 @@ namespace nvr {
                        g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                           g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
-                       g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                  //     g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
                     //   g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
                 //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-                      g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
-                     g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
-                    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
+              //        g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+             //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
@@ -247,28 +247,28 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-                appData.initialQueue,
+        //        appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
     //            appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
+     //           appData.finalQueue,
                 appData.sink,
                 nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-                appData.initialQueue,
+      //          appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
    //             appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
+     //           appData.finalQueue,
                 appData.sink,
                 NULL);
         }
@@ -398,7 +398,7 @@ namespace nvr {
     }
 
     void Streamer::padAddedHandler(GstElement* src, GstPad* new_pad, StreamData* data) {
-        GstPad* sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
+        GstPad* sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
         GstCaps* new_pad_caps = nullptr;
         GstStructure* new_pad_struct;
