@@ -150,14 +150,14 @@ namespace nvr {
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
-        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
+ //       g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", toNanoseconds(120), nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay / 2, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120), nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
@@ -178,12 +178,12 @@ namespace nvr {
 
             // h265 parser
             appData.parser = gst_element_factory_make("h265parse", nullptr);
-            g_object_set(G_OBJECT(appData.parser), "config-interval", 0, nullptr);
+            g_object_set(G_OBJECT(appData.parser), "config-interval", -1, nullptr);
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
-            g_object_set(G_OBJECT(appData.dePayloader), "max-reorder", 0, nullptr);
+
 
             if (!this->has_vaapi && !this->has_nvidia) {
                 logger->warn("Not using vaapi/nvidia for encoding/decoding");
@@ -206,8 +206,8 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-             //   g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-          //      g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
              //   g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
