@@ -135,6 +135,8 @@ namespace nvr {
      //   g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
        // g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "keep-listening", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "authentication", false, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "uri", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
