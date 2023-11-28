@@ -149,10 +149,15 @@ namespace nvr {
       //  g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
 
 
-        appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
+        appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
+        g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", toNanoseconds(120), nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
+
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay / 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120), nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
@@ -233,11 +238,10 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-     //           appData.initialQueue,
+                appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -247,11 +251,10 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-        //        appData.initialQueue,
+               appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
