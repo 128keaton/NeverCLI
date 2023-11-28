@@ -203,13 +203,14 @@ namespace nvr {
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265sldec", "dec");
+                g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-point-flags", 1, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr);
            //     g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "preset", 7, nullptr); // low-latency-hp
+                g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
             //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 20, nullptr);
              //  g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
          //      g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
