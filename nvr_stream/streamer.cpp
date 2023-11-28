@@ -206,7 +206,7 @@ namespace nvr {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("avdec_h265", "dec");
                 g_object_set(G_OBJECT(appData.decoder), "output-corrupt", false, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
+           //     g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
                 appData.encoder = gst_element_factory_make("x265enc", "enc");
 
