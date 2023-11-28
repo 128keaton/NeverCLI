@@ -103,11 +103,11 @@ namespace nvr {
 
         gst_plugin_list_free(plugins);
 
-        string rtsp_stream_location = buildStreamURL(this->stream_url, this->ip_address, this->port,
-                                                     this->rtsp_password, this->rtsp_username, this->type);
-        string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
+        string rtsp_stream_location = string("srt://").append(this->ip_address).append(":").append(std::to_string(this->port)).append(this->stream_url);
 
-        logger->info("Opening connection to '{}'", sanitized_stream_location);
+      //  string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
+
+        logger->info("Opening connection to '{}'", rtsp_stream_location);
 
         // queue delays
         int64_t max_delay = 0;
