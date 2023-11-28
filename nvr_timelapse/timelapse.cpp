@@ -91,9 +91,9 @@ int main(int argc, char **argv) {
         //exit(1);
     }
     /* find the mpeg1video encoder */
-    codec = avcodec_find_encoder_by_name("libx264");
+    codec = avcodec_find_encoder_by_name("libx265");
     if (!codec) {
-        fprintf(stderr, "Codec libx264 not found\n");
+        fprintf(stderr, "Codec libx265 not found\n");
         exit(1);
     }
 
