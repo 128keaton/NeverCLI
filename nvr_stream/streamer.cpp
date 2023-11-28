@@ -154,7 +154,7 @@ namespace nvr {
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120), nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
