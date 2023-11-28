@@ -19,6 +19,7 @@ extern "C" {
 #include <iostream>
 #include <string>
 #include <iterator>
+#include <ctime>
 #include "../common.h"
 
 static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
@@ -50,7 +51,6 @@ int main(int argc, char **argv) {
     int i, ret;
     FILE *f;
     AVFrame *frame;
-    //AVPacket *pkt;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
 
     /*validate args*/
@@ -103,7 +103,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-
     /* put sample parameters */
     c->bit_rate = 400000;
     c->qmin = 16;
@@ -123,7 +122,7 @@ int main(int argc, char **argv) {
     if (codec->id == AV_CODEC_ID_H264)
         av_opt_set(c->priv_data, "preset", "slow", 0);
 
-    /* open it */
+    /* open codec */
     ret = avcodec_open2(c, codec, NULL);
     if (ret < 0) {
         fprintf(stderr, "Could not open codec\n");
@@ -144,6 +143,15 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+    /*set start of timelapse based on days specified*/
+    time_t current_time;
+    time(&current_time);
+    current_time -= days*24*3600;
+    tm *local_time = localtime(&current_time);
+    char date_time[20];
+    strftime(date_time, 20, "%Y-%m-%d_%H-%M-%S", local_time);
+    std::string start_date_time = std::string(snapshot_directory) + "/" + camera_name + "-" + std::string(date_time);
+
     /*sort files in the directory in ascending order*/
     std::vector<std::filesystem::path> files_in_directory;
     copy(std::filesystem::directory_iterator(snapshot_directory), std::filesystem::directory_iterator(), // directory_iterator::value_type
@@ -162,6 +170,11 @@ int main(int argc, char **argv) {
         /*prepare image*/
         AVFormatContext *input_format_context;
         input_format_context = avformat_alloc_context();
+
+        /*continue to next snapshot file if current file is earlier that start_date_time */
+        if(strcmp(start_date_time.c_str(), std::string(filename).c_str()) > 0){
+            continue;
+        }
         if (avformat_open_input(&input_format_context, std::string(filename).c_str(), NULL, NULL) != 0) {
             fprintf(stderr, "Unable to open %s\n", std::string(filename).c_str());
             exit(1);
@@ -272,6 +285,5 @@ int main(int argc, char **argv) {
 
     avcodec_free_context(&c);
     av_frame_free(&frame);
-    //av_packet_free(&pkt);
     return 0;
 }
