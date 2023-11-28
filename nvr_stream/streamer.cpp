@@ -130,16 +130,16 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-       // g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-      //  g_object_set(G_OBJECT(appData.rtspSrc), "add-reference-timestamp-meta", true, nullptr);
+        // g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+        //  g_object_set(G_OBJECT(appData.rtspSrc), "add-reference-timestamp-meta", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-     //   g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-   //     g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-    //    g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        //   g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
+        //     g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+        //    g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         // g_object_set(G_OBJECT(appData.payloader), "mtu", 1250, nullptr); // -150 mtu
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
@@ -153,7 +153,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-     //   g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
+        //   g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
         appData.initialQueue = gst_element_factory_make("queue2", "initial_queue");
@@ -203,21 +203,21 @@ namespace nvr {
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-                //    g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
+                g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
                 //     g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
-             //       g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
-                       g_object_set(G_OBJECT(appData.encoder), "bitrate", 2048, nullptr);
-                //        g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
-                          g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
-                  //     g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
-                    //   g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
-                //    g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
-                //  g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
-              //        g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
-             //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "gop-size", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1048, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr); // cbr
+                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 25, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qos", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "strict-gop", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "i-adapt", true, nullptr);
+                //        g_object_set(G_OBJECT(appData.encoder), "b-adapt", true, nullptr);
                 //    g_object_set(G_OBJECT(appData.encoder), "nonref-p", true, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
@@ -247,28 +247,28 @@ namespace nvr {
             gst_bin_add_many(
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
-        //        appData.initialQueue,
+                //        appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-    //            appData.finalBufferQueue,
+                //            appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-     //           appData.finalQueue,
+                //           appData.finalQueue,
                 appData.sink,
                 nullptr
             );
 
             // link everything except source
             gst_element_link_many(
-      //          appData.initialQueue,
+                //          appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-   //             appData.finalBufferQueue,
+                //             appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
-     //           appData.finalQueue,
+                //           appData.finalQueue,
                 appData.sink,
                 NULL);
         }
