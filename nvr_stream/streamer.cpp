@@ -138,17 +138,17 @@ namespace nvr {
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-        g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+     //   g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
+    //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+   //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
        // g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr); // -150 mtu
         //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
 
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
-        g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-        g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
+     //   g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
+     //   g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
