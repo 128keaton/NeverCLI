@@ -114,7 +114,7 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(15);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 5000;
+        int64_t latency = 200;
         int64_t max_buffers = 0;
         gint config_interval = -1;
 
@@ -125,7 +125,7 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
- //       g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -138,7 +138,7 @@ namespace nvr {
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-        //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
 
 
         // udp output sink
@@ -208,7 +208,8 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
-             //   g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "aud", false, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", 1024 * 8, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
