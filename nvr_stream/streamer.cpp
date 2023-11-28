@@ -116,7 +116,7 @@ namespace nvr {
         int64_t max_bytes_size = 0;
         int64_t latency = 4000;
         int64_t max_buffers = 0;
-        gint config_interval = 1;
+        gint config_interval = -1;
 
         this->logger->info("Using max_delay: {}", max_delay);
 
@@ -148,7 +148,7 @@ namespace nvr {
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
         g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-
+        g_object_set(GST_BIN(appData.parser), "disable-passthrough", true, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
@@ -208,7 +208,7 @@ namespace nvr {
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-              //  g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr); // low-latency-hpq
+                g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr);
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
