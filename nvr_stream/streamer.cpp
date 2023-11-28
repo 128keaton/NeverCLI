@@ -202,7 +202,7 @@ namespace nvr {
             }
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
-                appData.decoder = gst_element_factory_make("nvh265sldec", "dec");
+                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
            //     g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-point-flags", 1, nullptr);
          //       g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr);
