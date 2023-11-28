@@ -256,7 +256,7 @@ namespace nvr {
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                //            appData.finalBufferQueue,
+                            appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
