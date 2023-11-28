@@ -114,11 +114,10 @@ namespace nvr {
         int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
-        int64_t latency = 2000;
+        int64_t latency = 4000;
         int64_t max_buffers = 0;
         gint config_interval = -1;
 
-        this->logger->info("Using max_delay: {}", max_delay);
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
@@ -138,42 +137,38 @@ namespace nvr {
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-    //    g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-   //     g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr)
-       // g_object_set(G_OBJECT(appData.payloader), "mtu", 1400, nullptr);
-        //     g_object_set(G_OBJECT(appData.payloader), "timestamp-offset", delay, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
 
 
         // h265 parser
         appData.parser = gst_element_factory_make("h265parse", nullptr);
         g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
-        g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
+        //   g_object_set(G_OBJECT(appData.parser), "disable-passthrough", true, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
-        // g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("rtpjitterbuffer", nullptr);
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-    //    g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", max_delay * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", max_buffers * 2, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(60), nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
         // final buffer queue
-      //  appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
-    //  appData.finalBufferQueue =  gst_element_factory_make("videoconvert", "video_convert");
+        //  appData.finalBufferQueue = gst_element_factory_make("queue2", "final_buf_queue");
+        //  appData.finalBufferQueue =  gst_element_factory_make("videoconvert", "video_convert");
 
         //    g_object_set(G_OBJECT(appData.finalBufferQueue), "min-threshold-time", min_delay + delay, nullptr);
-   //     g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
-     //   g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
-     //   g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
+        //     g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-time", max_delay * 2, nullptr);
+        //   g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-bytes", max_bytes_size * 2, nullptr);
+        //   g_object_set(G_OBJECT(appData.finalBufferQueue), "max-size-buffers", max_buffers, nullptr);
 
 
         if (this->type == h265) {
@@ -181,7 +176,7 @@ namespace nvr {
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-              //  g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
+            //  g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
 
             if (!this->has_vaapi && !this->has_nvidia) {
@@ -203,21 +198,19 @@ namespace nvr {
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-           //     g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-point-flags", 1, nullptr);
-         //       g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
+                //     g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-point-flags", 1, nullptr);
+                //       g_object_set(G_OBJECT(appData.decoder), "automatic-request-sync-points", true, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "discard-corrupted-frames", true, nullptr);
-           //     g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
+                //     g_object_set(G_OBJECT(appData.decoder), "skip-frame", 1, nullptr);
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
-            //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 20, nullptr);
-             //  g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
-         //      g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
+                //     g_object_set(G_OBJECT(appData.encoder), "preset", 5, nullptr); // low-latency-hp
+                //    g_object_set(G_OBJECT(appData.encoder), "gop-size", 20, nullptr);
+                //  g_object_set(G_OBJECT(appData.encoder), "bitrate", 5120, nullptr);
+                //      g_object_set(G_OBJECT(appData.encoder), "min-force-key-unit-interval", min_delay, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 3, nullptr); // cbr
                 //         g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", max_buffers, nullptr);
-
-
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
@@ -250,7 +243,7 @@ namespace nvr {
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                   //         appData.finalBufferQueue,
+                //         appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -264,7 +257,7 @@ namespace nvr {
                 appData.dePayloader,
                 appData.parser,
                 appData.decoder,
-                  //           appData.finalBufferQueue,
+                //           appData.finalBufferQueue,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
