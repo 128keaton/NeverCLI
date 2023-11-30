@@ -120,7 +120,7 @@ namespace nvr {
         int64_t latency = 5000;
         int64_t max_buffers = 0;
         int64_t mtu = 1400;
-        gint config_interval = 3;
+        gint config_interval = -1;
 
 
         // initialize pipeline
@@ -173,7 +173,7 @@ namespace nvr {
 
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
- //       g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120), nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
