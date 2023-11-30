@@ -119,7 +119,7 @@ namespace nvr {
         int64_t max_bytes_size = 0;
         int64_t latency = 5000;
         int64_t max_buffers = 0;
-        gint config_interval = -1;
+        gint config_interval = 5;
 
 
         // initialize pipeline
@@ -148,6 +148,7 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 700, nullptr); // half
 
 
         // udp output sink
@@ -155,7 +156,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
@@ -187,7 +189,7 @@ namespace nvr {
 
             // h265 parser
             appData.parser = gst_element_factory_make("h265parse", nullptr);
-            g_object_set(G_OBJECT(appData.parser), "config-interval", -1, nullptr);
+            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
