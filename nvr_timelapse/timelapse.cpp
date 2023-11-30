@@ -20,6 +20,7 @@ extern "C" {
 #include <string>
 #include <iterator>
 #include <ctime>
+#include <cmath>
 #include "../common.h"
 
 static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
@@ -49,13 +50,16 @@ int main(int argc, char **argv) {
     const AVCodec *codec;
     AVCodecContext *c = NULL;
     int i, ret;
+    int frame_index;
     FILE *f;
     AVFrame *frame;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
+    long time_interval = 1; //default interval between frames
+    char * time_unit;
 
     /*validate args*/
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON>\n", argv[0]);
+    if ((argc < 3)||(argc > 4)) {
+        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON> <OPTIONAL_TIME_INTERVAL>\n", argv[0]);
         exit(0);
     }
     days = atoi(argv[1]);
@@ -68,7 +72,17 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Could not find %s. File does not exist.\n", argv[2]);
         exit(1);
     }
-
+    if(argc == 4){
+        time_interval = strtol(argv[3], &time_unit, 10);
+        if(strcmp(time_unit,"m")==0){
+          time_interval = std::round(time_interval * (float)60/(float)36);
+        }else if(strcmp(time_unit,"h")==0){
+            time_interval = std::round(time_interval * (float)3600/(float)36);
+        }else{
+            fprintf(stderr, "Could not parse TIME_INTERVAL. Usage: <TIME_INTERVAL>h(hour) or <TIME_INTERVAL>m(minute).\n");
+            exit(1);
+        }
+    }
     std::string camera_name = (std::string(json_file_path).substr(
             std::string(json_file_path).find("camera-"),
             std::string(json_file_path).find(".json") -
@@ -102,7 +116,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Could not allocate video codec context\n");
         exit(1);
     }
-
     /* put sample parameters */
     c->bit_rate = 400000;
     c->qmin = 16;
@@ -114,9 +127,9 @@ int main(int argc, char **argv) {
     c->time_base = (AVRational) {1, 25};
     c->framerate = (AVRational) {25, 1};
 
-    /* emit one intra frame every 25 frames*/
-    c->gop_size = 25;
-    c->max_b_frames = 10;
+    /*start encoding from 1st frame; group of pictures = 1*/
+    c->gop_size = 1;
+    c->max_b_frames = 1;
     c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if (codec->id == AV_CODEC_ID_H264)
@@ -158,9 +171,9 @@ int main(int argc, char **argv) {
          std::back_inserter(files_in_directory));
     sort(files_in_directory.begin(), files_in_directory.end());
     /*loop through the snapshots*/
+    frame_index = 0;
     i = 0;
     for (const auto &filename: files_in_directory) {
-        //for (i=0; i< 25; i++) {
         fflush(stdout);
 
         /*make the frame data is writable by allocating a new buffer for the frame*/
@@ -171,10 +184,17 @@ int main(int argc, char **argv) {
         AVFormatContext *input_format_context;
         input_format_context = avformat_alloc_context();
 
+        /*select frames in time_interval*/
+        if(frame_index%time_interval != 0){
+            frame_index++;
+            continue;
+        }
+        frame_index++;
         /*continue to next snapshot file if current file is earlier that start_date_time */
         if(strcmp(start_date_time.c_str(), std::string(filename).c_str()) > 0){
             continue;
         }
+        //std::cout<<i<<std::endl;
         if (avformat_open_input(&input_format_context, std::string(filename).c_str(), NULL, NULL) != 0) {
             fprintf(stderr, "Unable to open %s\n", std::string(filename).c_str());
             exit(1);
