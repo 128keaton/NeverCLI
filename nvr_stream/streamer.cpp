@@ -140,7 +140,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
         appData.rtspSrc = gst_element_factory_make("uridecodebin", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "async-handling", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "expose-all-streams", false, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "download", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "use-buffering", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-duration", delay, nullptr);
