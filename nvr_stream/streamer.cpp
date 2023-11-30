@@ -119,7 +119,7 @@ namespace nvr {
         int64_t max_bytes_size = 0;
         int64_t latency = 5000;
         int64_t max_buffers = 0;
-        int64_t mtu = 2800;
+        int64_t mtu = 1472;
         gint config_interval = -1;
 
 
@@ -139,11 +139,6 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
-  //      g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr);
-  //      g_object_set(G_OBJECT(appData.rtspSrc), "keep-listening", true, nullptr);
-  //      g_object_set(G_OBJECT(appData.rtspSrc), "authentication", false, nullptr);
-  //      g_object_set(G_OBJECT(appData.rtspSrc), "wait-for-connection", true, nullptr);
-  //      g_object_set(G_OBJECT(appData.rtspSrc), "uri", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
