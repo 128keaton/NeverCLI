@@ -106,9 +106,9 @@ namespace nvr {
                                                      this->rtsp_password, this->rtsp_username, this->type);
         string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
-    //    string rtsp_stream_location = string("srt://").append(this->ip_address).append(":").append(std::to_string(this->port)).append(this->stream_url);
+        //    string rtsp_stream_location = string("srt://").append(this->ip_address).append(":").append(std::to_string(this->port)).append(this->stream_url);
 
-      //  string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
+        //  string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
@@ -128,17 +128,17 @@ namespace nvr {
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
-       /* appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
-        g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
-        g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 1073741823, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
+        /* appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
+         g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
+         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
+         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
+         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
+         g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
+         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
+         g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 1073741823, nullptr);
+         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
+         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
+         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
         appData.rtspSrc = gst_element_factory_make("uridecodebin", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "download", true, nullptr);
@@ -146,14 +146,14 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-size", 2147483647, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-duration", 9223372036854775807, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "post-stream-topology", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "connection-speed", 3250, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "uri",  rtsp_stream_location.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "connection-speed", 1250, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "uri", rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-        g_object_set(G_OBJECT(appData.payloader), "mtu", mtu, nullptr); // half
+        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 1, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", mtu, nullptr);
 
 
         // udp output sink
@@ -161,21 +161,22 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
-       // g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
-       // g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", 2147483647, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
+        // g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
- //       g_object_set(G_OBJECT(appData.initialQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", delay / 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", toNanoseconds(120), nullptr);
+        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120), nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
@@ -219,7 +220,11 @@ namespace nvr {
             }
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
-                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
+              //  appData.decoder = gst_element_factory_make("nvh265dec", "dec");
+
+                appData.decoder = gst_element_factory_make("videorate", "rate");
+                g_object_set(G_OBJECT(appData.decoder), "max-rate", 15, nullptr);
+                g_object_set(G_OBJECT(appData.decoder), "drop-only", true, nullptr);
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
@@ -254,9 +259,9 @@ namespace nvr {
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
                 appData.initialQueue,
-            //    appData.dePayloader,
-           //     appData.parser,
-           //     appData.decoder,
+                //    appData.dePayloader,
+                //     appData.parser,
+                appData.decoder,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -267,9 +272,10 @@ namespace nvr {
             // link everything except source
             gst_element_link_many(
                 appData.initialQueue,
-           //==//     appData.dePayloader,
-          //      appData.parser,
-          //      appData.decoder,
+                //==//     appData.dePayloader,
+                //      appData.parser,
+                //
+                appData.decoder,
                 appData.encoder,
                 appData.payloader,
                 appData.finalQueue,
@@ -291,7 +297,7 @@ namespace nvr {
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
                 appData.initialQueue,
-     //           appData.dePayloader,
+                //           appData.dePayloader,
                 appData.parser,
                 appData.payloader,
                 appData.finalQueue,
@@ -301,7 +307,7 @@ namespace nvr {
             // link everything except source
             gst_element_link_many(
                 appData.initialQueue,
- //               appData.dePayloader,
+                //               appData.dePayloader,
                 appData.parser,
                 appData.payloader,
                 appData.finalQueue,
@@ -399,7 +405,13 @@ namespace nvr {
             case GST_MESSAGE_NEED_CONTEXT:
             case GST_MESSAGE_HAVE_CONTEXT:
             case GST_MESSAGE_NEW_CLOCK:
+                break;
             case GST_MESSAGE_LATENCY:
+                if (!gst_bin_recalculate_latency(GST_BIN(data->pipeline)))
+                    data->logger->error("Could not reconfigure latency");
+                else
+                    data->logger->info("Reconfigured latency");
+
                 break;
             case GST_MESSAGE_STREAM_START:
                 data->logger->info("Stream started");
@@ -435,8 +447,8 @@ namespace nvr {
 
         /* Check the new pad's name */
         if (!g_str_has_prefix(GST_PAD_NAME(new_pad), "recv_rtp_src_")) {
-           data->logger->error("Incorrect pad.  Need recv_rtp_src_. Ignoring.");
-        //    goto exit;
+            data->logger->error("Incorrect pad.  Need recv_rtp_src_. Ignoring.");
+            //    goto exit;
         }
 
         /* If our converter is already linked, we have nothing to do here */
