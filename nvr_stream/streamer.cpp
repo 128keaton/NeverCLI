@@ -119,8 +119,8 @@ namespace nvr {
         int64_t max_bytes_size = 0;
         int64_t latency = 5000;
         int64_t max_buffers = 0;
-        int64_t mtu = 1472;
-        gint config_interval = -1;
+        int64_t mtu = 1400;
+        gint config_interval = 3;
 
 
         // initialize pipeline
@@ -156,8 +156,8 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
+       // g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
+       // g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
