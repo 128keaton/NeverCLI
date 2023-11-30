@@ -141,7 +141,7 @@ namespace nvr {
          g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
         appData.rtspSrc = gst_element_factory_make("uridecodebin", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "download", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "use-buffering", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "async-handling", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-size", 2147483647, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-duration", 9223372036854775807, nullptr);
@@ -162,7 +162,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", 2147483647, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
+     //   g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
         // g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
 
 
