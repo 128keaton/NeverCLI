@@ -119,7 +119,8 @@ namespace nvr {
         int64_t max_bytes_size = 0;
         int64_t latency = 5000;
         int64_t max_buffers = 0;
-        gint config_interval = 5;
+        int64_t mtu = 2800;
+        gint config_interval = -1;
 
 
         // initialize pipeline
@@ -148,7 +149,7 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr); //max-step
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 700, nullptr); // half
+        g_object_set(G_OBJECT(appData.payloader), "mtu", mtu, nullptr); // half
 
 
         // udp output sink
@@ -219,7 +220,6 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "aud", false, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", 1024 * 8, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
