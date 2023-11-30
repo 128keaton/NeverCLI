@@ -128,7 +128,7 @@ namespace nvr {
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
         // rtsp source
-        appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
+       /* appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
@@ -138,7 +138,13 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 1073741823, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
+        appData.rtspSrc = gst_element_factory_make("uridecodebin", "src");
+        g_object_set(G_OBJECT(appData.rtspSrc), "async-handling", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "download", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "use-buffering", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-duration", delay, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "uri",  rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");

@@ -21,7 +21,6 @@ namespace nvr {
         GstElement *encoder;
         GstElement *payloader;
         GstElement *initialQueue;
-        GstElement *finalBufferQueue;
         GstElement *finalQueue;
         GstElement *sink;
         string stream_name;
