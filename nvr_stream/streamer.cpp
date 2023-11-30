@@ -160,7 +160,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "auto-multicast", true, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
        // g_object_set(G_OBJECT(appData.sink), "max-lateness", min_delay, nullptr);
        // g_object_set(G_OBJECT(appData.sink), "render-delay", min_delay, nullptr);
 
