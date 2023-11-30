@@ -143,7 +143,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "expose-all-streams", false, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "download", false, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "use-buffering", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-duration", delay, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "post-stream-topology", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "uri",  rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
