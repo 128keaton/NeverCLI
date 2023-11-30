@@ -263,6 +263,7 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
+            appData.rtspSrc,
                 appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
