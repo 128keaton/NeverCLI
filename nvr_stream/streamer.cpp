@@ -263,7 +263,6 @@ namespace nvr {
 
             // link everything except source
             gst_element_link_many(
-            appData.rtspSrc,
                 appData.initialQueue,
                 appData.dePayloader,
                 appData.parser,
@@ -433,8 +432,8 @@ namespace nvr {
 
         /* Check the new pad's name */
         if (!g_str_has_prefix(GST_PAD_NAME(new_pad), "recv_rtp_src_")) {
-            data->logger->error("Incorrect pad.  Need recv_rtp_src_. Ignoring.");
-            goto exit;
+           data->logger->error("Incorrect pad.  Need recv_rtp_src_. Ignoring.");
+        //    goto exit;
         }
 
         /* If our converter is already linked, we have nothing to do here */
