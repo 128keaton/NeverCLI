@@ -140,8 +140,12 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);*/
         appData.rtspSrc = gst_element_factory_make("uridecodebin", "src");
+        g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "download", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "async-handling", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-size", 2147483647, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "post-stream-topology", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "connection-speed", 3250, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "uri",  rtsp_stream_location.c_str(), nullptr);
 
         // h264 final payloader
