@@ -288,7 +288,7 @@ namespace nvr {
                 GST_BIN(appData.pipeline),
                 appData.rtspSrc,
                 appData.initialQueue,
-                appData.dePayloader,
+     //           appData.dePayloader,
                 appData.parser,
                 appData.payloader,
                 appData.finalQueue,
@@ -298,7 +298,7 @@ namespace nvr {
             // link everything except source
             gst_element_link_many(
                 appData.initialQueue,
-                appData.dePayloader,
+ //               appData.dePayloader,
                 appData.parser,
                 appData.payloader,
                 appData.finalQueue,
