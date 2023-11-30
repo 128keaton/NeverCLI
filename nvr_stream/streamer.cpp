@@ -144,6 +144,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "download", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "async-handling", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "buffer-size", 2147483647, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "buffer-duration", 9223372036854775807, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "post-stream-topology", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "connection-speed", 3250, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "uri",  rtsp_stream_location.c_str(), nullptr);
