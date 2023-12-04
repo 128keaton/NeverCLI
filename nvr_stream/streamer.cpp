@@ -234,7 +234,7 @@ namespace nvr {
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
+           //     appData.finalQueue,
                 appData.sink,
                 nullptr
             );
@@ -247,7 +247,7 @@ namespace nvr {
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-                appData.finalQueue,
+         //       appData.finalQueue,
                 appData.sink,
                 NULL);
         }
