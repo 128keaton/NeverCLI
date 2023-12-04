@@ -149,8 +149,8 @@ namespace nvr {
         //rtmpsink output sink
         appData.sink = gst_element_factory_make("rtmp2sink", "rtmp");
         g_object_set(G_OBJECT(appData.sink), "stream", camera_name.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.sink), "async", true, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "async-connect", true, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "async", false, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "async-connect", false, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
