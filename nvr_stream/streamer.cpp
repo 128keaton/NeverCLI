@@ -178,7 +178,7 @@ namespace nvr {
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
             // flv
-            appData.encoder = gst_element_factory_make("avenc_flv", "enc");
+            appData.encoder = gst_element_factory_make("avenc_flv", "enc_flv");
 
             if (!this->has_vaapi && !this->has_nvidia) {
                 logger->warn("Not using vaapi/nvidia for encoding/decoding");
