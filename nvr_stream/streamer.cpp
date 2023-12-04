@@ -159,11 +159,11 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
-        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
+   //     appData.finalQueue = gst_element_factory_make("queue", "final_queue");
     //    g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
+ //       g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
+  //      g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
+  //      g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
         if (this->type == h265) {
