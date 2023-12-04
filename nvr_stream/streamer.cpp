@@ -146,8 +146,8 @@ namespace nvr {
 
         //rtmpsink output sink
         string rtmp_url = string("http://127.0.0.1/live/").append(camera_name);
+        logger->info("Using '{}' for flv sink", rtmp_url);
         appData.sink = gst_element_factory_make("rtmpsink", "rtmp");
-
         g_object_set(G_OBJECT(appData.sink), "location", rtmp_url.c_str(), nullptr);
 
 
