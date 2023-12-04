@@ -30,6 +30,7 @@ namespace nvr {
         Janus janus;
         GMainLoop *loop;
         gboolean is_live;
+        string rtmp_url;
     } StreamData;
 
 
