@@ -141,9 +141,9 @@ namespace nvr {
         appData.payloader = gst_element_factory_make("avenc_flv", "enc_flv");
 
         // flv muxer
-      //  appData.finalQueue = gst_element_factory_make("flvmux", "muxer");
-    //    g_object_set(G_OBJECT(appData.finalQueue), "latency", min_delay, nullptr);
-  //      g_object_set(G_OBJECT(appData.finalQueue), "streamable", true, nullptr);
+        appData.finalQueue = gst_element_factory_make("flvmux", "muxer");
+        g_object_set(G_OBJECT(appData.finalQueue), "latency", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "streamable", true, nullptr);
 
 
         //rtmpsink output sink
@@ -233,7 +233,7 @@ namespace nvr {
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-           //     appData.finalQueue,
+                appData.finalQueue,
                 appData.sink,
                 nullptr
             );
@@ -246,7 +246,7 @@ namespace nvr {
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
-         //       appData.finalQueue,
+                appData.finalQueue,
                 appData.sink,
                 NULL);
         }
