@@ -175,31 +175,21 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
+            // flv
+            appData.encoder = gst_element_factory_make("avenc_flv", "enc");
+            g_object_set(G_OBJECT(appData.encoder), "gop-size", 90, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "bufsize", toBytes(1024), nullptr);
+
 
             if (!this->has_vaapi && !this->has_nvidia) {
                 logger->warn("Not using vaapi/nvidia for encoding/decoding");
 
                 // h265 decode without vaapi
                 appData.decoder = gst_element_factory_make("libde265dec", "dec");
-
-                // h264 encode without vaapi
-                appData.encoder = gst_element_factory_make("x264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
             }
             else if (this->has_nvidia) {
                 logger->info("Using nvidia hardware acceleration");
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-
-                appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", 1024 * 8, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
@@ -211,16 +201,6 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.decoder), "max-size-time", max_delay * 2, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "disable-vpp", true, nullptr);
                 g_object_set(G_OBJECT(appData.decoder), "message-forward", true, nullptr);
-
-                // h264 encode with vaapi
-                appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
-
-                logger->info("Using encoder parameters: {}", quality_config.toJSON().dump(4));
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr); // 30 (duh)
-                g_object_set(G_OBJECT(appData.encoder), "target-percentage", 50, nullptr); // quality from 0-100
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr); // use cabac entropy
-                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
             }
 
 
