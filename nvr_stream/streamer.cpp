@@ -178,9 +178,6 @@ namespace nvr {
             // flv
             appData.encoder = gst_element_factory_make("avenc_flv", "enc");
             g_object_set(G_OBJECT(appData.encoder), "gop-size", 90, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "maxrate", 1024, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "bufsize", toBytes(1024), nullptr);
-
 
             if (!this->has_vaapi && !this->has_nvidia) {
                 logger->warn("Not using vaapi/nvidia for encoding/decoding");
