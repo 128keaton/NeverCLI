@@ -145,7 +145,7 @@ namespace nvr {
 
 
         //rtmpsink output sink
-        string rtmp_url = string("rtmp://127.0.0.1:1953/live/").append(camera_name).append(" live=true");
+        string rtmp_url = string("rtmp://localhost/live/cameraTest");
         appData.rtmp_url = rtmp_url;
         logger->info("Using '{}' for flv sink", rtmp_url);
 
