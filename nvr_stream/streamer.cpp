@@ -145,14 +145,8 @@ namespace nvr {
 
 
         //rtmpsink output sink
-        string rtmp_url = string("rtmp://localhost/live/cameraTest");
-        appData.rtmp_url = rtmp_url;
-        logger->info("Using '{}' for flv sink", rtmp_url);
-
-        appData.sink = gst_element_factory_make("rtmpsink", "rtmp");
-        g_object_set(G_OBJECT(appData.sink), "location", rtmp_url.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.sink), "sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "async", true, nullptr);
+        appData.sink = gst_element_factory_make("rtmp2sink", "rtmp");
+        g_object_set(G_OBJECT(appData.sink), "stream", camera_name.c_str(), nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
@@ -384,7 +378,6 @@ namespace nvr {
                 break;
             case GST_MESSAGE_STREAM_START:
                 data->logger->info("Stream started");
-                data->logger->info("Using '{}' for flv sink", data->rtmp_url);
 
                 break;
             case GST_MESSAGE_PROGRESS:
