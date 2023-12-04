@@ -147,7 +147,7 @@ namespace nvr {
 
         request["janus"] = "attach";
         request["session_id"] = sessionID;
-        request["plugin"] = "janus.plugin.streaming";
+        request["plugin"] = "janus.plugin.rtmp";
         request["transaction"] = generateRandom();
 
         json response = performRequest(request);
@@ -333,7 +333,7 @@ namespace nvr {
      * @return true if created
      */
     bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
-        json list = getStreamList();
+  /*     json list = getStreamList();
 
         _stream_id = streamID;
         for (auto &stream: getStreamList()) {
@@ -342,17 +342,18 @@ namespace nvr {
                 destroyStream(streamID);
                 break;
             }
-        }
+        }*/
 
         json body;
 
         logger->info("Creating Janus stream '{}'", streamName);
 
-        body["request"] = "create";
-        body["name"] = streamName;
-        body["type"] = "rtp";
-        body["id"] = streamID;
-        body["media"] = buildMedia(streamName, streamID, port);
+        string rtmp_url = string("http://127.0.0.1/live/").append(streamName);
+        body["request"] = "start";
+        body["url"] = rtmp_url;
+       // body["type"] = "rtp";
+   //     body["id"] = streamID;
+  //      body["media"] = buildMedia(streamName, streamID, port);
 
         json request = buildMessage(body);
 
@@ -365,8 +366,8 @@ namespace nvr {
             logger->error("Could not create stream: {}", error);
             logger->error(response_data.dump());
             streaming = false;
-        } else if (response_data.contains("created")) {
-            logger->info("Stream '{}' created", streamName);
+        } else if (response_data.contains("streaming")) {
+            logger->info("Stream '{}' created", rtmp_url);
             streaming = true;
         } else {
             logger->warn("Not sure, dumping response: {}", response.dump());
