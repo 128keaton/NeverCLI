@@ -138,10 +138,12 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
 
+        appData.payloader = gst_element_factory_make("avenc_flv", "enc");
+
         // flv muxer
-        appData.payloader = gst_element_factory_make("flvmux", "muxer");
-        g_object_set(G_OBJECT(appData.payloader), "latency", min_delay, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "streamable", true, nullptr);
+        appData.finalQueue = gst_element_factory_make("flvmux", "muxer");
+        g_object_set(G_OBJECT(appData.finalQueue), "latency", min_delay, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "streamable", true, nullptr);
 
 
         //rtmpsink output sink
@@ -155,11 +157,11 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
 
 
-        appData.finalQueue = gst_element_factory_make("queue", "final_queue");
+       /* appData.finalQueue = gst_element_factory_make("queue", "final_queue");
         g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", delay, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
         g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
+        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);*/
 
 
         if (this->type == h265) {
