@@ -138,7 +138,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
 
-        appData.payloader = gst_element_factory_make("avenc_flv", "enc");
+        appData.payloader = gst_element_factory_make("avenc_flv", "enc_flv");
 
         // flv muxer
       //  appData.finalQueue = gst_element_factory_make("flvmux", "muxer");
@@ -177,8 +177,7 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
-            // flv
-            appData.encoder = gst_element_factory_make("avenc_flv", "enc_flv");
+
 
             if (!this->has_vaapi && !this->has_nvidia) {
                 logger->warn("Not using vaapi/nvidia for encoding/decoding");
