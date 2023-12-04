@@ -111,7 +111,7 @@ namespace nvr {
 
         // queue delays
         int64_t max_delay = 0;
-        int64_t min_delay = toNanoseconds(15);
+        int64_t min_delay = toNanoseconds(5);
         int64_t delay = toNanoseconds(30);
         int64_t max_bytes_size = 0;
         int64_t latency = 5000;
@@ -140,12 +140,12 @@ namespace nvr {
 
         // flv muxer
         appData.payloader = gst_element_factory_make("flvmux", "muxer");
-        g_object_set(G_OBJECT(appData.payloader), "enforce-increasing-timestamps", true, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "latency", min_delay, nullptr);
         g_object_set(G_OBJECT(appData.payloader), "streamable", true, nullptr);
 
 
         //rtmpsink output sink
-        string rtmp_url = string("rtmp://127.0.0.1/live/").append(camera_name).append(" live=1");
+        string rtmp_url = string("rtmp://127.0.0.1:1953/live/").append(camera_name).append(" live=1");
         appData.rtmp_url = rtmp_url;
         logger->info("Using '{}' for flv sink", rtmp_url);
 
