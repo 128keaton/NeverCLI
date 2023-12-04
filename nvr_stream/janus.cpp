@@ -346,9 +346,10 @@ namespace nvr {
 
         json body;
 
-        logger->info("Creating Janus stream '{}'", streamName);
+        string rtmp_url = string("rtmp://127.0.0.1/live/").append(streamName);
+        logger->info("Creating Janus stream '{}'", rtmp_url);
 
-        string rtmp_url = string("http://127.0.0.1/live/").append(streamName);
+
         body["request"] = "start";
         body["url"] = rtmp_url;
        // body["type"] = "rtp";
