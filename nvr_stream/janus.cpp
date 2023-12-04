@@ -349,7 +349,7 @@ namespace nvr {
         logger->info("Creating Janus stream '{}'", streamName);
 
         body["request"] = "create";
-        body["url"] = streamName;
+        body["name"] = streamName;
         body["type"] = "rtp";
         body["id"] = streamID;
         body["media"] = buildMedia(streamName, streamID, port);

@@ -145,12 +145,14 @@ namespace nvr {
 
 
         //rtmpsink output sink
-        string rtmp_url = string("rtmp://127.0.0.1:1953/live/").append(camera_name).append(" live=1");
+        string rtmp_url = string("rtmp://127.0.0.1:1953/live/").append(camera_name).append(" live=true");
         appData.rtmp_url = rtmp_url;
         logger->info("Using '{}' for flv sink", rtmp_url);
 
         appData.sink = gst_element_factory_make("rtmpsink", "rtmp");
         g_object_set(G_OBJECT(appData.sink), "location", rtmp_url.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData.sink), "sync", true, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "async", true, nullptr);
 
 
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
@@ -201,9 +203,6 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
 
                 appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "vbv-buffer-size", 1024 * 8, nullptr);
             }
             else if (this->has_vaapi && !this->has_nvidia) {
                 logger->info("Using vaapi for encoding");
