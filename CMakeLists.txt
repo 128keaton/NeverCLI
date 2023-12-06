@@ -58,7 +58,6 @@ install(TARGETS nvr_stream DESTINATION bin)
 
 ## Target: nvr_status_manager (Linux only)
 add_executable(nvr_status_manager nvr_status_manager/nvr_status_server.cpp)
-target_link_libraries(nvr_status_manager PRIVATE PkgConfig::SYSTEMD)
 add_executable(nvr_camera nvr_status_manager/nvr_status_client.cpp)
 
 add_executable(nvr_timelapse nvr_timelapse/timelapse.cpp  common.cpp common.h)
