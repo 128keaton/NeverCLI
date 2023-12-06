@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
     char * time_unit;
 
     /*validate args*/
-    if ((argc < 3)||(argc > 4)) {
-        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON> <OPTIONAL_TIME_INTERVAL>\n", argv[0]);
+    if ((argc < 3)||(argc > 5)) {
+        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON> <PATH_TO_NVR_DIR> <OPTIONAL_TIME_INTERVAL>\n", argv[0]);
         exit(0);
     }
     days = atoi(argv[1]);
@@ -67,13 +67,20 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s is not an integer\n", argv[1]);
         exit(1);
     }
+    std::filesystem::path nvr_directory = std::filesystem::path("/nvr");
     std::filesystem::path json_file_path = argv[2];
+
     if (!exists(json_file_path)) {
         fprintf(stderr, "Could not find %s. File does not exist.\n", argv[2]);
         exit(1);
     }
-    if(argc == 4){
-        time_interval = strtol(argv[3], &time_unit, 10);
+
+    if (argc >= 4)
+        nvr_directory = std::filesystem::path(argv[3]);
+
+
+    if(argc == 5){
+        time_interval = strtol(argv[4], &time_unit, 10);
         if(strcmp(time_unit,"m")==0){
           time_interval = std::round(time_interval * (float)60/(float)36);
         }else if(strcmp(time_unit,"h")==0){
@@ -83,21 +90,25 @@ int main(int argc, char **argv) {
             exit(1);
         }
     }
-    std::string camera_name = (std::string(json_file_path).substr(
-            std::string(json_file_path).find("camera-"),
-            std::string(json_file_path).find(".json") -
-            std::string(json_file_path).find("camera-")));
+
+
+
+    const string config_file_path = string(json_file_path);
+
+    size_t last_path_index = config_file_path.find_last_of('/');
+    string config_file_name = config_file_path.substr(last_path_index + 1);
+    size_t last_ext_index = config_file_name.find_last_of('.');
+    string camera_name = config_file_name.substr(0, last_ext_index);
 
     /*check if snapshots exist*/
-    std::filesystem::path snapshot_directory = std::filesystem::path("/nvr/snapshots") /
-                                          camera_name;
+    std::filesystem::path snapshot_directory = nvr_directory / "snapshots" / camera_name;
     if (!exists(snapshot_directory)) {
         fprintf(stderr, "Could not find %s. Path does not exist.", std::string(snapshot_directory).c_str());
         exit(1);
     }
 
     /*create timelapse file*/
-    string timelapse_file_str = generateOutputFilename(camera_name, string("/nvr"), nvr::timelapse);
+    string timelapse_file_str = generateOutputFilename(camera_name, nvr_directory.string(), nvr::timelapse);
     //std::cout<<timelapse_file_str<<std::endl;
     f = fopen(timelapse_file_str.c_str(), "wb");
     if (!f) {
@@ -105,11 +116,18 @@ int main(int argc, char **argv) {
         //exit(1);
     }
     /* find the mpeg1video encoder */
-    codec = avcodec_find_encoder_by_name("libx265");
+
+    codec = avcodec_find_encoder_by_name("hevc_videotoolbox");
     if (!codec) {
-        fprintf(stderr, "Codec libx265 not found\n");
-        exit(1);
+        fprintf(stderr, "Codec hevc_videotoolbox not found\n");
+        codec = avcodec_find_encoder_by_name("libx265");
+        if (!codec) {
+            fprintf(stderr, "Codec libx265 not found\n");
+            exit(1);
+        }
     }
+
+
 
     c = avcodec_alloc_context3(codec);
     if (!c) {
@@ -131,9 +149,10 @@ int main(int argc, char **argv) {
     c->gop_size = 1;
     c->max_b_frames = 1;
     c->pix_fmt = AV_PIX_FMT_YUV420P;
+    c->codec_tag = MKTAG('h', 'v', 'c', '1');
 
-    if (codec->id == AV_CODEC_ID_H264)
-        av_opt_set(c->priv_data, "preset", "slow", 0);
+ //   if (codec->id == AV_CODEC_ID_H264)
+//      av_opt_set(c->priv_data, "preset", "fast", 0);
 
     /* open codec */
     ret = avcodec_open2(c, codec, NULL);
@@ -194,7 +213,7 @@ int main(int argc, char **argv) {
         if(strcmp(start_date_time.c_str(), std::string(filename).c_str()) > 0){
             continue;
         }
-        //std::cout<<i<<std::endl;
+        std::cout<<i<<std::endl;
         if (avformat_open_input(&input_format_context, std::string(filename).c_str(), NULL, NULL) != 0) {
             fprintf(stderr, "Unable to open %s\n", std::string(filename).c_str());
             exit(1);
@@ -299,8 +318,9 @@ int main(int argc, char **argv) {
     //encode(c, NULL, NULL, f);
 
     /* Add sequence end code to have a real MPEG file*/
-    if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
-        fwrite(endcode, 1, sizeof(endcode), f);
+    //if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
+
+    fwrite(endcode, 1, sizeof(endcode), f);
     fclose(f);
 
     avcodec_free_context(&c);
