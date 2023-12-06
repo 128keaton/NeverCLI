@@ -177,6 +177,8 @@ int main(){
             memcpy(req.camera_id, ptr, string_length);
             *(req.camera_id + string_length) = '\0';
 
+            fprintf(stderr,"ptr: %s", ptr);
+
             /*send request to systemd and copy response to stream_buffer*/
             if (strcmp(req.command, "start") == 0) {
                 request_service("StartUnit", "nvr-record@", req.camera_id, "replace");
