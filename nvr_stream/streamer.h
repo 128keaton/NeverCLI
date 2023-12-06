@@ -45,7 +45,7 @@ namespace nvr {
 
     private:
         GstBus *bus{};
-        StreamType type;
+        StreamType type{};
         StreamData appData{};
         std::shared_ptr<spdlog::logger> logger;
         int rtp_port{};
@@ -55,7 +55,6 @@ namespace nvr {
         string rtsp_username;
         string rtsp_password;
         string ip_address;
-        StreamQualityConfig quality_config;
         bool has_vaapi = false;
         bool has_nvidia = false;
         bool quitting = false;

@@ -76,10 +76,6 @@ namespace nvr {
         // Get optional fields
         string sub_stream_url =  config["streamURL"];
         int port = 554;
-        int quality_level = 5;
-        int quality_factor = 32;
-        int max_bframes = 10;
-        int keyframe_period = 5;
         long snapshot_interval = config["splitEvery"];
 
         if (config.contains("port"))
@@ -90,25 +86,6 @@ namespace nvr {
 
         if (config.contains("snapshotInterval"))
             snapshot_interval = config["snapshotInterval"];
-
-        if (config.contains("qualityFactor"))
-            quality_factor = config["qualityFactor"];
-
-        if (config.contains("qualityLevel"))
-            quality_level = config["qualityLevel"];
-
-        if (config.contains("maxBFrames"))
-            max_bframes = config["maxBFrames"];
-
-        if (config.contains("keyframePeriod"))
-            keyframe_period = config["keyframePeriod"];
-
-        StreamQualityConfig quality_config = {
-            quality_level,
-            quality_factor,
-            max_bframes,
-            keyframe_period
-        };
 
         return {
             stream_url,
@@ -125,7 +102,6 @@ namespace nvr {
             snapshot_interval,
             rtp_port,
             port,
-            quality_config,
         };
     }
 

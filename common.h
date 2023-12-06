@@ -43,43 +43,6 @@ namespace nvr {
         log
     };
 
-    struct StreamQualityConfig {
-        int quality_level;
-        int quality_factor;
-        int max_bframes;
-        int keyframe_period;
-
-        StreamQualityConfig(int quality_level, int quality_factor, int max_bframes, int keyframe_period) {
-            this->quality_level = quality_level;
-            this->quality_factor = quality_factor;
-            this->max_bframes = max_bframes;
-            this->keyframe_period = keyframe_period;
-        }
-
-        StreamQualityConfig() {
-            quality_level = 5;
-            quality_factor = 32;
-            max_bframes = 10;
-            keyframe_period = 5;
-        }
-
-        StreamQualityConfig(const StreamQualityConfig&config) {
-            quality_level = config.quality_level;
-            quality_factor = config.quality_factor;
-            max_bframes = config.max_bframes;
-            keyframe_period = config.keyframe_period;
-        }
-
-        nlohmann::json toJSON() {
-            nlohmann::json config;
-            config["qualityLevel"] = quality_level;
-            config["qualityFactor"] = quality_factor;
-            config["maxBFrames"] = max_bframes;
-            config["keyframePeriod"] = keyframe_period;
-
-            return config;
-        }
-    };
 
     struct CameraConfig {
         string stream_url;
@@ -96,7 +59,6 @@ namespace nvr {
         const long snapshot_interval;
         const int rtp_port;
         const int port;
-        StreamQualityConfig quality_config{};
     };
 
     string buildStreamURL(const string&url, const string&ip_address, int port, const string&password,
