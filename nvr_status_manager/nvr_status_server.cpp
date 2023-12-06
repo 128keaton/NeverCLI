@@ -175,7 +175,7 @@ int main(){
             ptr += sizeof(string_length);
             req.camera_id = (char *)malloc(string_length);
             memcpy(req.camera_id, ptr, string_length);
-            *(req.command + string_length) = '\0';
+            *(req.camera_id + string_length) = '\0';
 
             /*send request to systemd and copy response to stream_buffer*/
             if (strcmp(req.command, "start") == 0) {
