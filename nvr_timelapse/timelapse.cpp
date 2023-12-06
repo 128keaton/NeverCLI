@@ -32,6 +32,7 @@ static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
         fprintf(stderr, "Error sending a frame for encoding\n");
         exit(1);
     }
+
     while (ret >= 0) {
         ret = avcodec_receive_packet(enc_ctx, pkt);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
@@ -48,18 +49,19 @@ static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
 int main(int argc, char **argv) {
     int days;
     const AVCodec *codec;
-    AVCodecContext *c = NULL;
+    AVCodecContext *c = nullptr;
     int i, ret;
     int frame_index;
     FILE *f;
     AVFrame *frame;
     uint8_t endcode[] = {0, 0, 1, 0xb7};
     long time_interval = 1; //default interval between frames
-    char * time_unit;
+    char *time_unit;
 
     /*validate args*/
-    if ((argc < 3)||(argc > 5)) {
-        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON> <PATH_TO_NVR_DIR> <OPTIONAL_TIME_INTERVAL>\n", argv[0]);
+    if ((argc < 3) || (argc > 5)) {
+        fprintf(stderr, "Usage: %s <NUMBER_OF_DAYS> <PATH_TO_CAMERA_JSON> <PATH_TO_NVR_DIR> <OPTIONAL_TIME_INTERVAL>\n",
+                argv[0]);
         exit(0);
     }
     days = atoi(argv[1]);
@@ -79,18 +81,18 @@ int main(int argc, char **argv) {
         nvr_directory = std::filesystem::path(argv[3]);
 
 
-    if(argc == 5){
+    if (argc == 5) {
         time_interval = strtol(argv[4], &time_unit, 10);
-        if(strcmp(time_unit,"m")==0){
-          time_interval = std::round(time_interval * (float)60/(float)36);
-        }else if(strcmp(time_unit,"h")==0){
-            time_interval = std::round(time_interval * (float)3600/(float)36);
-        }else{
-            fprintf(stderr, "Could not parse TIME_INTERVAL. Usage: <TIME_INTERVAL>h(hour) or <TIME_INTERVAL>m(minute).\n");
+        if (strcmp(time_unit, "m") == 0) {
+            time_interval = std::round(time_interval * (float) 60 / (float) 36);
+        } else if (strcmp(time_unit, "h") == 0) {
+            time_interval = std::round(time_interval * (float) 3600 / (float) 36);
+        } else {
+            fprintf(stderr,
+                    "Could not parse TIME_INTERVAL. Usage: <TIME_INTERVAL>h(hour) or <TIME_INTERVAL>m(minute).\n");
             exit(1);
         }
     }
-
 
 
     const string config_file_path = string(json_file_path);
@@ -109,24 +111,24 @@ int main(int argc, char **argv) {
 
     /*create timelapse file*/
     string timelapse_file_str = generateOutputFilename(camera_name, nvr_directory.string(), nvr::timelapse);
-    //std::cout<<timelapse_file_str<<std::endl;
     f = fopen(timelapse_file_str.c_str(), "wb");
     if (!f) {
         fprintf(stderr, "Could not open %s\n", timelapse_file_str.c_str());
         //exit(1);
     }
-    /* find the mpeg1video encoder */
 
+    /* find the m1 hevc video encoder */
     codec = avcodec_find_encoder_by_name("hevc_videotoolbox");
     if (!codec) {
         fprintf(stderr, "Codec hevc_videotoolbox not found\n");
+
+        /* find the common h265 video encoder */
         codec = avcodec_find_encoder_by_name("libx265");
         if (!codec) {
             fprintf(stderr, "Codec libx265 not found\n");
             exit(1);
         }
     }
-
 
 
     c = avcodec_alloc_context3(codec);
@@ -149,13 +151,15 @@ int main(int argc, char **argv) {
     c->gop_size = 1;
     c->max_b_frames = 1;
     c->pix_fmt = AV_PIX_FMT_YUV420P;
+
+    /* required on macOS to make a valid 'hevc' video playable by iOS/QuickTime */
     c->codec_tag = MKTAG('h', 'v', 'c', '1');
 
- //   if (codec->id == AV_CODEC_ID_H264)
-//      av_opt_set(c->priv_data, "preset", "fast", 0);
+    if (codec->id == AV_CODEC_ID_H264)
+        av_opt_set(c->priv_data, "preset", "fast", 0);
 
     /* open codec */
-    ret = avcodec_open2(c, codec, NULL);
+    ret = avcodec_open2(c, codec, nullptr);
     if (ret < 0) {
         fprintf(stderr, "Could not open codec\n");
         exit(1);
@@ -178,7 +182,7 @@ int main(int argc, char **argv) {
     /*set start of timelapse based on days specified*/
     time_t current_time;
     time(&current_time);
-    current_time -= days*24*3600;
+    current_time -= days * 24 * 3600;
     tm *local_time = localtime(&current_time);
     char date_time[20];
     strftime(date_time, 20, "%Y-%m-%d_%H-%M-%S", local_time);
@@ -186,7 +190,8 @@ int main(int argc, char **argv) {
 
     /*sort files in the directory in ascending order*/
     std::vector<std::filesystem::path> files_in_directory;
-    copy(std::filesystem::directory_iterator(snapshot_directory), std::filesystem::directory_iterator(), // directory_iterator::value_type
+    copy(std::filesystem::directory_iterator(snapshot_directory),
+         std::filesystem::directory_iterator(), // directory_iterator::value_type
          std::back_inserter(files_in_directory));
     sort(files_in_directory.begin(), files_in_directory.end());
     /*loop through the snapshots*/
@@ -204,28 +209,28 @@ int main(int argc, char **argv) {
         input_format_context = avformat_alloc_context();
 
         /*select frames in time_interval*/
-        if(frame_index%time_interval != 0){
+        if (frame_index % time_interval != 0) {
             frame_index++;
             continue;
         }
         frame_index++;
         /*continue to next snapshot file if current file is earlier that start_date_time */
-        if(strcmp(start_date_time.c_str(), std::string(filename).c_str()) > 0){
+        if (strcmp(start_date_time.c_str(), std::string(filename).c_str()) > 0) {
             continue;
         }
-        std::cout<<i<<std::endl;
-        if (avformat_open_input(&input_format_context, std::string(filename).c_str(), NULL, NULL) != 0) {
+        std::cout << i << std::endl;
+        if (avformat_open_input(&input_format_context, std::string(filename).c_str(), nullptr, nullptr) != 0) {
             fprintf(stderr, "Unable to open %s\n", std::string(filename).c_str());
             exit(1);
         }
-        if (avformat_find_stream_info(input_format_context, NULL) < 0) {
+        if (avformat_find_stream_info(input_format_context, nullptr) < 0) {
             fprintf(stderr, "Unable to find steam info");
             avformat_close_input(&input_format_context);
             exit(1);
         }
 
         int video_stream_index = -1;
-        for (uint16_t stream_index = 0; stream_index < input_format_context->nb_streams; stream_index++) {
+        for (int stream_index = 0; stream_index < input_format_context->nb_streams; stream_index++) {
             if (input_format_context->streams[stream_index]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
                 video_stream_index = stream_index;
                 break;
@@ -239,7 +244,7 @@ int main(int argc, char **argv) {
         /*Find decoder for video stream*/
         AVCodecParameters *input_codec_parameters = input_format_context->streams[video_stream_index]->codecpar;
         const AVCodec *input_codec = avcodec_find_decoder(input_codec_parameters->codec_id);
-        if (input_codec == NULL) {
+        if (input_codec == nullptr) {
             fprintf(stderr, "Could not find decoder\n");
             avformat_close_input(&input_format_context);
             exit(1);
@@ -247,7 +252,7 @@ int main(int argc, char **argv) {
 
         AVCodecContext *input_codec_context;
         input_codec_context = avcodec_alloc_context3(input_codec);
-        if (avcodec_open2(input_codec_context, input_codec, NULL) < 0) {
+        if (avcodec_open2(input_codec_context, input_codec, nullptr) < 0) {
             fprintf(stderr, "Could not open decoder\n");
             avformat_close_input(&input_format_context);
             exit(1);
@@ -256,7 +261,7 @@ int main(int argc, char **argv) {
         /*read encoded frame into AVPacket*/
         AVPacket *encoded_packet;
         encoded_packet = av_packet_alloc();
-        encoded_packet->data = NULL;
+        encoded_packet->data = nullptr;
         encoded_packet->size = 0;
         if (av_read_frame(input_format_context, encoded_packet) < 0) {
             fprintf(stderr, "Cannot read frame\n");
@@ -289,7 +294,7 @@ int main(int argc, char **argv) {
         SwsContext *sws_context = sws_getContext(decoded_frame->width, decoded_frame->height,
                                                  AV_PIX_FMT_YUV420P, c->width, c->height, c->pix_fmt,
                                                  SWS_BILINEAR, nullptr, nullptr, nullptr);
-        if (sws_context == NULL) {
+        if (sws_context == nullptr) {
             fprintf(stderr, "Error while calling sws_getContext\n");
             av_packet_free(&encoded_packet);
             avcodec_close(input_codec_context);
@@ -315,12 +320,11 @@ int main(int argc, char **argv) {
     }
 
     /* flush the encoder */
-    //encode(c, NULL, NULL, f);
+    //encode(c, nullptr, nullptr, f);
 
     /* Add sequence end code to have a real MPEG file*/
-    //if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
-
-    fwrite(endcode, 1, sizeof(endcode), f);
+    if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
+        fwrite(endcode, 1, sizeof(endcode), f);
     fclose(f);
 
     avcodec_free_context(&c);
