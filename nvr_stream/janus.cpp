@@ -77,7 +77,7 @@ namespace nvr {
     }
 
     bool Janus::disconnect() {
-        if (streaming && _stream_id > 0)
+        if (streaming && !_stream_id.empty())
             if (!destroyStream(_stream_id))
                 logger->warn("Could not destroy Janus stream with ID '{}'", _stream_id);
 
@@ -279,7 +279,7 @@ namespace nvr {
      * @param streamID ID of the stream to destroy
      * @return
      */
-    bool Janus::destroyStream(int64_t streamID) {
+    bool Janus::destroyStream(const string& streamID) {
         json body;
 
         body["request"] = "destroy";
@@ -304,11 +304,11 @@ namespace nvr {
     /**
      * Create a Media JSON array for the stream
      * @param streamName Readable stream name with hyphen
-     * @param streamID Numeric stream ID
+     * @param streamID String stream ID
      * @param port RTP streaming port
      * @return
      */
-    json Janus::buildMedia(const string &streamName, int64_t streamID, int64_t port) {
+    json Janus::buildMedia(const string &streamName, const string& streamID, int64_t port) {
         json media;
 
         media["mid"] = std::to_string(generateMediaID());
@@ -332,7 +332,7 @@ namespace nvr {
      * @param port RTP streaming port
      * @return true if created
      */
-    bool Janus::createStream(const string &streamName, int64_t streamID, int64_t port) {
+    bool Janus::createStream(const string& streamName, const string& streamID, int64_t port) {
         json list = getStreamList();
 
         _stream_id = streamID;

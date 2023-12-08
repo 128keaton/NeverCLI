@@ -25,7 +25,7 @@ namespace nvr {
         GstElement *sink;
         string stream_name;
         int64_t rtp_port;
-        int stream_id;
+        string stream_id;
         std::shared_ptr<spdlog::logger> logger;
         Janus janus;
         GMainLoop *loop;

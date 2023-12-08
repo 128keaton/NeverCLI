@@ -62,7 +62,7 @@ namespace nvr {
         // Get required fields
         const long clip_runtime = config["splitEvery"];
         const int rtp_port = config["rtpPort"];
-        const int stream_id = config["id"];
+        const string stream_id = config["id"];
         const string stream_url = config["streamURL"];
         const string snapshot_url = config["snapshotURL"];
         const string output_path = config["outputPath"];

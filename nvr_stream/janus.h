@@ -29,8 +29,8 @@ namespace nvr {
         int64_t getSessionID();
         json getStreamList();
 
-        bool destroyStream(int64_t streamID);
-        bool createStream(const string& streamName, int64_t streamID, int64_t port);
+        bool destroyStream(const string& streamID);
+        bool createStream(const string& streamName, const string& streamID, int64_t port);
         bool connect();
         bool disconnect();
 
@@ -47,14 +47,14 @@ namespace nvr {
 
         int64_t _session_id = -1;
         int64_t _handler_id = -1;
-        int64_t _stream_id = -1;
+        string _stream_id = nullptr;
 
         [[nodiscard]] json performRequest(const json& request) const;
         json buildMessage(json &body);
 
         static string generateRandom();
         static int64_t generateMediaID();
-        static json buildMedia(const string &streamName, int64_t streamID, int64_t port);
+        static json buildMedia(const string &streamName, const string& streamID, int64_t port);
     };
 }
 
