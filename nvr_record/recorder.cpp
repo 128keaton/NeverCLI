@@ -34,7 +34,7 @@ namespace nvr {
 
                     spdlog::info("Finishing segment '{}'", segment_file_dest_path.c_str());
 
-                    fs::create_directories(segment_file_dest_path.parent_path().filename());
+                    fs::create_directories(segment_file_dest_path.parent_path());
                     fs::rename(segment_file_src_path, segment_file_dest_path);
                 } else if (string_fmt.find(string("starts")) != std::string::npos) {
                     auto segment_file_name_string = string(segment_file_name);
