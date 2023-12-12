@@ -7,9 +7,53 @@
 #include "recorder.h"
 #include "../common.h"
 
+using path = std::filesystem::path;
+namespace fs = std::filesystem;
+
 namespace nvr {
+
+    void Recorder::logCallback(void *ptr, int level, const char *fmt, va_list vargs) {
+        if (level <= AV_LOG_ERROR) {
+            vprintf(fmt, vargs);
+        } else {
+            string string_fmt = string(fmt);
+
+            if (string_fmt.find(string("segment")) != std::string::npos) {
+                auto segment_file_name = va_arg(vargs, char*);
+
+                if (string_fmt.find(string("ended")) != std::string::npos) {
+                    auto segment_file_name_string = string(segment_file_name);
+                    auto tmp_path = string("/tmp/");
+
+                    std::size_t pos = segment_file_name_string.find(tmp_path);
+                    if (pos == std::string::npos) return;
+                    segment_file_name_string.replace(pos, tmp_path.length(), "");
+
+                    path segment_file_dest_path = (segment_file_name_string.c_str());
+                    path segment_file_src_path = (segment_file_name);
+
+                    spdlog::info("Finishing segment '{}'", segment_file_dest_path.c_str());
+
+                    fs::create_directories(segment_file_dest_path.parent_path().filename());
+                    fs::rename(segment_file_src_path, segment_file_dest_path);
+                } else if (string_fmt.find(string("starts")) != std::string::npos) {
+                    auto segment_file_name_string = string(segment_file_name);
+                    auto dot_path = string("./");
+
+                    std::size_t pos = segment_file_name_string.find(dot_path);
+                    if (pos == std::string::npos) return;
+                    segment_file_name_string.replace(pos, dot_path.length(), "");
+
+                    spdlog::info("Starting segment '{}'", segment_file_name_string);
+                }
+            }
+        }
+    }
+
+
     Recorder::Recorder(const CameraConfig &config) {
-        av_log_set_level(AV_LOG_QUIET);
+        av_log_set_level(AV_LOG_DEBUG);
+        av_log_set_callback(logCallback);
         this->type = config.type;
         this->error_count = 0;
         this->camera_name = config.stream_name;
@@ -29,6 +73,8 @@ namespace nvr {
         this->port = config.port;
         this->snapshot_interval = config.snapshot_interval;
         this->logger = buildLogger(config);
+        spdlog::register_logger(this->logger);
+        spdlog::set_default_logger(this->logger);
     }
 
     void Recorder::quit() {
@@ -61,7 +107,8 @@ namespace nvr {
         AVDictionary *params = nullptr;
         av_dict_set(&params, "rtsp_flags", "prefer_tcp", AV_DICT_APPEND);
 
-        string full_stream_url = buildStreamURL(this->stream_url, this->ip_address, this->port, this->rtsp_password, this->rtsp_username, this->type);
+        string full_stream_url = buildStreamURL(this->stream_url, this->ip_address, this->port, this->rtsp_password,
+                                                this->rtsp_username, this->type);
         string sanitized_stream_url = sanitizeStreamURL(full_stream_url, this->rtsp_password);
 
         this->logger->info("Opening connection to '{}'", sanitized_stream_url);
@@ -190,7 +237,7 @@ namespace nvr {
 
 
     int Recorder::setupMuxer() {
-        string output_file_str = generateOutputFilename(this->camera_name, this->output_path, video);
+        string output_file_str = generateOutputFilename(this->camera_name, this->output_path, video, true);
 
         // Segment muxer
         output_format = (AVOutputFormat *) av_guess_format("segment", output_file_str.c_str(), nullptr);
@@ -262,7 +309,8 @@ namespace nvr {
             }
 
             if (packet->stream_index != input_index) {
-                logger->error("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index, input_index);
+                logger->error("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index,
+                              input_index);
                 continue;
             }
 
@@ -321,5 +369,6 @@ namespace nvr {
     Recorder::Recorder() {
         this->logger = nullptr;
     }
+
 } // nvr
 #pragma clang diagnostic pop

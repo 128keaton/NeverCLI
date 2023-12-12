@@ -29,13 +29,16 @@ extern "C" {
 #include <spdlog/sinks/rotating_file_sink.h>
 
 using string = std::string;
+using nvr_logger = std::shared_ptr<spdlog::logger>;
 
 namespace nvr {
     class Recorder {
     public:
         Recorder();
 
-        Recorder(const CameraConfig &config);
+        static void logCallback(void *ptr, int level, const char *fmt, va_list vargs);
+
+        explicit Recorder(const CameraConfig &config);
         bool connect();
         int startRecording(long _clip_runtime);
         int clipCount();
@@ -44,14 +47,14 @@ namespace nvr {
         string getName();
 
     private:
-        AVCodecContext *input_codec_context;
-        AVFormatContext *input_format_context;
-        AVStream *input_stream;
-        AVOutputFormat *output_format;
-        AVFormatContext *output_format_context;
-        AVStream *output_stream;
-        CURL *curl_handle;
-        std::shared_ptr<spdlog::logger> logger;
+        AVCodecContext *input_codec_context{};
+        AVFormatContext *input_format_context{};
+        AVStream *input_stream{};
+        AVOutputFormat *output_format{};
+        AVFormatContext *output_format_context{};
+        AVStream *output_stream{};
+        CURL *curl_handle{};
+        nvr_logger logger;
 
         StreamType type;
         string camera_name;

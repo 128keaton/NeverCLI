@@ -172,7 +172,7 @@ namespace nvr {
         return current;
     }
 
-    string generateOutputFilename(const string&name, const string&output_path, FileType file_type) {
+    string generateOutputFilename(const string&name, const string&output_path, FileType file_type, bool temporary) {
         string file_name;
 
         file_name.append(name);
@@ -193,7 +193,10 @@ namespace nvr {
         }
 
 
-        path file_path = output_path;
+        path file_path = temporary ? "/tmp" : output_path;
+
+        if (temporary)
+            file_path /= (output_path);
 
         switch (file_type) {
             case video:
