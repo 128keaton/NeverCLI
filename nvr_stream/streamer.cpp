@@ -131,17 +131,12 @@ namespace nvr {
         // h264 final payloader
         appData.payloader = gst_element_factory_make("rtph264pay", "pay");
         g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "aggregate-mode", 2, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
-        g_object_set(G_OBJECT(appData.payloader), "mtu", mtu, nullptr);
 
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "ts-offset", delay, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
 
         // queues for buffering
@@ -199,16 +194,17 @@ namespace nvr {
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
-
-                g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 35, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "min-qp", 31, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 31, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
+//                g_object_set(G_OBJECT(appData.encoder), "init-qp", 35, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
+ //               g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 20, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 20, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "default-roi-delta-qp", 0, nullptr);
+    //            g_object_set(G_OBJECT(appData.encoder), "qp-ib", 20, nullptr);
+  //              g_object_set(G_OBJECT(appData.encoder), "qp-ip", 20, nullptr);
+//                g_object_set(G_OBJECT(appData.encoder), "default-roi-delta-qp", 0, nullptr);
             }
 
 

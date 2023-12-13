@@ -318,9 +318,11 @@ namespace nvr {
         media["codec"] = "h264";
         media["is_private"] = false;
         media["port"] = port;
+        media["collision"] = 1000;
+        media["bufferkf"] = true;
+        media["simulcast"] = true;
         media["rtpmap"] = "H264/90000";
         media["pt"] = 96;
-        media["bitrate"] = 1024;
         media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         media = json::array({media});
