@@ -303,12 +303,10 @@ namespace nvr {
 
     /**
      * Create a Media JSON array for the stream
-     * @param streamName Readable stream name with hyphen
-     * @param streamID String stream ID
      * @param port RTP streaming port
      * @return
      */
-    json Janus::buildMedia(const string &streamName, const string& streamID, int64_t port) {
+    json Janus::buildMedia(int64_t port) {
         json media;
 
         media["mid"] = std::to_string(generateMediaID());
@@ -332,18 +330,7 @@ namespace nvr {
      * @param port RTP streaming port
      * @return true if created
      */
-    bool Janus::createStream(const string& streamName, const string& streamID, int64_t port) {
-        json list = getStreamList();
-
-        _stream_id = streamID;
-        for (auto &stream: getStreamList()) {
-            if (stream.contains("id") && stream["id"] == streamID) {
-                logger->warn("Destroying existing stream with ID '{}'", streamID);
-                destroyStream(streamID);
-                break;
-            }
-        }
-
+    bool Janus::createStream(const string& streamName, int64_t port) {
         json body;
 
         logger->info("Creating Janus stream '{}'", streamName);
@@ -351,8 +338,7 @@ namespace nvr {
         body["request"] = "create";
         body["name"] = streamName;
         body["type"] = "rtp";
-        body["id"] = streamID;
-        body["media"] = buildMedia(streamName, streamID, port);
+        body["media"] = buildMedia(port);
 
         json request = buildMessage(body);
 
@@ -366,7 +352,7 @@ namespace nvr {
             logger->error(response_data.dump());
             streaming = false;
         } else if (response_data.contains("created")) {
-            logger->info("Stream '{}' created", streamName);
+            logger->info("Stream '{}' created: {}", streamName, response.dump());
             streaming = true;
         } else {
             logger->warn("Not sure, dumping response: {}", response.dump());
