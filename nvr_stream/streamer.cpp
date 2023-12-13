@@ -427,7 +427,7 @@ namespace nvr {
             data->logger->info("Link of type '{}' succeeded", new_pad_type);
 
             if (janus_connected)
-                if (data->janus.createStream(data->stream_name, data->stream_id, data->rtp_port)) {
+                if (data->janus.createStream(data->stream_name,data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
                     data->janus.keepAlive();
                 } else
