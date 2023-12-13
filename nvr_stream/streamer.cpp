@@ -200,17 +200,10 @@ namespace nvr {
                 logger->info("Using vaapi for encoding");
 
                 // h265 decode with vaapi
-                appData.decoder = gst_element_factory_make("vaapidecodebin", "dec");
-                g_object_set(G_OBJECT(appData.decoder), "max-size-buffers", max_buffers, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "max-size-bytes", max_bytes_size * 2, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "max-size-time", max_delay * 2, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "disable-vpp", true, nullptr);
-                g_object_set(G_OBJECT(appData.decoder), "message-forward", true, nullptr);
-
+                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 1, nullptr); // vbr
-                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 15, nullptr); // 30 (duh)
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr); // vbr
                 g_object_set(G_OBJECT(appData.encoder), "target-percentage", 50, nullptr); // quality from 0-100
                 g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
             }
