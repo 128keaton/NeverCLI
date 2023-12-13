@@ -29,10 +29,15 @@ namespace nvr {
                 if (string_fmt.find(string("ended")) != std::string::npos) {
                     auto segment_file_name_string = string(segment_file_name);
                     auto tmp_path = string("/tmp/");
+                    auto dot_path = string("./");
 
-                    std::size_t pos = segment_file_name_string.find(tmp_path);
-                    if (pos == std::string::npos) return;
-                    segment_file_name_string.replace(pos, tmp_path.length(), "");
+                    std::size_t tmp_pos = segment_file_name_string.find(tmp_path);
+                    if (tmp_pos == std::string::npos) return;
+                    segment_file_name_string.replace(tmp_pos, tmp_path.length(), "");
+
+                    std::size_t dot_pos = segment_file_name_string.find(dot_path);
+                    if (dot_pos == std::string::npos) return;
+                    segment_file_name_string.replace(dot_pos, dot_path.length(), "");
 
                     path segment_file_dest_path = (segment_file_name_string.c_str());
                     path segment_file_src_path = (segment_file_name);
