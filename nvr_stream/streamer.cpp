@@ -201,11 +201,12 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 32, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 35, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 15, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 15, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 3, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 20, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 20, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "default-roi-delta-qp", 0, nullptr);
             }
 
