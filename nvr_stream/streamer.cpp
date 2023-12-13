@@ -104,11 +104,8 @@ namespace nvr {
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
         // queue delays
-        int64_t max_delay = 0;
-        int64_t delay = toNanoseconds(30);
-        int64_t max_bytes_size = 0;
+        int64_t delay = toNanoseconds(5);
         int64_t latency = 5000;
-        int64_t max_buffers = 0;
         int64_t mtu = 1400;
         gint config_interval = -1;
 
