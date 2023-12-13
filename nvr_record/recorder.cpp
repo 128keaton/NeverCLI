@@ -27,23 +27,26 @@ namespace nvr {
                 auto segment_file_name = va_arg(vargs, char*);
 
                 if (string_fmt.find(string("ended")) != std::string::npos) {
-                    auto segment_file_name_string = string(segment_file_name);
+                    auto segment_source_file_name = string(segment_file_name);
+                    auto segment_dest_file_name = string(segment_file_name);
                     auto tmp_path = string("/tmp/");
                     auto dot_path = string("./");
 
-                    std::size_t tmp_pos = segment_file_name_string.find(tmp_path);
+                    // Change destination from original (/tmp/./videos/blah/x.mp4)
+                    std::size_t tmp_pos = segment_dest_file_name.find(tmp_path);
                     if (tmp_pos == std::string::npos) return;
-                    segment_file_name_string.replace(tmp_pos, tmp_path.length(), "");
+                    segment_dest_file_name.replace(tmp_pos, tmp_path.length(), "");
 
-                    std::size_t dot_pos = segment_file_name_string.find(dot_path);
+                    std::size_t dot_pos = segment_source_file_name.find(dot_path);
                     if (dot_pos == std::string::npos) return;
-                    segment_file_name_string.replace(dot_pos, dot_path.length(), "");
+                    segment_source_file_name.replace(dot_pos, dot_path.length(), "");
 
-                    path segment_file_dest_path = (segment_file_name_string.c_str());
-                    path segment_file_src_path = (segment_file_name);
+                    path segment_file_dest_path = (segment_dest_file_name.c_str());
+                    path segment_file_src_path = (segment_source_file_name.c_str());
 
                     instance()->last_clip = segment_file_dest_path;
-                    instance()->logger->info("Finished clip '{}' with runtime of {} seconds", segment_file_dest_path.c_str(), instance()->clip_runtime);
+                    instance()->logger->info("Finished clip '{}' with runtime of {} seconds", segment_file_dest_path.filename().c_str(), instance()->clip_runtime);
+                    instance()->logger->info("Moving clip from '{}' to '{}'", segment_file_src_path.string(), segment_file_dest_path.string());
 
                     fs::create_directories(segment_file_dest_path.parent_path());
                     fs::rename(segment_file_src_path, segment_file_dest_path);
