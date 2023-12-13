@@ -27,6 +27,10 @@ namespace nvr {
         return this->streaming;
     }
 
+    int64_t Janus::getStreamID() {
+        return this->_stream_id;
+    }
+
     void Janus::keepAlive() {
         std::thread{
                 [this]() {
@@ -77,7 +81,7 @@ namespace nvr {
     }
 
     bool Janus::disconnect() {
-        if (streaming && !_stream_id.empty())
+        if (streaming && _stream_id != -1)
             if (!destroyStream(_stream_id))
                 logger->warn("Could not destroy Janus stream with ID '{}'", _stream_id);
 
@@ -279,7 +283,7 @@ namespace nvr {
      * @param streamID ID of the stream to destroy
      * @return
      */
-    bool Janus::destroyStream(const string& streamID) {
+    bool Janus::destroyStream(int64_t streamID) {
         json body;
 
         body["request"] = "destroy";
@@ -330,7 +334,7 @@ namespace nvr {
      * @param port RTP streaming port
      * @return true if created
      */
-    bool Janus::createStream(const string& streamName, int64_t port) {
+    bool Janus::createStream(const string &streamName, int64_t port) {
         json body;
 
         logger->info("Creating Janus stream '{}'", streamName);
@@ -352,7 +356,12 @@ namespace nvr {
             logger->error(response_data.dump());
             streaming = false;
         } else if (response_data.contains("created")) {
-            logger->info("Stream '{}' created: {}", streamName, response.dump());
+
+            json stream_data = response_data["stream"];
+
+            this->_stream_id = stream_data["id"];
+
+            logger->info("Stream '{}' created and has ID '{}'", streamName, this->getStreamID());
             streaming = true;
         } else {
             logger->warn("Not sure, dumping response: {}", response.dump());
