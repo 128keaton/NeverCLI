@@ -46,10 +46,13 @@ namespace nvr {
 
                     instance()->last_clip = segment_file_dest_path;
                     instance()->logger->info("Finished clip '{}' with runtime of {} seconds", segment_file_dest_path.filename().c_str(), instance()->clip_runtime);
-                    instance()->logger->info("Moving clip from '{}' to '{}'", segment_file_src_path.string(), segment_file_dest_path.string());
+                    instance()->logger->info("Copying clip from '{}' to '{}'", segment_file_src_path.string(), segment_file_dest_path.string());
 
                     fs::create_directories(segment_file_dest_path.parent_path());
-                    fs::rename(segment_file_src_path, segment_file_dest_path);
+                    fs::copy(segment_file_src_path, segment_file_dest_path);
+
+                    instance()->logger->info("Removing temporary clip from '{}'", segment_file_src_path.string());
+                    fs::remove(segment_file_src_path);
                 } else if (string_fmt.find(string("starts")) != std::string::npos) {
                     auto segment_file_name_string = string(segment_file_name);
                     auto dot_path = string("./");
