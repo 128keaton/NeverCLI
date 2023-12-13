@@ -204,7 +204,7 @@ namespace nvr {
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 850, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
             }
 
