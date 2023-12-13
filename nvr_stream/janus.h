@@ -47,7 +47,7 @@ namespace nvr {
 
         int64_t _session_id = -1;
         int64_t _handler_id = -1;
-        string _stream_id = nullptr;
+        string _stream_id = "";
 
         [[nodiscard]] json performRequest(const json& request) const;
         json buildMessage(json &body);
