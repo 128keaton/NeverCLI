@@ -203,10 +203,13 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
 
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr); // cbr
                 g_object_set(G_OBJECT(appData.encoder), "tune", 1, nullptr); // high-compression
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cpb-length", 10000, nullptr); // max size for cpb-length
+                g_object_set(G_OBJECT(appData.encoder), "quality-level", 6, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "init-qp", 32, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ib", 30, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "qp-ip", 30, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "default-roi-delta-qp", 0, nullptr);
             }
 
 
