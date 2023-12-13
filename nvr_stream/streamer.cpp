@@ -205,8 +205,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "temporal-levels", 4, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 3, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qp-ib", 20, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "qp-ip", 20, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "default-roi-delta-qp", 0, nullptr);
