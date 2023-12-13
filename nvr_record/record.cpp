@@ -1,9 +1,8 @@
 #include "recorder.h"
 
-nvr::Recorder *recorder;
+std::shared_ptr<nvr::Recorder> recorder;
 
-void quit(int sig)
-{
+void quit(int sig) {
     if (recorder->valid())
         recorder->quit();
 
@@ -21,7 +20,8 @@ int main(int argc, char **argv) {
 
     const auto config = nvr::getConfig(argv[1]);
 
-    recorder = new nvr::Recorder(config);
+    recorder = nvr::Recorder::instance();
+    recorder->configure(config);
 
     signal(SIGINT, quit);
 

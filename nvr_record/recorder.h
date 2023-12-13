@@ -34,19 +34,20 @@ using nvr_logger = std::shared_ptr<spdlog::logger>;
 namespace nvr {
     class Recorder {
     public:
-        Recorder();
-
-        static void logCallback(void *ptr, int level, const char *fmt, va_list vargs);
-
-        explicit Recorder(const CameraConfig &config);
+        Recorder(Recorder const&) = delete;
+        Recorder& operator=(Recorder const&) = delete;
+        static void logCallback([[maybe_unused]] void *ptr, int level, const char *fmt, va_list vargs);
+        void configure(const CameraConfig &config);
         bool connect();
         int startRecording(long _clip_runtime);
         int clipCount();
         void quit();
         bool valid();
         string getName();
+        static std::shared_ptr<Recorder> instance();
 
     private:
+        Recorder();
         AVCodecContext *input_codec_context{};
         AVFormatContext *input_format_context{};
         AVStream *input_stream{};
@@ -56,16 +57,18 @@ namespace nvr {
         CURL *curl_handle{};
         nvr_logger logger;
 
-        StreamType type;
-        string camera_name;
-        string stream_url;
-        string snapshot_url;
-        string output_path;
-        string rtsp_username;
-        string rtsp_password;
-        string ip_address;
+        StreamType type = h265;
+        string camera_name = "";
+        string stream_url = "";
+        string snapshot_url = "";
+        string output_path = "";
+        string rtsp_username = "";
+        string rtsp_password = "";
+        string ip_address = "";
+        string last_clip = "";
 
 
+        bool configured = false;
         int port{};
         bool connected = false;
         int input_index = -1;

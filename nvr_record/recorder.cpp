@@ -12,7 +12,12 @@ namespace fs = std::filesystem;
 
 namespace nvr {
 
-    void Recorder::logCallback(void *ptr, int level, const char *fmt, va_list vargs) {
+    std::shared_ptr<Recorder> Recorder::instance(){
+        static std::shared_ptr<Recorder> s{new Recorder};
+        return s;
+    }
+
+    void Recorder::logCallback([[maybe_unused]] void *ptr, int level, const char *fmt, va_list vargs) {
         if (level <= AV_LOG_ERROR) {
             vprintf(fmt, vargs);
         } else {
@@ -32,7 +37,8 @@ namespace nvr {
                     path segment_file_dest_path = (segment_file_name_string.c_str());
                     path segment_file_src_path = (segment_file_name);
 
-                    spdlog::info("Finishing segment '{}'", segment_file_dest_path.c_str());
+                    instance()->last_clip = segment_file_dest_path;
+                    instance()->logger->info("Finished clip '{}' with runtime of {} seconds", segment_file_dest_path.c_str(), instance()->clip_runtime);
 
                     fs::create_directories(segment_file_dest_path.parent_path());
                     fs::rename(segment_file_src_path, segment_file_dest_path);
@@ -44,16 +50,19 @@ namespace nvr {
                     if (pos == std::string::npos) return;
                     segment_file_name_string.replace(pos, dot_path.length(), "");
 
-                    spdlog::info("Starting segment '{}'", segment_file_name_string);
+                    instance()->logger->info("Starting clip '{}' with predicted runtime of {} seconds", segment_file_name_string, instance()->clip_runtime);
                 }
             }
         }
     }
 
 
-    Recorder::Recorder(const CameraConfig &config) {
+    Recorder::Recorder() {
         av_log_set_level(AV_LOG_DEBUG);
         av_log_set_callback(logCallback);
+    }
+
+    void Recorder::configure(const CameraConfig &config) {
         this->type = config.type;
         this->error_count = 0;
         this->camera_name = config.stream_name;
@@ -73,8 +82,7 @@ namespace nvr {
         this->port = config.port;
         this->snapshot_interval = config.snapshot_interval;
         this->logger = buildLogger(config);
-        spdlog::register_logger(this->logger);
-        spdlog::set_default_logger(this->logger);
+        this->configured = true;
     }
 
     void Recorder::quit() {
@@ -96,7 +104,7 @@ namespace nvr {
     }
 
     bool Recorder::valid() {
-        return this->logger != nullptr;
+        return this->logger != nullptr && this->configured;
     }
 
     bool Recorder::connect() {
@@ -335,11 +343,8 @@ namespace nvr {
             av_interleaved_write_frame(output_format_context, packet);
 
             // Finished writing clip
-            if (duration_counter >= (double) this->clip_runtime) {
-                this->logger->info("Finished clip with duration {}, starting new clip", duration_counter);
-                this->logger->flush();
+            if (duration_counter >= (double) this->clip_runtime)
                 duration_counter = 0.0;
-            }
 
             // Take snapshot
             if (snapshot_duration_counter >= (double) this->snapshot_interval) {
@@ -364,10 +369,6 @@ namespace nvr {
 
     int Recorder::clipCount() {
         return countClips(output_path, camera_name);
-    }
-
-    Recorder::Recorder() {
-        this->logger = nullptr;
     }
 
 } // nvr
