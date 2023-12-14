@@ -103,10 +103,11 @@ namespace nvr {
 
         logger->info("Opening connection to '{}'", sanitized_stream_location);
 
-        // queue delays
         int64_t delay = toNanoseconds(5);
-        int64_t latency = 5000;
+        int64_t latency = 6000;
+        int64_t bitrate = 375;
         gint config_interval = -1;
+
 
 
         // initialize pipeline
@@ -129,7 +130,7 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 700, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 600, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
@@ -186,7 +187,7 @@ namespace nvr {
             g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "buffer-size", 2147483647, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", 400, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", bitrate, nullptr);
         } else if (this->has_nvidia) {
             logger->info("Using nvidia hardware acceleration");
 
@@ -199,7 +200,7 @@ namespace nvr {
             g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "buffer-size", 2147483647, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", 400, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", bitrate, nullptr);
         } else {
             logger->info("Using vaapi for encoding");
 
@@ -210,7 +211,7 @@ namespace nvr {
 
             appData.encoder = gst_element_factory_make("vaapivp8enc", "enc");
             g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "bitrate", 400, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "bitrate", bitrate, nullptr);
         }
 
 

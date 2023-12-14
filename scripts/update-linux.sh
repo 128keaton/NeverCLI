@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## Update
-git pull
+git reset --hard origin/main && git pull
 
 ## Build
 cmake --build cmake-build-debug
