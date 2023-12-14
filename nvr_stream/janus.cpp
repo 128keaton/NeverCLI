@@ -323,7 +323,6 @@ namespace nvr {
         media["simulcast"] = true;
         media["rtpmap"] = "VP8/90000";
         media["pt"] = 96;
- //       media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         media = json::array({media});
         return media;

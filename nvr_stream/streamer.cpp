@@ -129,7 +129,6 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-        // g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
 
 
         // udp output sink
@@ -153,7 +152,7 @@ namespace nvr {
 
 
         if (this->type == h265) {
-            logger->info("Starting h265->h264 pipeline on port {}", rtp_port);
+            logger->info("Starting h265->vp8 pipeline on port {}", rtp_port);
 
             // h265 parser
             appData.parser = gst_element_factory_make("h265parse", nullptr);
@@ -163,71 +162,8 @@ namespace nvr {
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
-
-            if (!this->has_vaapi && !this->has_nvidia) {
-                logger->warn("Not using vaapi/nvidia for encoding/decoding");
-
-                // h265 decode without vaapi
-                appData.decoder = gst_element_factory_make("libde265dec", "dec");
-
-                // h264 encode without vaapi
-                appData.encoder = gst_element_factory_make("x264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "speed-preset", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "ref", 1, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cabac", false, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-lookahead", 0, nullptr);
-            } else if (this->has_nvidia) {
-                logger->info("Using nvidia hardware acceleration");
-                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-
-                appData.encoder = gst_element_factory_make("nvh264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 1024, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rc-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "zerolatency", true, nullptr);
-            } else {
-                logger->info("Using vaapi for encoding");
-
-                // h265 decode with vaapi
-                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-                appData.encoder = gst_element_factory_make("vaapivp8enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 400, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
-            }
-
-
-            // add everything
-            gst_bin_add_many(
-                    GST_BIN(appData.pipeline),
-                    appData.rtspSrc,
-                    appData.initialQueue,
-                    appData.dePayloader,
-                    appData.parser,
-                    appData.decoder,
-                    appData.encoder,
-                    appData.payloader,
-                    appData.finalQueue,
-                    appData.sink,
-                    nullptr
-            );
-
-            // link everything except source
-            gst_element_link_many(
-                    appData.initialQueue,
-                    appData.dePayloader,
-                    appData.parser,
-                    appData.decoder,
-                    appData.encoder,
-                    appData.payloader,
-                    appData.finalQueue,
-                    appData.sink,
-                    NULL);
         } else {
-            logger->info("Starting h264->h264 pipeline on port {}", rtp_port);
+            logger->info("Starting h264->vp8 pipeline on port {}", rtp_port);
 
             // h264 parser
             appData.parser = gst_element_factory_make("h264parse", nullptr);
@@ -235,29 +171,78 @@ namespace nvr {
 
             // h264 de-payload
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
-
-            // add everything
-            gst_bin_add_many(
-                    GST_BIN(appData.pipeline),
-                    appData.rtspSrc,
-                    appData.initialQueue,
-                    appData.dePayloader,
-                    appData.parser,
-                    appData.payloader,
-                    appData.finalQueue,
-                    appData.sink,
-                    nullptr);
-
-            // link everything except source
-            gst_element_link_many(
-                    appData.initialQueue,
-                    appData.dePayloader,
-                    appData.parser,
-                    appData.payloader,
-                    appData.finalQueue,
-                    appData.sink,
-                    NULL);
         }
+
+        if (!this->has_vaapi && !this->has_nvidia) {
+            logger->warn("Not using vaapi/nvidia for encoding/decoding");
+
+            if (this->type == h265)
+                appData.decoder = gst_element_factory_make("libde265dec", "dec");
+            else
+                appData.decoder = gst_element_factory_make("avdec_h264", "dec");
+
+
+            appData.encoder = gst_element_factory_make("vp8enc", "enc");
+            g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "buffer-size", 2147483647, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", 400, nullptr);
+        } else if (this->has_nvidia) {
+            logger->info("Using nvidia hardware acceleration");
+
+            if (this->type == h265)
+                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
+            else
+                appData.decoder = gst_element_factory_make("nvh264dec", "dec");
+
+            appData.encoder = gst_element_factory_make("vp8enc", "enc");
+            g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "buffer-size", 2147483647, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", 400, nullptr);
+        } else {
+            logger->info("Using vaapi for encoding");
+
+            if (this->type == h265)
+                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
+            else
+                appData.decoder = gst_element_factory_make("vaapih264dec", "dec");
+
+            appData.encoder = gst_element_factory_make("vaapivp8enc", "enc");
+            g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "bitrate", 400, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
+            g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
+        }
+
+
+        // add everything
+        gst_bin_add_many(
+                GST_BIN(appData.pipeline),
+                appData.rtspSrc,
+                appData.initialQueue,
+                appData.dePayloader,
+                appData.parser,
+                appData.decoder,
+                appData.encoder,
+                appData.payloader,
+                appData.finalQueue,
+                appData.sink,
+                nullptr
+        );
+
+        // link everything except source
+        gst_element_link_many(
+                appData.initialQueue,
+                appData.dePayloader,
+                appData.parser,
+                appData.decoder,
+                appData.encoder,
+                appData.payloader,
+                appData.finalQueue,
+                appData.sink,
+                NULL);
+
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
 
@@ -411,7 +396,7 @@ namespace nvr {
             data->logger->info("Link of type '{}' succeeded", new_pad_type);
 
             if (janus_connected)
-                if (data->janus.createStream(data->stream_name,data->rtp_port)) {
+                if (data->janus.createStream(data->stream_name, data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
                     data->janus.keepAlive();
                 } else
