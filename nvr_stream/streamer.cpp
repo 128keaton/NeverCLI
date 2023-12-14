@@ -105,8 +105,7 @@ namespace nvr {
 
         // queue delays
         int64_t delay = toNanoseconds(5);
-        int64_t latency = 5000;
-        int64_t mtu = 1400;
+        int64_t latency = 2000;
         gint config_interval = -1;
 
 
@@ -194,17 +193,11 @@ namespace nvr {
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
-                g_object_set(G_OBJECT(appData.encoder), "min-qp", 31, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "init-qp", 31, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "rate-control", 4, nullptr);
-//                g_object_set(G_OBJECT(appData.encoder), "init-qp", 35, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 750, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
- //               g_object_set(G_OBJECT(appData.encoder), "keyframe-period", 0, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
-    //            g_object_set(G_OBJECT(appData.encoder), "qp-ib", 20, nullptr);
-  //              g_object_set(G_OBJECT(appData.encoder), "qp-ip", 20, nullptr);
-//                g_object_set(G_OBJECT(appData.encoder), "default-roi-delta-qp", 0, nullptr);
             }
 
 
