@@ -105,7 +105,7 @@ namespace nvr {
 
         // queue delays
         int64_t delay = toNanoseconds(5);
-        int64_t latency = 2000;
+        int64_t latency = 5000;
         gint config_interval = -1;
 
 
@@ -129,7 +129,7 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 700, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
