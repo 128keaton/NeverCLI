@@ -127,9 +127,9 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
 
-        // h264 final payloader
-        appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
+        // vp8 final payloader
+        appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
+        // g_object_set(G_OBJECT(appData.payloader), "config-interval", config_interval, nullptr);
 
 
         // udp output sink
@@ -192,10 +192,10 @@ namespace nvr {
 
                 // h265 decode with vaapi
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-                appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
+                appData.encoder = gst_element_factory_make("vaapivp8enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "bitrate", 400, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
             }
 

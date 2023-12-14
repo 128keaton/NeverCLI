@@ -315,15 +315,15 @@ namespace nvr {
 
         media["mid"] = std::to_string(generateMediaID());
         media["type"] = "video";
-        media["codec"] = "h264";
+        media["codec"] = "vp8";
         media["is_private"] = false;
         media["port"] = port;
         media["collision"] = 1000;
         media["bufferkf"] = true;
         media["simulcast"] = true;
-        media["rtpmap"] = "H264/90000";
+        media["rtpmap"] = "VP8/90000";
         media["pt"] = 96;
-        media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
+ //       media["fmtp"] = "profile-level-id=42e01f;packetization-mode=1";
 
         media = json::array({media});
         return media;
