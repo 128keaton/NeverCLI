@@ -211,7 +211,6 @@ namespace nvr {
             appData.encoder = gst_element_factory_make("vaapivp8enc", "enc");
             g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "bitrate", 400, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
         }
 
