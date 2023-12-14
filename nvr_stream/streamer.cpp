@@ -194,9 +194,8 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
                 appData.encoder = gst_element_factory_make("vaapih264enc", "enc");
                 g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "bitrate", 750, nullptr);
+                g_object_set(G_OBJECT(appData.encoder), "bitrate", 400, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "cabac", true, nullptr);
-                g_object_set(G_OBJECT(appData.encoder), "trellis", true, nullptr);
                 g_object_set(G_OBJECT(appData.encoder), "max-bframes", 1, nullptr);
             }
 
