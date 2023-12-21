@@ -60,10 +60,9 @@ namespace nvr {
         bool has_nvidia = false;
         bool quitting = false;
         static int64_t toNanoseconds(int64_t seconds);
-        static int64_t toBytes(int64_t megabytes);
         static void callbackMessage ([[maybe_unused]] GstBus *bus, GstMessage *msg, StreamData *data);
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
-        static int findOpenPort() ;
+        int findOpenPort();
     };
 }
 

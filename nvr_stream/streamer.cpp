@@ -9,7 +9,7 @@
 #include <string>
 #include <gst/gstpad.h>
 #include <netinet/in.h>
-
+#include <stdexcept>
 
 using string = std::string;
 using std::ifstream;
@@ -358,17 +358,19 @@ namespace nvr {
     int Streamer::findOpenPort() {
         int current_port = 5004;
 
-        while (true) {
+        while (current_port < 6000) {
             struct sockaddr_in address{};
             int opt = 1;
             int server_fd;
             if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+                this->logger->debug("Could not create socket for port {}, unable to initialize", current_port);
                 close(server_fd);
                 current_port += 1;
                 continue;
             }
 
             if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+                this->logger->debug("Could not create socket for port {}, unable to set socket option", current_port);
                 close(server_fd);
                 current_port += 1;
                 continue;
@@ -379,12 +381,14 @@ namespace nvr {
             address.sin_port = htons(current_port);
 
             if (bind(server_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
+                this->logger->debug("Could not create socket for port {}, unable to bind", current_port);
                 close(server_fd);
                 current_port += 1;
                 continue;
             }
 
             if (listen(server_fd, 3) < 0) {
+                this->logger->debug("Could not create socket for port {}, unable to listen", current_port);
                 close(server_fd);
                 current_port += 1;
                 continue;
@@ -392,6 +396,9 @@ namespace nvr {
 
             break;
         }
+
+        if (current_port == 6000)
+            throw std::invalid_argument("Exhausted port possibilities, cannot continue");
 
         return current_port;
     }
@@ -469,10 +476,6 @@ namespace nvr {
 
     int64_t Streamer::toNanoseconds(int64_t seconds) {
         return seconds * 1000000000;
-    }
-
-    int64_t Streamer::toBytes(int64_t megabytes) {
-        return megabytes * 1024 * 1024;
     }
 
     Streamer::Streamer() {
