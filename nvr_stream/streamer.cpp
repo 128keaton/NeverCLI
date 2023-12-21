@@ -458,10 +458,9 @@ namespace nvr {
             data->logger->debug("Streaming output RTP port: {}", port_value);
 
             if (janus_connected)
-                if (data->janus.createStream(data->stream_name, data->rtp_port)) {
-                    data->logger->info("Stream created and live on Janus");
+                if (data->janus.createStream(data->stream_name, data->rtp_port))
                     data->janus.keepAlive();
-                } else
+                else
                     data->logger->warn("Stream created, but unable to notify Janus");
             else
                 data->logger->warn("Stream created, but unable to connect to Janus");

@@ -165,7 +165,7 @@ namespace nvr {
         json request;
         int64_t session_id;
 
-        logger->info("Sending keep-alive");
+        logger->debug("Sending keep-alive");
         session_id = this->getSessionID();
 
         request["janus"] = "keepalive";
