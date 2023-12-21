@@ -61,7 +61,7 @@ namespace nvr {
         logger->info("Connecting to Janus with socket '{}'", janus_socket);
 
         if ((out_sock = socket(AF_UNIX, SOCK_SEQPACKET, 0)) == -1) {
-            logger->error("Could not initialize socket");
+            logger->error("Could not initialize Janus socket");
             return false;
         }
 

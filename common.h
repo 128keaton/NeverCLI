@@ -57,7 +57,6 @@ namespace nvr {
         string stream_id;
         const long clip_runtime;
         const long snapshot_interval;
-        const int rtp_port;
         const int port;
     };
 

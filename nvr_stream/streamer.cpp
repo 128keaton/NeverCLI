@@ -8,6 +8,8 @@
 #include <gst/gst.h>
 #include <string>
 #include <gst/gstpad.h>
+#include <netinet/in.h>
+
 
 using string = std::string;
 using std::ifstream;
@@ -23,7 +25,7 @@ namespace nvr {
         this->ip_address = config.ip_address;
         this->rtsp_password = config.rtsp_password;
         this->rtsp_username = config.rtsp_username;
-        this->rtp_port = config.rtp_port;
+        this->rtp_port = nvr::Streamer::findOpenPort();
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
@@ -101,7 +103,7 @@ namespace nvr {
                                                      this->rtsp_password, this->rtsp_username, this->type);
         string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
-        logger->info("Opening connection to '{}'", sanitized_stream_location);
+        logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
         int64_t delay = toNanoseconds(5);
         int64_t latency = 6000;
@@ -153,7 +155,8 @@ namespace nvr {
 
 
         if (this->type == h265) {
-            logger->info("Starting h265->vp8 pipeline on port {}", rtp_port);
+            logger->info("Building h265->vp8 pipeline on port {}", rtp_port);
+            appData.is_h265 = true;
 
             // h265 parser
             appData.parser = gst_element_factory_make("h265parse", nullptr);
@@ -164,7 +167,8 @@ namespace nvr {
             g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
 
         } else {
-            logger->info("Starting h264->vp8 pipeline on port {}", rtp_port);
+            logger->info("Building h264->vp8 pipeline on port {}", rtp_port);
+            appData.is_h265 = false;
 
             // h264 parser
             appData.parser = gst_element_factory_make("h264parse", nullptr);
@@ -175,21 +179,19 @@ namespace nvr {
         }
 
         if (!this->has_vaapi && !this->has_nvidia) {
-            logger->warn("Not using vaapi/nvidia for encoding/decoding");
+            logger->debug("Not using vaapi/nvidia for encoding/decoding");
 
             if (this->type == h265)
-                appData.decoder = gst_element_factory_make("libde265dec", "dec");
+                appData.decoder = gst_element_factory_make("avdec_h265", "dec");
             else
                 appData.decoder = gst_element_factory_make("avdec_h264", "dec");
 
 
             appData.encoder = gst_element_factory_make("vp8enc", "enc");
-            g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "buffer-size", 2147483647, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "target-bitrate", bitrate, nullptr);
         } else if (this->has_nvidia) {
-            logger->info("Using nvidia hardware acceleration");
+            logger->debug("Using nvidia hardware acceleration");
 
             if (this->type == h265)
                 appData.decoder = gst_element_factory_make("nvh265dec", "dec");
@@ -197,12 +199,10 @@ namespace nvr {
                 appData.decoder = gst_element_factory_make("nvh264dec", "dec");
 
             appData.encoder = gst_element_factory_make("vp8enc", "enc");
-            g_object_set(G_OBJECT(appData.encoder), "tune", 0x00000002, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "buffer-size", 2147483647, nullptr);
             g_object_set(G_OBJECT(appData.encoder), "target-bitrate", bitrate, nullptr);
         } else {
-            logger->info("Using vaapi for encoding");
+            logger->debug("Using vaapi for encoding");
 
             if (this->type == h265)
                 appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
@@ -271,7 +271,7 @@ namespace nvr {
         return 0;
     }
 
-    void Streamer::callbackMessage(GstBus *bus, GstMessage *msg, StreamData *data) {
+    void Streamer::callbackMessage([[maybe_unused]] GstBus *bus, GstMessage *msg, StreamData *data) {
         switch (GST_MESSAGE_TYPE(msg)) {
             case GST_MESSAGE_ERROR: {
                 GError *err;
@@ -336,7 +336,7 @@ namespace nvr {
 
                 break;
             case GST_MESSAGE_STREAM_START:
-                data->logger->info("Stream started");
+                data->logger->info("Stream has successfully started");
 
                 break;
             case GST_MESSAGE_PROGRESS:
@@ -345,7 +345,7 @@ namespace nvr {
 
                 gst_message_parse_progress(msg, &type, &code, &text);
 
-                data->logger->info("Progress: ({}) {}", code, text);
+                data->logger->debug("Progress: ({}) {}", code, text);
                 g_free(code);
                 g_free(text);
                 break;
@@ -355,18 +355,60 @@ namespace nvr {
         }
     }
 
+    int Streamer::findOpenPort() {
+        int current_port = 5004;
+
+        while (true) {
+            struct sockaddr_in address{};
+            int opt = 1;
+            int server_fd;
+            if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+                close(server_fd);
+                current_port += 1;
+                continue;
+            }
+
+            if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+                close(server_fd);
+                current_port += 1;
+                continue;
+            }
+
+            address.sin_family = AF_INET;
+            address.sin_addr.s_addr = INADDR_ANY;
+            address.sin_port = htons(current_port);
+
+            if (bind(server_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
+                close(server_fd);
+                current_port += 1;
+                continue;
+            }
+
+            if (listen(server_fd, 3) < 0) {
+                close(server_fd);
+                current_port += 1;
+                continue;
+            }
+
+            break;
+        }
+
+        return current_port;
+    }
+
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
         GstPad *sink_pad = gst_element_get_static_pad(data->initialQueue, "sink");
         GstPadLinkReturn ret;
         GstCaps *new_pad_caps = nullptr;
         GstStructure *new_pad_struct;
         const gchar *new_pad_type;
+        string caps_str;
 
 
         bool janus_connected = data->janus.connect();
 
 
-        data->logger->info("Received new pad '{}' from '{}'", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+        data->logger->debug("Received new pad '{}' from '{}'", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
 
         /* Check the new pad's name */
         if (!g_str_has_prefix(GST_PAD_NAME(new_pad), "recv_rtp_src_")) {
@@ -385,23 +427,37 @@ namespace nvr {
         new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
         new_pad_type = gst_structure_get_name(new_pad_struct);
 
-        data->logger->info("Caps '{}'", gst_caps_to_string(new_pad_caps));
+        caps_str = string(gst_caps_to_string(new_pad_caps));
+
+        if (data->is_h265 && caps_str.find("H264") != string::npos) {
+            data->logger->error("Whoops, you're trying to decode an H264 stream with an H265 decoder");
+            goto exit;
+        } else if (!data->is_h265 && caps_str.find("H265") != string::npos) {
+            data->logger->error("Whoops, you're trying to decode an H265 stream with an H264 decoder");
+            goto exit;
+        } else
+            data->logger->debug("Caps should be setup correctly, continuing");
+
 
         /* Attempt the link */
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
             data->logger->error("Type dictated is '{}', but link failed", new_pad_type);
         } else {
-            data->logger->info("Link of type '{}' succeeded", new_pad_type);
+            data->logger->debug("Link of type '{}' succeeded", new_pad_type);
+
+            gint port_value;
+            g_object_get(G_OBJECT(data->sink), "port", &port_value, nullptr);
+            data->logger->debug("Streaming output RTP port: {}", port_value);
 
             if (janus_connected)
                 if (data->janus.createStream(data->stream_name, data->rtp_port)) {
                     data->logger->info("Stream created and live on Janus");
                     data->janus.keepAlive();
                 } else
-                    data->logger->warn("Not streaming because we were not able to create a stream endpoint on Janus");
+                    data->logger->warn("Stream created, but unable to notify Janus");
             else
-                data->logger->warn("Not streaming because we were not able to connect to Janus");
+                data->logger->warn("Stream created, but unable to connect to Janus");
         }
 
         exit:
