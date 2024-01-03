@@ -105,7 +105,6 @@ namespace nvr {
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t latency = 100;
         int64_t bitrate = 850;
         int64_t buffer_size = 2500000;
         int64_t mtu = 1024;
@@ -119,7 +118,6 @@ namespace nvr {
 
         // rtsp source
         appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", latency, nullptr); // 200ms latency
         g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
@@ -139,6 +137,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "processing-deadline", 25000000, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", buffer_size, nullptr);
 
 
