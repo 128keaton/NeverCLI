@@ -107,7 +107,9 @@ namespace nvr {
 
         int64_t delay = toNanoseconds(5);
         int64_t latency = 6000;
-        int64_t bitrate = 375;
+        int64_t bitrate = 1024;
+        int64_t buffer_size = 2500000;
+        gint mtu = 1024;
         gint config_interval = -1;
 
 
@@ -124,7 +126,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "message-forward", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "ntp-sync", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", 1073741823, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", buffer_size, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
@@ -132,12 +134,13 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 600, nullptr);
+        g_object_set(G_OBJECT(appData.payloader), "mtu", mtu, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", buffer_size, nullptr);
 
 
         // queues for buffering
