@@ -61,7 +61,7 @@ namespace nvr {
     };
 
     string buildStreamURL(const string&url, const string&ip_address, int port, const string&password,
-                          const string&username, bool use_tcp = false);
+                          const string&username);
 
     string sanitizeStreamURL(const string&stream_url, const string&password);
 
