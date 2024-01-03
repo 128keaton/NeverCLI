@@ -105,11 +105,9 @@ namespace nvr {
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t bitrate = 850;
+        int64_t bitrate = 512;
         int64_t buffer_size = 2500000;
         int64_t mtu = 1024;
-        gint config_interval = -1;
-
 
 
         // initialize pipeline
@@ -123,6 +121,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", buffer_size, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
+        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 0, nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
 
@@ -150,7 +149,6 @@ namespace nvr {
 
             // h265 parser
             appData.parser = gst_element_factory_make("h265parse", nullptr);
-            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h265 de-payload
             appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
@@ -162,7 +160,6 @@ namespace nvr {
 
             // h264 parser
             appData.parser = gst_element_factory_make("h264parse", nullptr);
-            g_object_set(G_OBJECT(appData.parser), "config-interval", config_interval, nullptr);
 
             // h264 de-payload
             appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
