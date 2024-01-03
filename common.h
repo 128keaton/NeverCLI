@@ -67,7 +67,7 @@ namespace nvr {
 
     CameraConfig getConfig(const char* config_file);
 
-    string generateOutputFilename(const string&name, const string&output_path, FileType file_type, bool temporary = false);
+    string generateOutputFilename(const string&camera_id, const string&output_path, FileType file_type, bool temporary = false);
 
     int countClips(const string&output_path, const string&camera_name);
 

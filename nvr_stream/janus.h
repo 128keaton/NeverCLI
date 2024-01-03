@@ -25,13 +25,13 @@ namespace nvr {
         explicit Janus(nvr_logger &logger);
         void keepAlive();
 
-        int64_t getPluginHandlerID(int64_t sessionID);
+        int64_t getPluginHandlerID(int64_t session_id);
         int64_t getSessionID();
         int64_t getStreamID();
         json getStreamList();
 
-        bool destroyStream(int64_t streamID);
-        bool createStream(const string& streamName, int64_t port);
+        bool destroyStream(int64_t camera_id);
+        bool createStream(const string& camera_id, int64_t port);
         bool connect();
         bool disconnect();
 

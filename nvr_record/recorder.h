@@ -58,7 +58,7 @@ namespace nvr {
         nvr_logger logger;
 
         StreamType type = h265;
-        string camera_name = "";
+        string camera_id = "";
         string stream_url = "";
         string snapshot_url = "";
         string output_path = "";

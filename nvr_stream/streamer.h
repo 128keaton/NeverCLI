@@ -49,7 +49,7 @@ namespace nvr {
         std::shared_ptr<spdlog::logger> logger;
         int rtp_port{};
         int port{};
-        string camera_name;
+        string camera_id;
         string stream_url;
         string rtsp_username;
         string rtsp_password;

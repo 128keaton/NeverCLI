@@ -21,7 +21,7 @@ namespace nvr {
         this->has_vaapi = false;
         this->type = config.type;
         this->logger = nvr::buildLogger(config);
-        this->camera_name = config.stream_name;
+        this->camera_id = config.stream_id;
         this->ip_address = config.ip_address;
         this->rtsp_password = config.rtsp_password;
         this->rtsp_username = config.rtsp_username;
@@ -29,7 +29,7 @@ namespace nvr {
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
-        this->appData.stream_name = this->camera_name;
+        this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
         this->appData.stream_id = config.stream_id;
         this->appData.logger = this->logger;
@@ -434,7 +434,7 @@ namespace nvr {
             data->logger->debug("Streaming output RTP port: {}", port_value);
 
             if (janus_connected)
-                if (data->janus.createStream(data->stream_name, data->rtp_port))
+                if (data->janus.createStream(data->stream_id, data->rtp_port))
                     data->janus.keepAlive();
                 else
                     data->logger->warn("Stream created, but unable to notify Janus");

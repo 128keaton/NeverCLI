@@ -143,14 +143,14 @@ namespace nvr {
         return _session_id;
     }
 
-    int64_t Janus::getPluginHandlerID(int64_t sessionID) {
+    int64_t Janus::getPluginHandlerID(int64_t session_id) {
         if (_handler_id > 0)
             return _handler_id;
 
         json request;
 
         request["janus"] = "attach";
-        request["session_id"] = sessionID;
+        request["session_id"] = session_id;
         request["plugin"] = "janus.plugin.streaming";
         request["transaction"] = generateRandom();
 
@@ -280,14 +280,14 @@ namespace nvr {
 
     /**
      * Destroy a Janus stream
-     * @param streamID ID of the stream to destroy
+     * @param camera_id ID of the stream to destroy
      * @return
      */
-    bool Janus::destroyStream(int64_t streamID) {
+    bool Janus::destroyStream(int64_t camera_id) {
         json body;
 
         body["request"] = "destroy";
-        body["id"] = streamID;
+        body["id"] = camera_id;
 
         json request = buildMessage(body);
         json response = performRequest(request);
@@ -295,12 +295,12 @@ namespace nvr {
         json plugin_data = response["plugindata"];
         json response_data = plugin_data["data"];
 
-        if (response_data.contains("destroyed") && response_data["destroyed"] == streamID) {
+        if (response_data.contains("destroyed") && response_data["destroyed"] == camera_id) {
             streaming = !(response_data["streaming"] == string("destroyed"));
             return !streaming;
         }
 
-        logger->error("Could not destroy stream with ID '{}'", streamID);
+        logger->error("Could not destroy stream with ID '{}'", camera_id);
         logger->error("Destroy response: {}", response.dump());
         return false;
     }
@@ -330,18 +330,18 @@ namespace nvr {
 
     /**
      * Create a stream on Janus
-     * @param streamName Readable stream name with hyphen
-     * @param streamID Numeric stream ID
+     * @param camera_id Readable camera ID with hyphen
      * @param port RTP streaming port
      * @return true if created
      */
-    bool Janus::createStream(const string &streamName, int64_t port) {
+    bool Janus::createStream(const string &camera_id, int64_t port) {
         json body;
 
-        logger->info("Creating Janus stream '{}'", streamName);
+        logger->info("Creating Janus stream '{}'", camera_id);
 
         body["request"] = "create";
-        body["name"] = streamName;
+        body["name"] = camera_id;
+        body["id"] = camera_id;
         body["type"] = "rtp";
         body["media"] = buildMedia(port);
 
@@ -362,7 +362,7 @@ namespace nvr {
 
             this->_stream_id = stream_data["id"];
 
-            logger->info("Stream '{}' created and has ID '{}'", streamName, this->getStreamID());
+            logger->info("Stream '{}' created and has ID '{}'", camera_id, this->getStreamID());
             streaming = true;
         } else {
             logger->warn("Not sure, dumping response: {}", response.dump());

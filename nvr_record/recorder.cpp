@@ -76,7 +76,7 @@ namespace nvr {
     void Recorder::configure(const CameraConfig &config) {
         this->type = config.type;
         this->error_count = 0;
-        this->camera_name = config.stream_name;
+        this->camera_id = config.stream_id;
         this->input_format_context = avformat_alloc_context();
         this->stream_url = config.stream_url;
         this->snapshot_url = config.snapshot_url;
@@ -186,7 +186,7 @@ namespace nvr {
      */
     void Recorder::takeSnapshot() {
         FILE *snapshot_file;
-        string snapshot_file_str = generateOutputFilename(this->camera_name, this->output_path, image);
+        string snapshot_file_str = generateOutputFilename(this->camera_id, this->output_path, image);
         string full_snapshot_url = string("http://").append(this->ip_address).append(this->snapshot_url);
 
         this->logger->info("Taking snapshot from URL '{}'", full_snapshot_url);
@@ -250,13 +250,13 @@ namespace nvr {
                 return handleError("Could not connect to camera", false);
         }
 
-        this->logger->info("{} starting to record", this->camera_name);
+        this->logger->info("{} starting to record", this->camera_id);
         return this->record();
     }
 
 
     int Recorder::setupMuxer() {
-        string output_file_str = generateOutputFilename(this->camera_name, this->output_path, video, true);
+        string output_file_str = generateOutputFilename(this->camera_id, this->output_path, video, true);
 
         // Segment muxer
         output_format = (AVOutputFormat *) av_guess_format("segment", output_file_str.c_str(), nullptr);
@@ -372,14 +372,6 @@ namespace nvr {
         av_packet_free(&packet);
 
         return EXIT_SUCCESS;
-    }
-
-    string Recorder::getName() {
-        return this->camera_name;
-    }
-
-    int Recorder::clipCount() {
-        return countClips(output_path, camera_name);
     }
 
 } // nvr

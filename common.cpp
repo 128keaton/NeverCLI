@@ -169,10 +169,10 @@ namespace nvr {
         return current;
     }
 
-    string generateOutputFilename(const string&name, const string&output_path, FileType file_type, bool temporary) {
+    string generateOutputFilename(const string&camera_id, const string&output_path, FileType file_type, bool temporary) {
         string file_name;
 
-        file_name.append(name);
+        file_name.append(camera_id);
         file_name.append("-");
 
         switch (file_type) {
@@ -208,7 +208,7 @@ namespace nvr {
 
         fs::create_directory(file_path);
 
-        file_path /= name;
+        file_path /= camera_id;
 
         fs::create_directory(file_path);
 
@@ -218,12 +218,12 @@ namespace nvr {
     }
 
 
-    int countClips(const string&output_path, const string&camera_name) {
+    int countClips(const string&output_path, const string&camera_id) {
         fs::path videos_path{output_path};
         videos_path /= "videos";
 
         fs::create_directory(videos_path);
-        videos_path /= camera_name;
+        videos_path /= camera_id;
         fs::create_directory(videos_path);
 
         int clip_count = 0;
