@@ -127,7 +127,7 @@ namespace nvr {
         av_dict_set(&params, "rtsp_flags", "prefer_tcp", AV_DICT_APPEND);
 
         string full_stream_url = buildStreamURL(this->stream_url, this->ip_address, this->port, this->rtsp_password,
-                                                this->rtsp_username, this->type);
+                                                this->rtsp_username);
         string sanitized_stream_url = sanitizeStreamURL(full_stream_url, this->rtsp_password);
 
         this->logger->info("Opening connection to '{}'", sanitized_stream_url);

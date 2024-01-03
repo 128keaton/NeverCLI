@@ -100,7 +100,7 @@ namespace nvr {
         gst_plugin_list_free(plugins);
 
         string rtsp_stream_location = buildStreamURL(this->stream_url, this->ip_address, this->port,
-                                                     this->rtsp_password, this->rtsp_username, this->type);
+                                                     this->rtsp_password, this->rtsp_username, true);
         string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);

@@ -236,8 +236,8 @@ namespace nvr {
     }
 
     string buildStreamURL(const string&url, const string&ip_address, const int port, const string&password,
-                          const string&username, const StreamType&codec) {
-        string base = string("rtspt://");
+                          const string&username, const bool use_tcp) {
+        string base = use_tcp ? string("rtspt://") : string("rtsp://");
 
         if (password.empty()) {
             base = base.append(ip_address);
