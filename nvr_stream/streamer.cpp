@@ -109,7 +109,7 @@ namespace nvr {
         int64_t latency = 6000;
         int64_t bitrate = 1024;
         int64_t buffer_size = 2500000;
-        gint mtu = 1024;
+        int64_t mtu = 45000;
         gint config_interval = -1;
 
 
