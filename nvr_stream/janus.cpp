@@ -341,7 +341,6 @@ namespace nvr {
 
         body["request"] = "create";
         body["name"] = camera_id;
-        body["id"] = camera_id;
         body["type"] = "rtp";
         body["media"] = buildMedia(port);
 
