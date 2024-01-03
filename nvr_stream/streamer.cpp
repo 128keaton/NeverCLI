@@ -105,9 +105,9 @@ namespace nvr {
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t bitrate = 512;
+        int64_t bitrate = 1024;
         int64_t buffer_size = 2500000;
-        int64_t mtu = 1024;
+        int64_t mtu = 1200;
 
 
         // initialize pipeline
