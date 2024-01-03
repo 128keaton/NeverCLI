@@ -107,7 +107,6 @@ namespace nvr {
 
         int64_t bitrate = 1024;
         int64_t buffer_size = 2500000;
-        int64_t mtu = 1200;
 
 
         // initialize pipeline
@@ -128,7 +127,6 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "mtu", mtu, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
