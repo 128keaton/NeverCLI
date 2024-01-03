@@ -29,5 +29,6 @@ int main(int argc, char *argv[]) {
     streamer = nvr::Streamer(config);
 
     signal(SIGINT, quit);
+    signal(SIGTERM, quit);
     return streamer.start();
 }
