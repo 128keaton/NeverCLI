@@ -105,7 +105,7 @@ namespace nvr {
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t bitrate = 780;
+        int64_t bitrate = 940;
         int64_t buffer_size = 2500000;
 
 
