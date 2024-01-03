@@ -105,9 +105,8 @@ namespace nvr {
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t delay = toNanoseconds(5);
-        int64_t latency = 1000;
-        int64_t bitrate = 1024;
+        int64_t latency = 100;
+        int64_t bitrate = 850;
         int64_t buffer_size = 2500000;
         int64_t mtu = 1024;
         gint config_interval = -1;
@@ -145,16 +144,7 @@ namespace nvr {
 
         // queues for buffering
         appData.initialQueue = gst_element_factory_make("queue", "initial_queue");
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
-        g_object_set(G_OBJECT(appData.initialQueue), "max-size-buffers", 0, nullptr);
-
-
         appData.finalQueue = gst_element_factory_make("queue", "final_queue");
-        g_object_set(G_OBJECT(appData.finalQueue), "min-threshold-time", delay, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-bytes", 0, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-time", toNanoseconds(120) * 2, nullptr);
-        g_object_set(G_OBJECT(appData.finalQueue), "max-size-buffers", 0, nullptr);
 
 
         if (this->type == h265) {
@@ -474,10 +464,6 @@ namespace nvr {
             gst_caps_unref(new_pad_caps);
 
         gst_object_unref(sink_pad);
-    }
-
-    int64_t Streamer::toNanoseconds(int64_t seconds) {
-        return seconds * 1000000000;
     }
 
     Streamer::Streamer() {
