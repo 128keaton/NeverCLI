@@ -106,10 +106,10 @@ namespace nvr {
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
         int64_t delay = toNanoseconds(5);
-        int64_t latency = 8000;
+        int64_t latency = 1000;
         int64_t bitrate = 1024;
         int64_t buffer_size = 2500000;
-        int64_t mtu = 1250;
+        int64_t mtu = 1024;
         gint config_interval = -1;
 
 
