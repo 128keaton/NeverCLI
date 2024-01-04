@@ -40,7 +40,8 @@ namespace nvr {
     enum FileType {
         video,
         image,
-        log
+        log,
+        timelapse
     };
 
 

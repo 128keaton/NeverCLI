@@ -187,6 +187,11 @@ namespace nvr {
             case log:
                 file_name.append("log.txt");
                 break;
+            case timelapse:
+             	file_name = appendTimestamp(file_name);
+                file_name.append(".mp4");
+                break;
+               
         }
 
 
@@ -204,6 +209,8 @@ namespace nvr {
                 break;
             case log:
                 file_path /= ("logs");
+            case timelapse:
+                file_path /= ("timelapse");
         }
 
         fs::create_directory(file_path);
