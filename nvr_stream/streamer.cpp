@@ -34,6 +34,7 @@ namespace nvr {
         this->appData.stream_id = config.stream_id;
         this->appData.logger = this->logger;
         this->appData.janus = Janus(this->logger);
+        this->appData.error_count = 0;
 
         // Use substream for streaming
         this->stream_url = config.sub_stream_url;
@@ -380,6 +381,43 @@ namespace nvr {
         return current_port;
     }
 
+    /**
+     * Create the stream on Janus
+     * @param data
+     */
+    void Streamer::createJanusStream(StreamData *data) { // NOLINT(*-no-recursion)
+        if (data->error_count > 5) {
+            data->logger->warn("Too many Janus errors, not trying again");
+            return;
+        }
+
+        if (data->janus.createStream(data->stream_id, data->rtp_port)) {
+            data->janus.keepAlive();
+            data->error_count = 0;
+            return;
+        } else {
+            data->logger->warn("Stream created, but unable to notify Janus, trying to destroy and recreate stream");
+            int64_t stream_id = data->janus.findStreamID(data->stream_id);
+
+            if (stream_id > 0) {
+                auto did_destroy = data->janus.destroyStream(stream_id);
+
+                if (!did_destroy)  {
+                    data->error_count += 1;
+                    data->logger->warn("Unable to stop stream");
+                }
+            } else {
+                data->error_count += 1;
+                data->logger->warn("Unable to find a stream to stop");
+            }
+
+            data->logger->info("Retrying stream creation");
+            sleep(1); // honk shoe
+
+            return createJanusStream(data);
+        }
+    }
+
     void Streamer::padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data) {
         GstPad *sink_pad = gst_element_get_static_pad(data->dePayloader, "sink");
         GstPadLinkReturn ret;
@@ -435,10 +473,7 @@ namespace nvr {
             data->logger->debug("Streaming output RTP port: {}", port_value);
 
             if (janus_connected)
-                if (data->janus.createStream(data->stream_id, data->rtp_port))
-                    data->janus.keepAlive();
-                else
-                    data->logger->warn("Stream created, but unable to notify Janus");
+                createJanusStream(data);
             else
                 data->logger->warn("Stream created, but unable to connect to Janus");
         }

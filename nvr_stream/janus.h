@@ -28,9 +28,10 @@ namespace nvr {
         int64_t getPluginHandlerID(int64_t session_id);
         int64_t getSessionID();
         int64_t getStreamID();
+        int64_t findStreamID(const string& description);
         json getStreamList();
 
-        bool destroyStream(int64_t camera_id);
+        bool destroyStream(int64_t stream_id);
         bool createStream(const string& camera_id, int64_t port);
         bool connect();
         bool disconnect();

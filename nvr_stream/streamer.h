@@ -29,6 +29,7 @@ namespace nvr {
         GMainLoop *loop;
         gboolean is_live;
         gboolean is_h265;
+        int error_count;
     } StreamData;
 
 
@@ -59,6 +60,7 @@ namespace nvr {
         bool quitting = false;
         static void callbackMessage ([[maybe_unused]] GstBus *bus, GstMessage *msg, StreamData *data);
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);
+        static void createJanusStream(StreamData *data);
         int findOpenPort();
     };
 }

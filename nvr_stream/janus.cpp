@@ -92,6 +92,23 @@ namespace nvr {
         return true;
     }
 
+    /**
+     * Find the stream ID by a description
+     * @param description
+     * @return
+     */
+    int64_t Janus::findStreamID(const string& description) {
+        json stream_list = getStreamList();
+
+        int64_t stream_id = -1;
+
+        for (auto &stream: stream_list)
+            if (stream.contains("description") && stream["description"] == description)
+                stream_id = stream["id"];
+
+        return stream_id;
+    }
+
 
     /**
      * Get the list of streams
@@ -283,11 +300,11 @@ namespace nvr {
      * @param camera_id ID of the stream to destroy
      * @return
      */
-    bool Janus::destroyStream(int64_t camera_id) {
+    bool Janus::destroyStream(int64_t stream_id) {
         json body;
 
         body["request"] = "destroy";
-        body["id"] = camera_id;
+        body["id"] = stream_id;
 
         json request = buildMessage(body);
         json response = performRequest(request);
@@ -295,12 +312,12 @@ namespace nvr {
         json plugin_data = response["plugindata"];
         json response_data = plugin_data["data"];
 
-        if (response_data.contains("destroyed") && response_data["destroyed"] == camera_id) {
+        if (response_data.contains("destroyed") && response_data["destroyed"] == stream_id) {
             streaming = !(response_data["streaming"] == string("destroyed"));
             return !streaming;
         }
 
-        logger->error("Could not destroy stream with ID '{}'", camera_id);
+        logger->error("Could not destroy stream with ID '{}'", stream_id);
         logger->error("Destroy response: {}", response.dump());
         return false;
     }
