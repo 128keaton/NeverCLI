@@ -318,9 +318,7 @@ namespace nvr {
         media["codec"] = "vp8";
         media["is_private"] = false;
         media["port"] = port;
-        media["collision"] = 1000;
         media["bufferkf"] = true;
-        media["simulcast"] = true;
         media["rtpmap"] = "VP8/90000";
         media["pt"] = 96;
 
