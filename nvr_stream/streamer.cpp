@@ -79,7 +79,7 @@ namespace nvr {
             auto *plugin = static_cast<GstPlugin *>(p->data);
             // Check for vaapi
             if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
-                has_vaapi = gst_registry_check_feature_version(gst_registry_get(), "vaapidecodebin", 1, 22, 6);
+                has_vaapi = gst_registry_check_feature_version(gst_registry_get(), "vaapidecodebin", 1, 22, 0);
 
                 if (has_vaapi) {
                     logger->info("Found vaapi plugin");
@@ -89,7 +89,7 @@ namespace nvr {
 
             // Check for nvcodec
             if (strcmp(gst_plugin_get_name(plugin), "nvcodec") == 0) {
-                has_nvidia = gst_registry_check_feature_version(gst_registry_get(), "nvh265dec", 1, 22, 4);
+                has_nvidia = gst_registry_check_feature_version(gst_registry_get(), "nvh265dec", 1, 22, 0);
 
                 if (has_nvidia) {
                     logger->info("Found nvcodec plugin");
