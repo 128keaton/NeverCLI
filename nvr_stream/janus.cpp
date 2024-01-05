@@ -97,7 +97,7 @@ namespace nvr {
      * @param description
      * @return
      */
-    int64_t Janus::findStreamID(const string& description) {
+    int64_t Janus::findStreamID(const string &description) {
         json stream_list = getStreamList();
 
         int64_t stream_id = -1;
@@ -325,12 +325,14 @@ namespace nvr {
     /**
      * Create a Media JSON array for the stream
      * @param port RTP streaming port
+     * @param media_id Media ID
+     *
      * @return
      */
-    json Janus::buildMedia(int64_t port) {
+    json Janus::buildMedia(int64_t port, int64_t media_id) {
         json media;
 
-        media["mid"] = std::to_string(generateMediaID());
+        media["mid"] = std::to_string(media_id);
         media["type"] = "video";
         media["codec"] = "vp8";
         media["is_private"] = false;
@@ -354,10 +356,12 @@ namespace nvr {
 
         logger->info("Creating Janus stream '{}'", camera_id);
 
+        int64_t media_id = generateMediaID();
+
         body["request"] = "create";
         body["name"] = camera_id;
         body["type"] = "rtp";
-        body["media"] = buildMedia(port);
+        body["media"] = buildMedia(port, media_id);
 
         json request = buildMessage(body);
 
@@ -371,13 +375,12 @@ namespace nvr {
             logger->error(response_data.dump());
             streaming = false;
         } else if (response_data.contains("created")) {
-
             json stream_data = response_data["stream"];
 
             this->_stream_id = stream_data["id"];
 
-            int64_t media_id = body["media"][0]["mid"];
-            logger->info("Stream '{}' created, has ID '{}' and media ID '{}'", camera_id, this->getStreamID(), media_id);
+            logger->info("Stream '{}' created, has ID '{}' and media ID '{}'", camera_id, this->getStreamID(),
+                         media_id);
             streaming = true;
         } else {
             logger->warn("Not sure, dumping response: {}", response.dump());
