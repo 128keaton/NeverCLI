@@ -55,7 +55,8 @@ namespace nvr {
         json buildMessage(json &body);
 
         static string generateRandom();
-        static json buildMedia(int64_t port, const string &media_id);
+        static int64_t generateMediaID();
+        static json buildMedia(int64_t port);
     };
 }
 
