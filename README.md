@@ -56,8 +56,8 @@ There are two systemd unit templates included, one for streaming and one for rec
 
 To start recording:
 ```shell
-systemd --user enable --now nvr-record@camera-1
+systemd --user enable --now nvr-record@05e1486e-0fe9-4363-b925-f3f0c3815d84
 ```
 This assumes you have a directory at root called `nvr`,
 this also assumes you have copied your compiled binary into `/usr/local/bin`,
-and this assumes `/nvr/cameras/` has a file named `camera-1.json`
+and this assumes `/nvr/cameras/` has a file named `05e1486e-0fe9-4363-b925-f3f0c3815d84.json`
