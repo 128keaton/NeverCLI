@@ -400,17 +400,16 @@ namespace nvr {
                 auto did_destroy = data->janus.destroyStream(stream_id);
 
                 if (!did_destroy)  {
-                    data->error_count += 1;
                     data->logger->warn("Unable to stop stream");
+                    exit(-1);
                 }
             } else {
-                data->error_count += 1;
                 data->logger->warn("Unable to find a stream to stop");
+                exit(-1);
             }
 
+            data->error_count += 1;
             data->logger->info("Retrying stream creation");
-            sleep(1); // honk shoe
-
             return createJanusStream(data);
         }
     }
