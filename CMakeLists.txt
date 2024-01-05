@@ -55,18 +55,3 @@ target_link_libraries(nvr_stream PRIVATE gstreamer-1.0 gobject-2.0 glib-2.0 curl
 target_include_directories(nvr_stream PRIVATE ${GSTLIBS_INCLUDE_DIRS})
 target_link_directories(nvr_stream PRIVATE ${GSTLIBS_LIBRARY_DIRS})
 install(TARGETS nvr_stream DESTINATION bin)
-
-## Target: nvr_status_manager (Linux only)
-add_executable(nvr_status_manager nvr_status_manager/status_manager.cpp)
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    #DEP: systemd
-    pkg_check_modules(SYSTEMD REQUIRED IMPORTED_TARGET
-            libsystemd
-    )
-
-    # Link systemd on Linux only
-    target_link_libraries(nvr_status_manager PRIVATE PkgConfig::SYSTEMD)
-
-    install(TARGETS nvr_status_manager DESTINATION bin)
-endif ()
