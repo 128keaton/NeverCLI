@@ -106,9 +106,8 @@ namespace nvr {
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t bitrate = 940;
+        int64_t bitrate = 1024;
         int64_t buffer_size = 2500000;
-
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
@@ -128,13 +127,11 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1024, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "processing-deadline", 10000000, nullptr);
         g_object_set(G_OBJECT(appData.sink), "buffer-size", buffer_size, nullptr);
 
 
