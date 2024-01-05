@@ -325,12 +325,13 @@ namespace nvr {
     /**
      * Create a Media JSON array for the stream
      * @param port RTP streaming port
+     * @param media_id Custom media ID
      * @return
      */
-    json Janus::buildMedia(int64_t port) {
+    json Janus::buildMedia(int64_t port, const string &media_id) {
         json media;
 
-        media["mid"] = std::to_string(generateMediaID());
+        media["mid"] = media_id;
         media["type"] = "video";
         media["codec"] = "vp8";
         media["is_private"] = false;
@@ -357,7 +358,7 @@ namespace nvr {
         body["request"] = "create";
         body["name"] = camera_id;
         body["type"] = "rtp";
-        body["media"] = buildMedia(port);
+        body["media"] = buildMedia(port, camera_id);
 
         json request = buildMessage(body);
 
@@ -384,21 +385,5 @@ namespace nvr {
         }
 
         return streaming;
-    }
-
-    int64_t Janus::generateMediaID() {
-        std::random_device rd;
-        std::mt19937_64 gen(rd());
-        std::uniform_int_distribution<unsigned long long> dis;
-
-        int64_t mid = dis(gen) % 9 + 1;
-        int index;
-
-        for (index = 0; index < 15; index++) {
-            mid *= 10;
-            mid += dis(gen) % 10;
-        }
-
-        return mid;
     }
 }
