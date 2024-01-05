@@ -376,7 +376,8 @@ namespace nvr {
 
             this->_stream_id = stream_data["id"];
 
-            logger->info("Stream '{}' created and has ID '{}'", camera_id, this->getStreamID());
+            int64_t media_id = body["media"]["mid"];
+            logger->info("Stream '{}' created, has ID '{}' and media ID '{}'", camera_id, this->getStreamID(), media_id);
             streaming = true;
         } else {
             logger->warn("Not sure, dumping response: {}", response.dump());
