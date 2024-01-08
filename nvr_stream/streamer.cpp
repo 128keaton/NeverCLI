@@ -470,8 +470,10 @@ namespace nvr {
 
             if (janus_connected)
                 createJanusStream(data);
-            else
+            else {
                 data->logger->warn("Stream created, but unable to connect to Janus");
+                exit(-1);
+            }
         }
 
         exit:
