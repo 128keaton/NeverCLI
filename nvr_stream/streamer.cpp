@@ -383,9 +383,9 @@ namespace nvr {
      * @param data
      */
     void Streamer::createJanusStream(StreamData *data) { // NOLINT(*-no-recursion)
-        if (data->error_count > 5) {
+        if (data->error_count > 10) {
             data->logger->warn("Too many Janus errors, not trying again");
-            return;
+            exit(-1);
         }
 
         if (data->janus.createStream(data->stream_id, data->rtp_port)) {
@@ -393,21 +393,8 @@ namespace nvr {
             data->error_count = 0;
             return;
         } else {
-            data->logger->warn("Stream created, but unable to notify Janus, trying to destroy and recreate stream");
-            int64_t stream_id = data->janus.findStreamID(data->stream_id);
-
-            if (stream_id > 0) {
-                auto did_destroy = data->janus.destroyStream(stream_id);
-
-                if (!did_destroy)  {
-                    data->logger->warn("Unable to stop stream");
-                    exit(-1);
-                }
-            } else {
-                data->logger->warn("Unable to find a stream to stop");
-                exit(-1);
-            }
-
+            data->logger->warn("Stream created, but unable to notify Janus, trying to recreate stream");
+            data->rtp_port += 1;
             data->error_count += 1;
             data->logger->info("Retrying stream creation");
             return createJanusStream(data);
