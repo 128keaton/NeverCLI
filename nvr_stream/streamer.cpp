@@ -331,23 +331,21 @@ namespace nvr {
     }
 
     int Streamer::findOpenPort() {
-        int current_port = 5004;
+        int current_port = 0;
 
-        while (current_port < 6000) {
+        while (current_port < 99999) {
             struct sockaddr_in address{};
             int opt = 1;
             int server_fd;
             if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
                 this->logger->debug("Could not create socket for port {}, unable to initialize", current_port);
                 close(server_fd);
-                current_port += 1;
                 continue;
             }
 
             if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
                 this->logger->debug("Could not create socket for port {}, unable to set socket option", current_port);
                 close(server_fd);
-                current_port += 1;
                 continue;
             }
 
@@ -358,17 +356,20 @@ namespace nvr {
             if (bind(server_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
                 this->logger->debug("Could not create socket for port {}, unable to bind", current_port);
                 close(server_fd);
-                current_port += 1;
                 continue;
             }
 
             if (listen(server_fd, 3) < 0) {
                 this->logger->debug("Could not create socket for port {}, unable to listen", current_port);
                 close(server_fd);
-                current_port += 1;
                 continue;
             }
 
+            socklen_t len = sizeof(address);
+            getsockname(server_fd, (struct sockaddr *) &address, &len);
+            current_port = ntohs(address.sin_port);
+            close(server_fd);
+            this->logger->debug("Using port {}", current_port);
             break;
         }
 
