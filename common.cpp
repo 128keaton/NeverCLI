@@ -150,6 +150,9 @@ namespace nvr {
 
             auto logger = std::make_shared<spdlog::logger>(config.stream_name, sinks.begin(), sinks.end());
             logger->flush_on(spdlog::level::err);
+            std::string json_pattern = {"{\"time\": \"%Y-%m-%dT%H:%M:%S.%f%z\", \"name\": \"%n\", \"level\": \"%^%l%$\", \"message\": \"%v\"}"};
+            logger->set_pattern(json_pattern);
+
             return logger;
         }
         catch (const spdlog::spdlog_ex&ex) {

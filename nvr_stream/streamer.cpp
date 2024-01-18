@@ -29,6 +29,7 @@ namespace nvr {
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
+        this->appData.bitrate = 1024;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
         this->appData.stream_id = config.stream_id;
@@ -72,41 +73,12 @@ namespace nvr {
 
         gst_init(nullptr, nullptr);
 
-        GList *plugins, *p;
-
-        plugins = gst_registry_get_plugin_list(gst_registry_get());
-        for (p = plugins; p; p = p->next) {
-            auto *plugin = static_cast<GstPlugin *>(p->data);
-            // Check for vaapi
-            if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
-                has_vaapi = gst_registry_check_feature_version(gst_registry_get(), "vaapidecodebin", 1, 22, 0);
-
-                if (has_vaapi) {
-                    logger->info("Found vaapi plugin");
-                    break;
-                }
-            }
-
-            // Check for nvcodec
-            if (strcmp(gst_plugin_get_name(plugin), "nvcodec") == 0) {
-                has_nvidia = gst_registry_check_feature_version(gst_registry_get(), "nvh265dec", 1, 22, 0);
-
-                if (has_nvidia) {
-                    logger->info("Found nvcodec plugin");
-                    break;
-                }
-            }
-        }
-
-        gst_plugin_list_free(plugins);
-
         string rtsp_stream_location = buildStreamURL(this->stream_url, this->ip_address, this->port,
                                                      this->rtsp_password, this->rtsp_username);
         string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
 
-        int64_t bitrate = 1024;
         int64_t buffer_size = 2500000;
 
         // initialize pipeline
@@ -135,64 +107,10 @@ namespace nvr {
         g_object_set(G_OBJECT(appData.sink), "buffer-size", buffer_size, nullptr);
 
 
-        if (this->type == h265) {
-            logger->info("Building h265->vp8 pipeline on port {}", rtp_port);
-            appData.is_h265 = true;
+        appData.is_h265 = type == h265;
 
-            // h265 parser
-            appData.parser = gst_element_factory_make("h265parse", nullptr);
-
-            // h265 de-payload
-            appData.dePayloader = gst_element_factory_make("rtph265depay", "depay");
-            g_object_set(G_OBJECT(appData.dePayloader), "source-info", true, nullptr);
-
-        } else {
-            logger->info("Building h264->vp8 pipeline on port {}", rtp_port);
-            appData.is_h265 = false;
-
-            // h264 parser
-            appData.parser = gst_element_factory_make("h264parse", nullptr);
-
-            // h264 de-payload
-            appData.dePayloader = gst_element_factory_make("rtph264depay", "depay");
-        }
-
-        if (!this->has_vaapi && !this->has_nvidia) {
-            logger->debug("Not using vaapi/nvidia for encoding/decoding");
-
-            if (this->type == h265)
-                appData.decoder = gst_element_factory_make("avdec_h265", "dec");
-            else
-                appData.decoder = gst_element_factory_make("avdec_h264", "dec");
-
-
-            appData.encoder = gst_element_factory_make("vp8enc", "enc");
-            g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", bitrate, nullptr);
-        } else if (this->has_nvidia) {
-            logger->debug("Using nvidia hardware acceleration");
-
-            if (this->type == h265)
-                appData.decoder = gst_element_factory_make("nvh265dec", "dec");
-            else
-                appData.decoder = gst_element_factory_make("nvh264dec", "dec");
-
-            appData.encoder = gst_element_factory_make("vp8enc", "enc");
-            g_object_set(G_OBJECT(appData.encoder), "threads", 2, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "target-bitrate", bitrate, nullptr);
-        } else {
-            logger->debug("Using vaapi for encoding");
-
-            if (this->type == h265)
-                appData.decoder = gst_element_factory_make("vaapih265dec", "dec");
-            else
-                appData.decoder = gst_element_factory_make("vaapih264dec", "dec");
-
-            appData.encoder = gst_element_factory_make("vaapivp8enc", "enc");
-            g_object_set(G_OBJECT(appData.encoder), "rate-control", 2, nullptr);
-            g_object_set(G_OBJECT(appData.encoder), "bitrate", bitrate, nullptr);
-        }
-
+        setupStreamInput(&appData);
+        setupStreamOutput(&appData, true);
 
         // add everything
         gst_bin_add_many(
@@ -216,7 +134,6 @@ namespace nvr {
                 appData.payloader,
                 appData.sink,
                 NULL);
-
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
 
@@ -437,15 +354,19 @@ namespace nvr {
 
         if (data->is_h265 && caps_str.find("H264") != string::npos) {
             data->logger->error("Whoops, you're trying to decode an H264 stream with an H265 decoder");
+            data->is_h265 = false;
+            switchCodecs(data);
             goto exit;
         } else if (!data->is_h265 && caps_str.find("H265") != string::npos) {
             data->logger->error("Whoops, you're trying to decode an H265 stream with an H264 decoder");
+            data->is_h265 = true;
+            switchCodecs(data);
             goto exit;
         } else
             data->logger->debug("Caps should be setup correctly, continuing");
 
 
-        /* Attempt the link */
+        /* Attempt3 the link */
         ret = gst_pad_link(new_pad, sink_pad);
         if (GST_PAD_LINK_FAILED(ret)) {
             data->logger->error("Type dictated is '{}', but link failed", new_pad_type);
@@ -460,7 +381,7 @@ namespace nvr {
                 createJanusStream(data);
             else {
                 data->logger->warn("Stream created, but unable to connect to Janus");
-                exit(-1);
+            //    exit(-1);
             }
         }
 
@@ -473,5 +394,166 @@ namespace nvr {
 
     Streamer::Streamer() {
         this->logger = nullptr;
+    }
+
+    void Streamer::switchCodecs(StreamData *appData) {
+        auto logger = appData->logger;
+
+        teardownStreamCodecs(appData);
+        setupStreamInput(appData);
+        setupStreamOutput(appData, false);
+
+        logger->info("Adding elements");
+        gst_bin_add_many(
+                GST_BIN(appData->pipeline),
+                appData->dePayloader,
+                appData->parser,
+                appData->decoder,
+                nullptr
+        );
+
+
+        logger->info("Linking elements");
+        gst_element_link_many(
+                appData->rtspSrc,
+                appData->dePayloader,
+                appData->parser,
+                appData->decoder,
+                appData->encoder,
+                NULL);
+
+        gst_element_set_state(appData->rtspSrc, GST_STATE_PLAYING);
+        gst_element_set_state(appData->dePayloader, GST_STATE_PLAYING);
+        gst_element_set_state(appData->parser, GST_STATE_PLAYING);
+        gst_element_set_state(appData->decoder, GST_STATE_PLAYING);
+        gst_element_set_state(appData->pipeline, GST_STATE_PLAYING);
+    }
+
+    void Streamer::teardownStreamCodecs(StreamData *appData) {
+        gst_element_set_state(appData->rtspSrc, GST_STATE_PAUSED);
+        gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
+        gst_element_set_state(appData->parser, GST_STATE_NULL);
+        gst_element_set_state(appData->decoder, GST_STATE_NULL);
+
+        gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
+        gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
+        gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
+    }
+
+    void Streamer::setupStreamInput(StreamData *appData) {
+        auto logger = appData->logger;
+
+        if (appData->is_h265) {
+            logger->info("Building h265->vp8 pipeline on port {}", appData->rtp_port);
+
+            // h265 parser
+            appData->parser = gst_element_factory_make("h265parse", nullptr);
+
+            // h265 de-payload
+            appData->dePayloader = gst_element_factory_make("rtph265depay", "depay");
+            g_object_set(G_OBJECT(appData->dePayloader), "source-info", true, nullptr);
+
+        } else {
+            logger->info("Building h264->vp8 pipeline on port {}", appData->rtp_port);
+
+            // h264 parser
+            appData->parser = gst_element_factory_make("h264parse", nullptr);
+
+            // h264 de-payload
+            appData->dePayloader = gst_element_factory_make("rtph264depay", "depay");
+        }
+
+        logger->info("Done creating input");
+    }
+
+    void Streamer::setupStreamOutput(StreamData *appData, bool create_encoder) {
+        auto logger = appData->logger;
+        bool has_vaapi = hasVAAPI();
+        bool has_nvidia = hasNVIDIA();
+
+        if (!has_vaapi && !has_nvidia) {
+            logger->debug("Not using vaapi/nvidia for encoding/decoding");
+
+            if (appData->is_h265)
+                appData->decoder = gst_element_factory_make("avdec_h265", "dec");
+            else
+                appData->decoder = gst_element_factory_make("avdec_h264", "dec");
+
+
+          if (create_encoder) {
+              appData->encoder = gst_element_factory_make("vp8enc", "enc");
+              g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
+              g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+          }
+
+        } else if (has_nvidia) {
+            logger->debug("Using nvidia hardware acceleration");
+
+            if (appData->is_h265)
+                appData->decoder = gst_element_factory_make("nvh265dec", "dec");
+            else
+                appData->decoder = gst_element_factory_make("nvh264dec", "dec");
+
+          if (create_encoder) {
+              appData->encoder = gst_element_factory_make("vp8enc", "enc");
+              g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
+              g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+          }
+        } else {
+            logger->debug("Using vaapi for encoding/decoding");
+
+            if (appData->is_h265)
+                appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
+            else
+                appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
+
+            if (create_encoder) {
+                appData->encoder = gst_element_factory_make("vaapivp8enc", "enc");
+                g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
+            }
+        }
+    }
+
+    bool Streamer::hasNVIDIA() {
+        GList *plugins, *p;
+
+        bool has_nvidia = false;
+        plugins = gst_registry_get_plugin_list(gst_registry_get());
+        for (p = plugins; p; p = p->next) {
+            auto *plugin = static_cast<GstPlugin *>(p->data);
+
+            // Check for nvcodec
+            if (strcmp(gst_plugin_get_name(plugin), "nvcodec") == 0) {
+                has_nvidia = gst_registry_check_feature_version(gst_registry_get(), "nvh265dec", 1, 22, 0);
+
+                if (has_nvidia)
+                    break;
+            }
+        }
+
+        gst_plugin_list_free(plugins);
+        return has_nvidia;
+    }
+
+    bool Streamer::hasVAAPI() {
+        GList *plugins, *p;
+
+        bool has_vaapi = false;
+        plugins = gst_registry_get_plugin_list(gst_registry_get());
+        for (p = plugins; p; p = p->next) {
+            auto *plugin = static_cast<GstPlugin *>(p->data);
+            // Check for vaapi
+            if (strcmp(gst_plugin_get_name(plugin), "vaapi") == 0) {
+                has_vaapi = gst_registry_check_feature_version(gst_registry_get(), "vaapidecodebin", 1, 22, 0);
+
+                if (has_vaapi)
+                    break;
+            }
+        }
+
+        gst_plugin_list_free(plugins);
+
+        return has_vaapi;
     }
 }
