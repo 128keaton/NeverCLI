@@ -478,7 +478,7 @@ namespace nvr {
         bool has_nvidia = hasNVIDIA();
 
         if (!has_vaapi && !has_nvidia) {
-            logger->debug("Not using vaapi/nvidia for encoding/decoding");
+            logger->info("Not using vaapi/nvidia for encoding/decoding");
 
             if (appData->is_h265)
                 appData->decoder = gst_element_factory_make("avdec_h265", "dec");
@@ -493,7 +493,7 @@ namespace nvr {
             }
 
         } else if (has_nvidia) {
-            logger->debug("Using nvidia hardware acceleration");
+            logger->info("Using nvidia hardware acceleration");
 
             if (appData->is_h265)
                 appData->decoder = gst_element_factory_make("nvh265dec", "dec");
@@ -506,7 +506,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
             }
         } else {
-            logger->debug("Using vaapi for encoding/decoding");
+            logger->info("Using vaapi for encoding/decoding");
 
             if (appData->is_h265)
                 appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
