@@ -407,6 +407,7 @@ namespace nvr {
         logger->info("Adding elements");
         gst_bin_add_many(
                 GST_BIN(appData->pipeline),
+                appData->rtspSrc,
                 appData->dePayloader,
                 appData->parser,
                 appData->decoder,
@@ -415,7 +416,6 @@ namespace nvr {
 
 
         gst_element_link_many(
-                appData->rtspSrc,
                 appData->dePayloader,
                 appData->parser,
                 appData->decoder,
