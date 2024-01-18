@@ -29,7 +29,7 @@ namespace nvr {
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
-        this->appData.bitrate = 1024;
+        this->appData.bitrate = 920;
         this->appData.buffer_size = 2500000;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
@@ -520,7 +520,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "keyframe-period", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "default-roi-delta-qp", -5, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "quality-level", 3, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "quality-level", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
             }
         }
