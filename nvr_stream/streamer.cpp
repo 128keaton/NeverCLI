@@ -76,7 +76,7 @@ namespace nvr {
         gst_init(nullptr, nullptr);
 
         appData.stream_url = buildStreamURL(this->stream_url, this->ip_address, this->port,
-                                                     this->rtsp_password, this->rtsp_username);
+                                            this->rtsp_password, this->rtsp_username);
 
         string sanitized_stream_location = sanitizeStreamURL(appData.stream_url, this->rtsp_password);
 
@@ -164,23 +164,29 @@ namespace nvr {
                 gst_message_parse_error(msg, &err, &debug);
 
 
+                bool switch_codecs = false;
                 if (strcmp(err->message, "Could not read from resource.") == 0) {
                     data->logger->warn("Could not read from resource, retrying");
                 } else {
                     data->logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
                     data->logger->error("Debugging information: {}", debug ? debug : "none");
 
-                    if (data->needs_codec_switch) {
-                        data->is_h265 = !data->is_h265;
-                        switchCodecs(data);
-                    }
+                    switch_codecs = data->needs_codec_switch;
 
-         //           gst_element_set_state(data->pipeline, GST_STATE_READY);
-                  //  g_main_loop_quit(data->loop);
+                    if (!switch_codecs) {
+                        g_main_loop_quit(data->loop);
+                    } else {
+                        gst_element_set_state(data->pipeline, GST_STATE_READY);
+                    }
                 }
 
                 g_error_free(err);
                 g_free(debug);
+
+                if (switch_codecs) {
+                    data->is_h265 = !data->is_h265;
+                    switchCodecs(data);
+                }
 
                 break;
             }
@@ -375,7 +381,7 @@ namespace nvr {
                 createJanusStream(data);
             else {
                 data->logger->warn("Stream created, but unable to connect to Janus");
-            //    exit(-1);
+                exit(-1);
             }
         }
 
@@ -408,7 +414,6 @@ namespace nvr {
         );
 
 
-        logger->info("Linking elements");
         gst_element_link_many(
                 appData->rtspSrc,
                 appData->dePayloader,
@@ -417,8 +422,6 @@ namespace nvr {
                 appData->encoder,
                 NULL);
 
-
-        logger->info("Added elements, connecting signal");
 
         g_signal_connect(appData->rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), appData);
 
@@ -429,12 +432,9 @@ namespace nvr {
         } else if (ret == GST_STATE_CHANGE_NO_PREROLL) {
             appData->is_live = TRUE;
         }
-
-        logger->info("done?");
     }
 
     void Streamer::teardownStreamCodecs(StreamData *appData) {
-        gst_element_set_state(appData->pipeline, GST_STATE_NULL);
         gst_element_set_state(appData->rtspSrc, GST_STATE_NULL);
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
@@ -486,11 +486,11 @@ namespace nvr {
                 appData->decoder = gst_element_factory_make("avdec_h264", "dec");
 
 
-          if (create_encoder) {
-              appData->encoder = gst_element_factory_make("vp8enc", "enc");
-              g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
-              g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-          }
+            if (create_encoder) {
+                appData->encoder = gst_element_factory_make("vp8enc", "enc");
+                g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+            }
 
         } else if (has_nvidia) {
             logger->debug("Using nvidia hardware acceleration");
@@ -500,11 +500,11 @@ namespace nvr {
             else
                 appData->decoder = gst_element_factory_make("nvh264dec", "dec");
 
-          if (create_encoder) {
-              appData->encoder = gst_element_factory_make("vp8enc", "enc");
-              g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
-              g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-          }
+            if (create_encoder) {
+                appData->encoder = gst_element_factory_make("vp8enc", "enc");
+                g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+            }
         } else {
             logger->debug("Using vaapi for encoding/decoding");
 

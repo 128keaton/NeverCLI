@@ -328,9 +328,8 @@ namespace nvr {
             }
 
             if (packet->stream_index != input_index) {
-                logger->error("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index,
+                logger->warn("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index,
                               input_index);
-                continue;
             }
 
             // This is _literally_ just to keep clang happy i.e. not marking it as unreachable
