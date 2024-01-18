@@ -422,14 +422,12 @@ namespace nvr {
                 appData->encoder,
                 NULL);
 
-        gst_element_set_state(appData->rtspSrc, GST_STATE_PLAYING);
-        gst_element_set_state(appData->dePayloader, GST_STATE_PLAYING);
-        gst_element_set_state(appData->parser, GST_STATE_PLAYING);
-        gst_element_set_state(appData->decoder, GST_STATE_PLAYING);
+
         gst_element_set_state(appData->pipeline, GST_STATE_PLAYING);
     }
 
     void Streamer::teardownStreamCodecs(StreamData *appData) {
+        gst_element_set_state(appData->pipeline, GST_STATE_PAUSED);
         gst_element_set_state(appData->rtspSrc, GST_STATE_PAUSED);
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
