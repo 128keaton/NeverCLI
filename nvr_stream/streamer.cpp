@@ -510,8 +510,10 @@ namespace nvr {
 
             if (appData->is_h265)
                 appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
-            else
+            else {
                 appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
+                g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
+            }
 
             if (create_encoder) {
                 appData->encoder = gst_element_factory_make("vaapivp8enc", "enc");
