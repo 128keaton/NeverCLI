@@ -101,8 +101,8 @@ namespace nvr {
 
         appData.is_h265 = type == h265;
 
-        setupStreamInput(&appData);
-        setupStreamOutput(&appData, true);
+        Streamer::setupStreamInput(&appData);
+        Streamer::setupStreamOutput(&appData, true);
 
         // add everything
         gst_bin_add_many(
@@ -185,7 +185,7 @@ namespace nvr {
 
                 if (switch_codecs) {
                     data->is_h265 = !data->is_h265;
-                    switchCodecs(data);
+                    Streamer::switchCodecs(data);
                 }
 
                 break;
@@ -399,10 +399,10 @@ namespace nvr {
     void Streamer::switchCodecs(StreamData *appData) {
         auto logger = appData->logger;
 
-        teardownStreamCodecs(appData);
-        setupStreamInput(appData);
-        setupRTSPStream(appData);
-        setupStreamOutput(appData, false);
+        Streamer::teardownStreamCodecs(appData);
+        Streamer::setupStreamInput(appData);
+        Streamer::setupRTSPStream(appData);
+        Streamer::setupStreamOutput(appData, false);
 
         logger->info("Adding elements");
         gst_bin_add_many(
