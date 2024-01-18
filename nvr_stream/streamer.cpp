@@ -30,12 +30,14 @@ namespace nvr {
 
         this->appData.rtp_port = this->rtp_port;
         this->appData.bitrate = 1024;
+        this->appData.buffer_size = 2500000;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
         this->appData.stream_id = config.stream_id;
         this->appData.logger = this->logger;
         this->appData.janus = Janus(this->logger);
         this->appData.error_count = 0;
+        this->appData.needs_codec_switch = false;
 
         // Use substream for streaming
         this->stream_url = config.sub_stream_url;
@@ -73,29 +75,19 @@ namespace nvr {
 
         gst_init(nullptr, nullptr);
 
-        string rtsp_stream_location = buildStreamURL(this->stream_url, this->ip_address, this->port,
+        appData.stream_url = buildStreamURL(this->stream_url, this->ip_address, this->port,
                                                      this->rtsp_password, this->rtsp_username);
-        string sanitized_stream_location = sanitizeStreamURL(rtsp_stream_location, this->rtsp_password);
+
+        string sanitized_stream_location = sanitizeStreamURL(appData.stream_url, this->rtsp_password);
 
         logger->info("Stream will be pulled from '{}'", sanitized_stream_location);
-
-        int64_t buffer_size = 2500000;
 
         // initialize pipeline
         appData.pipeline = gst_pipeline_new("pipeline");
         g_object_set(GST_BIN(appData.pipeline), "message-forward", true, nullptr);
 
-        // rtsp source
-        appData.rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData.rtspSrc), "timeout", 0, nullptr); // disable timeout
-        g_object_set(G_OBJECT(appData.rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
-        g_object_set(G_OBJECT(appData.rtspSrc), "location", rtsp_stream_location.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-buffer-size", buffer_size, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "udp-reconnect", true, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "latency", 100, nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "user-id", this->rtsp_username.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData.rtspSrc), "user-pw", this->rtsp_password.c_str(), nullptr);
-
+        // rtsp stream
+        setupRTSPStream(&appData);
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
@@ -104,7 +96,7 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "buffer-size", buffer_size, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "buffer-size", appData.buffer_size, nullptr);
 
 
         appData.is_h265 = type == h265;
@@ -178,9 +170,13 @@ namespace nvr {
                     data->logger->error("Error received from element {}: {}", GST_OBJECT_NAME(msg->src), err->message);
                     data->logger->error("Debugging information: {}", debug ? debug : "none");
 
+                    if (data->needs_codec_switch) {
+                        data->is_h265 = !data->is_h265;
+                        switchCodecs(data);
+                    }
 
-                    gst_element_set_state(data->pipeline, GST_STATE_READY);
-                    g_main_loop_quit(data->loop);
+         //           gst_element_set_state(data->pipeline, GST_STATE_READY);
+                  //  g_main_loop_quit(data->loop);
                 }
 
                 g_error_free(err);
@@ -354,13 +350,11 @@ namespace nvr {
 
         if (data->is_h265 && caps_str.find("H264") != string::npos) {
             data->logger->error("Whoops, you're trying to decode an H264 stream with an H265 decoder");
-            data->is_h265 = false;
-            switchCodecs(data);
+            data->needs_codec_switch = true;
             goto exit;
         } else if (!data->is_h265 && caps_str.find("H265") != string::npos) {
             data->logger->error("Whoops, you're trying to decode an H265 stream with an H264 decoder");
-            data->is_h265 = true;
-            switchCodecs(data);
+            data->needs_codec_switch = true;
             goto exit;
         } else
             data->logger->debug("Caps should be setup correctly, continuing");
@@ -401,6 +395,7 @@ namespace nvr {
 
         teardownStreamCodecs(appData);
         setupStreamInput(appData);
+        setupRTSPStream(appData);
         setupStreamOutput(appData, false);
 
         logger->info("Adding elements");
@@ -423,16 +418,29 @@ namespace nvr {
                 NULL);
 
 
-        gst_element_set_state(appData->pipeline, GST_STATE_PLAYING);
+        logger->info("Added elements, connecting signal");
+
+        g_signal_connect(appData->rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), appData);
+
+        auto ret = gst_element_set_state(appData->pipeline, GST_STATE_PLAYING);
+        if (ret == GST_STATE_CHANGE_FAILURE) {
+            logger->error("Unable to set pipeline's state to PLAYING");
+            gst_object_unref(appData->pipeline);
+        } else if (ret == GST_STATE_CHANGE_NO_PREROLL) {
+            appData->is_live = TRUE;
+        }
+
+        logger->info("done?");
     }
 
     void Streamer::teardownStreamCodecs(StreamData *appData) {
-        gst_element_set_state(appData->pipeline, GST_STATE_PAUSED);
-        gst_element_set_state(appData->rtspSrc, GST_STATE_PAUSED);
+        gst_element_set_state(appData->pipeline, GST_STATE_NULL);
+        gst_element_set_state(appData->rtspSrc, GST_STATE_NULL);
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
         gst_element_set_state(appData->decoder, GST_STATE_NULL);
 
+        gst_bin_remove(GST_BIN(appData->pipeline), appData->rtspSrc);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
@@ -511,6 +519,18 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
             }
         }
+    }
+
+    void Streamer::setupRTSPStream(StreamData *appData) {
+        appData->rtspSrc = gst_element_factory_make("rtspsrc", "src");
+        g_object_set(G_OBJECT(appData->rtspSrc), "timeout", 0, nullptr); // disable timeout
+        g_object_set(G_OBJECT(appData->rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
+        g_object_set(G_OBJECT(appData->rtspSrc), "location", appData->stream_url.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "udp-buffer-size", appData->buffer_size, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "udp-reconnect", true, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 100, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "user-id", appData->rtsp_username.c_str(), nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "user-pw", appData->rtsp_password.c_str(), nullptr);
     }
 
     bool Streamer::hasNVIDIA() {
