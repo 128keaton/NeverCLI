@@ -29,7 +29,7 @@ namespace nvr {
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
-        this->appData.bitrate = 920;
+        this->appData.bitrate = 816; // The recorded video is ~about~ this
         this->appData.buffer_size = 2500000;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
