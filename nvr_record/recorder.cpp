@@ -292,7 +292,7 @@ namespace nvr {
         av_dict_set(&params, "strftime", "true", 0);
         av_dict_set(&params, "reset_timestamps", "true", 0);
         av_dict_set(&params, "segment_time", std::to_string(clip_runtime).c_str(), 0);
-        av_dict_set(&params, "movflags", "frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov", 0);
+        av_dict_set(&params, "movflags", "frag_keyframe+empty_moov+default_base_moof", 0);
 
         // Write the AVFormat header
         if (avformat_write_header(output_format_context, &params) < 0)
