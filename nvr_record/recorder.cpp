@@ -265,7 +265,7 @@ namespace nvr {
         // Allocate output format context
         avformat_alloc_output_context2(&this->output_format_context, output_format, nullptr, output_file_str.c_str());
 
-        av_opt_set_int(output_format_context, "keyint", 30, 0);
+        av_opt_set_int(output_format_context->priv_data, "keyint", 30, 0);
         av_opt_set_int(output_format_context->priv_data, "g", 1, 0);
         av_opt_set_int(output_format_context->priv_data, "bufsize", 100, 0);
 
@@ -291,6 +291,10 @@ namespace nvr {
 
         // Allow macOS/iOS to play this natively
         output_stream->codecpar->codec_tag = MKTAG('h', 'v', 'c', '1');
+        av_opt_set_int(output_stream->priv_data, "keyint", 30, 0);
+        av_opt_set_int(output_stream->priv_data, "g", 1, 0);
+        av_opt_set_int(output_stream->priv_data, "bufsize", 100, 0);
+
 
         // Customize stream rates/timing/aspect ratios/etc
         output_stream->sample_aspect_ratio.num = input_codec_context->sample_aspect_ratio.num;
