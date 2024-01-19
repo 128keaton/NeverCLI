@@ -265,11 +265,15 @@ namespace nvr {
         // Allocate output format context
         avformat_alloc_output_context2(&this->output_format_context, output_format, nullptr, output_file_str.c_str());
 
+        av_opt_set_int(output_format_context, "keyint", 30, 0);
+        av_opt_set_int(output_format_context->priv_data, "g", 1, 0);
+        av_opt_set_int(output_format_context->priv_data, "bufsize", 100, 0);
+
         // Set our muxer options
         av_dict_set(&params, "strftime", "true", 0);
         av_dict_set(&params, "reset_timestamps", "true", 0);
         av_dict_set(&params, "segment_time", std::to_string(clip_runtime).c_str(), 0);
-        av_dict_set(&params, "movflags", "+frag_keyframe+empty_moov+faststart", 0);
+        av_dict_set(&params, "movflags", "+frag_keyframe", 0);
 
         // Set flags on output format context
         if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
