@@ -280,6 +280,9 @@ namespace nvr {
         if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
             output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
+        // I think I need this for fragmented MP4
+        output_format_context->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+
         // Customize stream rates/timing/aspect ratios/etc
         output_stream->sample_aspect_ratio.num = input_codec_context->sample_aspect_ratio.num;
         output_stream->sample_aspect_ratio.den = input_codec_context->sample_aspect_ratio.den;
