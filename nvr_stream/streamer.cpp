@@ -91,6 +91,7 @@ namespace nvr {
 
         // vp8 final payloader
         appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
+        g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
@@ -532,7 +533,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData->rtspSrc), "location", appData->stream_url.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "udp-buffer-size", appData->buffer_size, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "udp-reconnect", true, nullptr);
-        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 100, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 50, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-id", appData->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-pw", appData->rtsp_password.c_str(), nullptr);
     }
