@@ -508,9 +508,11 @@ namespace nvr {
         } else {
             logger->info("Using vaapi for encoding/decoding");
 
-            if (appData->is_h265)
+            if (appData->is_h265) {
                 appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
-            else {
+                g_object_set(G_OBJECT(appData->decoder), "automatic-request-sync-points", true, nullptr);
+                g_object_set(G_OBJECT(appData->decoder), "min-force-key-unit-interval", 1000000000, nullptr);
+            } else {
                 appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
                 g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
             }
