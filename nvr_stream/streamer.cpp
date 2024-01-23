@@ -510,7 +510,6 @@ namespace nvr {
 
             if (appData->is_h265) {
                 appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
-                g_object_set(G_OBJECT(appData->decoder), "automatic-request-sync-points", true, nullptr);
             } else {
                 appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
                 g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
@@ -520,8 +519,6 @@ namespace nvr {
                 appData->encoder = gst_element_factory_make("vaapivp8enc", "enc");
                 g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "trellis", true, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "keyframe-period", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "quality-level", 4, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "yac-qi", 14, nullptr);
             }
