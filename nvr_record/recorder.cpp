@@ -78,7 +78,7 @@ namespace nvr {
         this->error_count = 0;
         this->camera_id = config.stream_id;
         this->input_format_context = avformat_alloc_context();
-        this->stream_url = config.sub_stream_url;
+        this->stream_url = config.stream_url;
         this->snapshot_url = config.snapshot_url;
         this->output_path = config.output_path;
         this->rtsp_username = config.rtsp_username;
