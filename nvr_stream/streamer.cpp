@@ -511,6 +511,7 @@ namespace nvr {
 
             if (appData->is_h265) {
                 appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
+                g_object_set(G_OBJECT(appData->decoder), "discard-corrupted-frames", true, nullptr);
             } else {
                 appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
                 g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
@@ -533,7 +534,7 @@ namespace nvr {
         g_object_set(G_OBJECT(appData->rtspSrc), "location", appData->stream_url.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "udp-buffer-size", appData->buffer_size, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "udp-reconnect", true, nullptr);
-        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 50, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 1000, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-id", appData->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-pw", appData->rtsp_password.c_str(), nullptr);
     }
