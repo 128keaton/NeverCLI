@@ -111,6 +111,7 @@ namespace nvr {
                 appData.rtspSrc,
                 appData.dePayloader,
                 appData.parser,
+                appData.timestamper,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
@@ -122,6 +123,7 @@ namespace nvr {
         gst_element_link_many(
                 appData.dePayloader,
                 appData.parser,
+                appData.timestamper,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
@@ -411,6 +413,7 @@ namespace nvr {
                 appData->rtspSrc,
                 appData->dePayloader,
                 appData->parser,
+                appData->timestamper,
                 appData->decoder,
                 nullptr
         );
@@ -419,6 +422,7 @@ namespace nvr {
         gst_element_link_many(
                 appData->dePayloader,
                 appData->parser,
+                appData->timestamper,
                 appData->decoder,
                 appData->encoder,
                 NULL);
@@ -439,11 +443,13 @@ namespace nvr {
         gst_element_set_state(appData->rtspSrc, GST_STATE_NULL);
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
+        gst_element_set_state(appData->timestamper, GST_STATE_NULL);
         gst_element_set_state(appData->decoder, GST_STATE_NULL);
 
         gst_bin_remove(GST_BIN(appData->pipeline), appData->rtspSrc);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
+        gst_bin_remove(GST_BIN(appData->pipeline), appData->timestamper);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
     }
 
@@ -456,6 +462,9 @@ namespace nvr {
             // h265 parser
             appData->parser = gst_element_factory_make("h265parse", nullptr);
 
+            // h265 timestamper
+            appData->timestamper = gst_element_factory_make("h265timestamper", nullptr);
+
             // h265 de-payload
             appData->dePayloader = gst_element_factory_make("rtph265depay", "depay");
             g_object_set(G_OBJECT(appData->dePayloader), "source-info", true, nullptr);
@@ -465,6 +474,9 @@ namespace nvr {
 
             // h264 parser
             appData->parser = gst_element_factory_make("h264parse", nullptr);
+
+            // h264 timestamper
+            appData->timestamper = gst_element_factory_make("h264timestamper", nullptr);
 
             // h264 de-payload
             appData->dePayloader = gst_element_factory_make("rtph264depay", "depay");
