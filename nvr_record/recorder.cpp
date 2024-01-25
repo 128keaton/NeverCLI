@@ -78,7 +78,7 @@ namespace nvr {
         this->error_count = 0;
         this->camera_id = config.stream_id;
         this->input_format_context = avformat_alloc_context();
-        this->stream_url = config.sub_stream_url;
+        this->stream_url = config.stream_url;
         this->snapshot_url = config.snapshot_url;
         this->output_path = config.output_path;
         this->rtsp_username = config.rtsp_username;
@@ -256,6 +256,7 @@ namespace nvr {
 
 
     int Recorder::setupMuxer() {
+        AVDictionary *params = nullptr;
         string output_file_str = generateOutputFilename(this->camera_id, this->output_path, video, true);
 
         // Segment muxer
@@ -264,6 +265,23 @@ namespace nvr {
         // Allocate output format context
         avformat_alloc_output_context2(&this->output_format_context, output_format, nullptr, output_file_str.c_str());
 
+        av_opt_set_int(output_format_context->priv_data, "keyint", 30, 0);
+        av_opt_set_int(output_format_context->priv_data, "g", 1, 0);
+        av_opt_set_int(output_format_context->priv_data, "bufsize", 100, 0);
+
+        // Set our muxer options
+        av_dict_set(&params, "strftime", "true", 0);
+        av_dict_set(&params, "reset_timestamps", "true", 0);
+        av_dict_set(&params, "segment_time", std::to_string(clip_runtime).c_str(), 0);
+        av_dict_set(&params, "movflags", "+frag_keyframe", 0);
+
+        // Set flags on output format context
+        if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
+            output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+        // I think I need this for fragmented MP4
+        output_format_context->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+
         // Create stream with context
         output_stream = avformat_new_stream(output_format_context, nullptr);
 
@@ -271,27 +289,18 @@ namespace nvr {
         if (avcodec_parameters_copy(output_stream->codecpar, input_stream->codecpar) < 0)
             return handleError("Cannot copy parameters to stream");
 
-        output_format_context->strict_std_compliance = -1;
-
         // Allow macOS/iOS to play this natively
         output_stream->codecpar->codec_tag = MKTAG('h', 'v', 'c', '1');
+        av_opt_set_int(output_stream->priv_data, "keyint", 30, 0);
+        av_opt_set_int(output_stream->priv_data, "g", 1, 0);
+        av_opt_set_int(output_stream->priv_data, "bufsize", 100, 0);
 
-        // Set flags on output format context
-        if (output_format_context->oformat->flags & AVFMT_GLOBALHEADER)
-            output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
         // Customize stream rates/timing/aspect ratios/etc
         output_stream->sample_aspect_ratio.num = input_codec_context->sample_aspect_ratio.num;
         output_stream->sample_aspect_ratio.den = input_codec_context->sample_aspect_ratio.den;
         output_stream->r_frame_rate = input_stream->r_frame_rate;
         output_stream->avg_frame_rate = output_stream->r_frame_rate;
-
-        AVDictionary *params = nullptr;
-
-        // Set our muxer options
-        av_dict_set(&params, "strftime", "true", 0);
-        av_dict_set(&params, "reset_timestamps", "true", 0);
-        av_dict_set(&params, "segment_time", std::to_string(clip_runtime).c_str(), 0);
 
         // Write the AVFormat header
         if (avformat_write_header(output_format_context, &params) < 0)
@@ -328,9 +337,8 @@ namespace nvr {
             }
 
             if (packet->stream_index != input_index) {
-                logger->error("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index,
+                logger->warn("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index,
                               input_index);
-                continue;
             }
 
             // This is _literally_ just to keep clang happy i.e. not marking it as unreachable
