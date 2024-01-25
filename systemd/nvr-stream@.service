@@ -1,6 +1,7 @@
 [Unit]
 Description=NVR streaming process for %i
-After=syslog.target network-online.target
+After=syslog.target network-online.target janus.service
+PartOf=janus.service
 
 [Service]
 Type=simple
