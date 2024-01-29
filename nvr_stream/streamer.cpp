@@ -533,7 +533,6 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "quality-level", 4, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "yac-qi", 14, nullptr);
             }
         }
     }
