@@ -11,6 +11,7 @@ TimeoutStopSec=300
 WorkingDirectory=/nvr
 Restart=always
 RestartSec=2
+Environment="GST_VAAPI_ALL_DRIVERS=1"
 
 [Install]
 WantedBy=default.target

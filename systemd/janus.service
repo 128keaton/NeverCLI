@@ -1,12 +1,20 @@
 [Unit]
 Description=Janus WebRTC Gateway
 After=syslog.target network-online.target
+PartOf=janus.service
 
 [Service]
 ExecStart=/usr/local/bin/janus
 TimeoutSec=100
 TimeoutStopSec=300
-
+Restart=on-abnormal
+Nice=-10
+LimitCORE=infinity
+LimitNOFILE=100000
+LimitNPROC=60000
+LimitSTACK=250000
+LimitRTTIME=7000000
+TasksMax=infinity
 
 [Install]
 WantedBy=default.target
