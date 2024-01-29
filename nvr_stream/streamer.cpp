@@ -542,7 +542,7 @@ namespace nvr {
         appData->rtspSrc = gst_element_factory_make("rtspsrc", "src");
         g_object_set(G_OBJECT(appData->rtspSrc), "location", appData->stream_url.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "udp-reconnect", true, nullptr);
-        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 1000, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 500, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-id", appData->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-pw", appData->rtsp_password.c_str(), nullptr);
     }
