@@ -29,7 +29,7 @@ namespace nvr {
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
-        this->appData.bitrate = 1024; // The recorded video is ~about~ this
+        this->appData.bitrate = 900; // The recorded video is ~about~ this
         this->appData.buffer_size = 2500000;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
@@ -97,7 +97,6 @@ namespace nvr {
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
-        g_object_set(G_OBJECT(appData.sink), "buffer-size", appData.buffer_size, nullptr);
 
 
         appData.is_h265 = type == h265;
@@ -541,12 +540,9 @@ namespace nvr {
 
     void Streamer::setupRTSPStream(StreamData *appData) {
         appData->rtspSrc = gst_element_factory_make("rtspsrc", "src");
-        g_object_set(G_OBJECT(appData->rtspSrc), "timeout", 0, nullptr); // disable timeout
-        g_object_set(G_OBJECT(appData->rtspSrc), "tcp-timeout", 0, nullptr); // disable tcp timeout
         g_object_set(G_OBJECT(appData->rtspSrc), "location", appData->stream_url.c_str(), nullptr);
-        g_object_set(G_OBJECT(appData->rtspSrc), "udp-buffer-size", appData->buffer_size, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "udp-reconnect", true, nullptr);
-        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 100, nullptr);
+        g_object_set(G_OBJECT(appData->rtspSrc), "latency", 1000, nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-id", appData->rtsp_username.c_str(), nullptr);
         g_object_set(G_OBJECT(appData->rtspSrc), "user-pw", appData->rtsp_password.c_str(), nullptr);
     }
