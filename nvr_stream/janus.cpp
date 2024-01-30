@@ -339,6 +339,8 @@ namespace nvr {
         media["port"] = port;
         media["bufferkf"] = true;
         media["rtpmap"] = "VP8/90000";
+        media["simulcast"] = true;
+        media["collision"] = 250;
         media["pt"] = 96;
 
         media = json::array({media});
