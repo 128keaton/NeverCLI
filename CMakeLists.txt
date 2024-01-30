@@ -18,6 +18,9 @@ find_package(CURL REQUIRED)
 ## DEP: spdlog
 find_package(spdlog REQUIRED)
 
+## DEP: MQTT
+# find_package(eclipse-paho-mqtt-c REQUIRED)
+
 ## DEP: json
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
 FetchContent_MakeAvailable(json)
@@ -39,6 +42,7 @@ pkg_check_modules(GSTLIBS REQUIRED
         gstreamer-1.0
         glib-2.0
 )
+
 
 
 ## Target: nvr_record
