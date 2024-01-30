@@ -5,7 +5,7 @@
 #pragma ide diagnostic ignored "misc-no-recursion"
 
 #include "recorder.h"
-#include "../common.h"
+#include "../common/common.h"
 
 using path = std::filesystem::path;
 namespace fs = std::filesystem;

@@ -2,7 +2,7 @@
 // Created by Keaton Burleson on 11/7/23.
 //
 
-#include "../common.h"
+#include "../common/common.h"
 #include "streamer.h"
 #include "janus.h"
 #include <gst/gst.h>

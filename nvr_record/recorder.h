@@ -18,7 +18,7 @@ extern "C" {
 }
 
 #include "nlohmann/json.hpp"
-#include "../common.h"
+#include "../common/common.h"
 #include <string>
 #include <iostream>
 #include <thread>

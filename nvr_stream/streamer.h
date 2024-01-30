@@ -5,7 +5,7 @@
 #ifndef NEVER_CLI_STREAMER_H
 #define NEVER_CLI_STREAMER_H
 
-#include "../common.h"
+#include "../common/common.h"
 #include <gst/gst.h>
 #include <gst/gstpad.h>
 #include "janus.h"
