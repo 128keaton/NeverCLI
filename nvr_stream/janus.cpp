@@ -339,8 +339,7 @@ namespace nvr {
         media["port"] = port;
         media["bufferkf"] = true;
         media["rtpmap"] = "VP8/90000";
-        media["simulcast"] = true;
-        media["collision"] = 250;
+        media["collision"] = 500;
         media["pt"] = 96;
 
         media = json::array({media});
@@ -355,15 +354,19 @@ namespace nvr {
      */
     bool Janus::createStream(const string &camera_id, int64_t port) {
         json body;
+        json metadata;
 
         logger->info("Creating Janus stream '{}'", camera_id);
 
         int64_t media_id = generateMediaID();
+        metadata["cameraID"] = camera_id;
 
         body["request"] = "create";
         body["name"] = camera_id;
         body["type"] = "rtp";
         body["media"] = buildMedia(port, media_id);
+        body["metadata"] = metadata;
+        body["threads"] = 2;
 
         json request = buildMessage(body);
 
