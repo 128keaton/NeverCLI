@@ -29,7 +29,7 @@ namespace nvr {
         this->port = config.port;
 
         this->appData.rtp_port = this->rtp_port;
-        this->appData.bitrate = 900; // The recorded video is ~about~ this
+        this->appData.bitrate = 800; // The recorded video is ~about~ this
         this->appData.buffer_size = 2500000;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
@@ -532,7 +532,7 @@ namespace nvr {
                 appData->encoder = gst_element_factory_make("vaapivp8enc", "enc");
                 g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "quality-level", 4, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "quality-level", 3, nullptr);
             }
         }
     }
