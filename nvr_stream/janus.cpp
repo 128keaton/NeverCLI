@@ -365,7 +365,7 @@ namespace nvr {
         body["name"] = camera_id;
         body["type"] = "rtp";
         body["media"] = buildMedia(port, media_id);
-        body["metadata"] = metadata;
+        body["metadata"] = to_string(metadata);
         body["threads"] = 2;
 
         json request = buildMessage(body);
