@@ -32,7 +32,7 @@ namespace nvr {
         json getStreamList();
 
         bool destroyStream(int64_t stream_id);
-        bool createStream(const string& camera_id, int64_t port);
+        bool createStream(const string& camera_id, int64_t port, string codec);
         bool connect();
         bool disconnect();
 
@@ -56,7 +56,7 @@ namespace nvr {
 
         static string generateRandom();
         static int64_t generateMediaID();
-        static json buildMedia(int64_t port, int64_t media_id);
+        static json buildMedia(int64_t port, int64_t media_id, string codec);
     };
 }
 

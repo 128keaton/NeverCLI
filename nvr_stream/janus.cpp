@@ -326,10 +326,11 @@ namespace nvr {
      * Create a Media JSON array for the stream
      * @param port RTP streaming port
      * @param media_id Media ID
+     * @param codec Media codec, either vp8 or h264
      *
      * @return
      */
-    json Janus::buildMedia(int64_t port, int64_t media_id) {
+    json Janus::buildMedia(int64_t port, int64_t media_id, string codec) {
         json media;
 
         media["mid"] = std::to_string(media_id);
@@ -338,7 +339,12 @@ namespace nvr {
         media["is_private"] = false;
         media["port"] = port;
         media["bufferkf"] = true;
-        media["rtpmap"] = "VP8/90000";
+
+        if (codec == "h264")
+            media["rtpmap"] = "H264/90000";
+        else if (codec == "vp8")
+            media["rtpmap"] = "VP8/90000";
+
         media["collision"] = 500;
         media["pt"] = 96;
 
@@ -350,9 +356,10 @@ namespace nvr {
      * Create a stream on Janus
      * @param camera_id Readable camera ID with hyphen
      * @param port RTP streaming port
+     * @param codec Media codec, either vp8 or h264
      * @return true if created
      */
-    bool Janus::createStream(const string &camera_id, int64_t port) {
+    bool Janus::createStream(const string &camera_id, int64_t port, string codec) {
         json body;
         json metadata;
 
@@ -364,7 +371,7 @@ namespace nvr {
         body["request"] = "create";
         body["name"] = camera_id;
         body["type"] = "rtp";
-        body["media"] = buildMedia(port, media_id);
+        body["media"] = buildMedia(port, media_id, codec);
         body["metadata"] = to_string(metadata);
         body["threads"] = 2;
 

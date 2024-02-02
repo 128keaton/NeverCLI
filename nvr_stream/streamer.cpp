@@ -89,14 +89,22 @@ namespace nvr {
         // rtsp stream
         setupRTSPStream(&appData);
 
-        // vp8 final payloader
-        appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
-        g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
+        if (hasU30()) {
+            // h264 final payloader
+            appData.payloader = gst_element_factory_make("rtph264pay", "pay");
+            g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
+            g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
+        } else {
+            // vp8 final payloader
+            appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
+            g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
+        }
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
         g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
+        g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
 
         appData.is_h265 = type == h265;
@@ -310,7 +318,9 @@ namespace nvr {
             exit(-1);
         }
 
-        if (data->janus.createStream(data->stream_id, data->rtp_port)) {
+        string codec = hasU30() ? "h264" : "vp8";
+
+        if (data->janus.createStream(data->stream_id, data->rtp_port, codec)) {
             data->janus.keepAlive();
             data->error_count = 0;
             return;
@@ -454,12 +464,17 @@ namespace nvr {
 
     void Streamer::setupStreamInput(StreamData *appData) {
         auto logger = appData->logger;
+        bool has_u30 = hasU30();
 
         if (appData->is_h265) {
-            logger->info("Building h265->vp8 pipeline on port {}", appData->rtp_port);
+            if (!has_u30)
+                logger->info("Building h265->vp8 pipeline on port {}", appData->rtp_port);
+            else
+                logger->info("Building h265->h264 pipeline on port {}", appData->rtp_port);
 
             // h265 parser
             appData->parser = gst_element_factory_make("h265parse", nullptr);
+            g_object_set(G_OBJECT(appData->parser), "config-interval", -1, nullptr);
 
             // h265 timestamper
             appData->timestamper = gst_element_factory_make("h265timestamper", nullptr);
@@ -469,10 +484,14 @@ namespace nvr {
             g_object_set(G_OBJECT(appData->dePayloader), "source-info", true, nullptr);
 
         } else {
-            logger->info("Building h264->vp8 pipeline on port {}", appData->rtp_port);
+            if (!has_u30)
+                logger->info("Building h264->vp8 pipeline on port {}", appData->rtp_port);
+            else
+                logger->info("Building h264->h264 pipeline on port {}", appData->rtp_port);
 
             // h264 parser
             appData->parser = gst_element_factory_make("h264parse", nullptr);
+            g_object_set(G_OBJECT(appData->parser), "config-interval", -1, nullptr);
 
             // h264 timestamper
             appData->timestamper = gst_element_factory_make("h264timestamper", nullptr);
@@ -488,6 +507,7 @@ namespace nvr {
         auto logger = appData->logger;
         bool has_vaapi = hasVAAPI();
         bool has_nvidia = hasNVIDIA();
+        bool has_u30 = hasU30();
 
         if (!has_vaapi && !has_nvidia) {
             logger->info("Not using vaapi/nvidia for encoding/decoding");
@@ -504,6 +524,24 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
             }
 
+        }  else if (has_u30) {
+            logger->info("Using XILINX U30 Media Accelerator");
+
+            appData->decoder = gst_element_factory_make("vvas_xvcudec", "dec");
+            g_object_set(G_OBJECT(appData->decoder), "dev-idx", 1, nullptr);
+
+            if (create_encoder) {
+                appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
+                g_object_set(G_OBJECT(appData->encoder), "dev-idx", 1, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "enable-pipeline", true, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "b-frames", 4, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "prefetch-buffer", true, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "num-slices", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gop-mode", "low-delay-p", nullptr);
+            }
         } else if (has_nvidia) {
             logger->info("Using nvidia hardware acceleration");
 
@@ -587,5 +625,26 @@ namespace nvr {
         gst_plugin_list_free(plugins);
 
         return has_vaapi;
+    }
+
+    bool Streamer::hasU30() {
+        GList *plugins, *p;
+
+        bool has_u30 = false;
+        plugins = gst_registry_get_plugin_list(gst_registry_get());
+        for (p = plugins; p; p = p->next) {
+            auto *plugin = static_cast<GstPlugin *>(p->data);
+            // Check for vvas_xvcudec
+            if (strcmp(gst_plugin_get_name(plugin), "vvas_xvcudec") == 0) {
+                has_u30 = gst_registry_check_feature_version(gst_registry_get(), "vvas_xvcudec", 0, 1, 0);
+
+                if (has_u30)
+                    break;
+            }
+        }
+
+        gst_plugin_list_free(plugins);
+
+        return has_u30;
     }
 }

@@ -75,6 +75,7 @@ namespace nvr {
         static void switchCodecs(StreamData *appData);
         static bool hasVAAPI();
         static bool hasNVIDIA();
+        static bool hasU30();
         int findOpenPort();
     };
 }
