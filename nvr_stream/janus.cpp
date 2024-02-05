@@ -340,14 +340,6 @@ namespace nvr {
         media["codec"] = codec;
         media["is_private"] = false;
         media["port"] = port;
-        media["bufferkf"] = true;
-
-        if (std::equal(codec.begin(), codec.end(), "h264"))
-            media["rtpmap"] = "H264/90000";
-        else
-            media["rtpmap"] = "VP8/90000";
-
-        media["collision"] = 500;
         media["pt"] = 96;
 
         media = json::array({media});
