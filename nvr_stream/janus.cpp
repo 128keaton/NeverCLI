@@ -337,14 +337,14 @@ namespace nvr {
 
         media["mid"] = std::to_string(media_id);
         media["type"] = "video";
-        media["codec"] = "vp8";
+        media["codec"] = codec;
         media["is_private"] = false;
         media["port"] = port;
         media["bufferkf"] = true;
 
-        if (codec == "h264")
+        if (std::equal(codec.begin(), codec.end(), "h264"))
             media["rtpmap"] = "H264/90000";
-        else if (codec == "vp8")
+        else
             media["rtpmap"] = "VP8/90000";
 
         media["collision"] = 500;
