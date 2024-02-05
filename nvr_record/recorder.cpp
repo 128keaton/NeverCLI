@@ -4,15 +4,17 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-no-recursion"
 
+#include <sys/un.h>
 #include "recorder.h"
 #include "../common.h"
 
+using json = nlohmann::json;
 using path = std::filesystem::path;
 namespace fs = std::filesystem;
 
 namespace nvr {
 
-    std::shared_ptr<Recorder> Recorder::instance(){
+    std::shared_ptr<Recorder> Recorder::instance() {
         static std::shared_ptr<Recorder> s{new Recorder};
         return s;
     }
@@ -45,14 +47,17 @@ namespace nvr {
                     path segment_file_src_path = (segment_source_file_name.c_str());
 
                     instance()->last_clip = segment_file_dest_path;
-                    instance()->logger->info("Finished clip '{}' with runtime of {} seconds", segment_file_dest_path.filename().c_str(), instance()->clip_runtime);
-                    instance()->logger->info("Copying clip from '{}' to '{}'", segment_file_src_path.string(), segment_file_dest_path.string());
+                    instance()->logger->info("Finished clip '{}' with runtime of {} seconds",
+                                             segment_file_dest_path.filename().c_str(), instance()->clip_runtime);
+                    instance()->logger->info("Copying clip from '{}' to '{}'", segment_file_src_path.string(),
+                                             segment_file_dest_path.string());
 
                     fs::create_directories(segment_file_dest_path.parent_path());
                     fs::copy(segment_file_src_path, segment_file_dest_path);
 
                     instance()->logger->info("Removing temporary clip from '{}'", segment_file_src_path.string());
                     fs::remove(segment_file_src_path);
+                    instance()->notifyClip(segment_file_dest_path.string());
                 } else if (string_fmt.find(string("starts")) != std::string::npos) {
                     auto segment_file_name_string = string(segment_file_name);
                     auto dot_path = string("./");
@@ -61,7 +66,8 @@ namespace nvr {
                     if (pos == std::string::npos) return;
                     segment_file_name_string.replace(pos, dot_path.length(), "");
 
-                    instance()->logger->info("Starting clip '{}' with predicted runtime of {} seconds", segment_file_name_string, instance()->clip_runtime);
+                    instance()->logger->info("Starting clip '{}' with predicted runtime of {} seconds",
+                                             segment_file_name_string, instance()->clip_runtime);
                 }
             }
         }
@@ -74,7 +80,6 @@ namespace nvr {
     }
 
     void Recorder::configure(const CameraConfig &config) {
-        this->type = config.type;
         this->error_count = 0;
         this->camera_id = config.stream_id;
         this->input_format_context = avformat_alloc_context();
@@ -93,6 +98,7 @@ namespace nvr {
         this->port = config.port;
         this->snapshot_interval = config.snapshot_interval;
         this->logger = buildLogger(config);
+        this->connectSocket();
         this->configured = true;
     }
 
@@ -236,6 +242,7 @@ namespace nvr {
         if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[2] == 0xff) {
             fclose(snapshot_file);
             this->logger->debug("Wrote snapshot to {}", snapshot_file_path);
+            this->notifySnapshot(snapshot_file_path);
         } else {
             this->logger->error("Invalid JPEG!\r\n");
             remove(snapshot_file_path.c_str());
@@ -338,7 +345,7 @@ namespace nvr {
 
             if (packet->stream_index != input_index) {
                 logger->warn("Not right index: '{}' (from packet), input_index: '{}'", packet->stream_index,
-                              input_index);
+                             input_index);
             }
 
             // This is _literally_ just to keep clang happy i.e. not marking it as unreachable
@@ -380,6 +387,75 @@ namespace nvr {
         av_packet_free(&packet);
 
         return EXIT_SUCCESS;
+    }
+
+    bool Recorder::connectSocket() {
+        if (socket_connected)
+            return socket_connected;
+
+        auto socket_path = string("/tmp/nvr.socket");
+
+        if ((camera_socket = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1) {
+            logger->error("Could not initialize Never socket at '{}'", socket_path);
+            return false;
+        }
+
+        struct sockaddr_un serv_addr{};
+        bzero(&serv_addr, sizeof(serv_addr));
+        serv_addr.sun_family = AF_UNIX;
+
+        strncpy(serv_addr.sun_path, socket_path.c_str(), sizeof(serv_addr.sun_path));
+        if (::connect(camera_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1) {
+            logger->error("Error on connecting to socket {}", socket_path);
+            return false;
+        }
+
+
+        socket_connected = true;
+        return socket_connected;
+    }
+
+    void Recorder::notifyClip(string clip_path) {
+        this->connectSocket();
+
+        json request;
+
+        request["path"] = clip_path;
+        request["type"] = "clip";
+        request["camera"] = camera_id;
+
+        auto raw = request.dump();
+
+       if (send(camera_socket, raw.data(), raw.size(), 0) == -1) {
+            logger->error("Could not notify socket of new clip at: {}", clip_path);
+        }
+
+       this->closeSocket();
+    }
+
+    void Recorder::notifySnapshot(string snapshot_path) {
+        this->connectSocket();
+
+        json request;
+
+        request["path"] = snapshot_path;
+        request["type"] = "snapshot";
+        request["camera"] = camera_id;
+
+        auto raw = request.dump();
+        if (send(camera_socket, raw.c_str(), raw.size(), 0) == -1) {
+            logger->error("Could not notify socket of new snapshot at: {}", snapshot_path);
+        }
+
+        this->closeSocket();
+    }
+
+    void Recorder::closeSocket() {
+        if (!this->socket_connected)
+            return;
+
+        close(this->camera_socket);
+        this->socket_connected = false;
     }
 
 } // nvr

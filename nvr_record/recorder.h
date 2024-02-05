@@ -44,6 +44,8 @@ namespace nvr {
         void quit();
         bool valid();
         string getName();
+        void notifyClip(string clip_path);
+        void notifySnapshot(string snapshot_path);
         static std::shared_ptr<Recorder> instance();
 
     private:
@@ -56,8 +58,6 @@ namespace nvr {
         AVStream *output_stream{};
         CURL *curl_handle{};
         nvr_logger logger;
-
-        StreamType type = h265;
         string camera_id = "";
         string stream_url = "";
         string snapshot_url = "";
@@ -71,10 +71,12 @@ namespace nvr {
         bool configured = false;
         int port{};
         bool connected = false;
+        bool socket_connected = false;
         int input_index = -1;
         long clip_runtime = 0;
         long snapshot_interval = 0;
         int error_count = 0;
+        int camera_socket{};
 
         int record();
 
@@ -83,7 +85,8 @@ namespace nvr {
         void takeSnapshot();
 
         void validateSnapshot(string snapshot_file_path);
-
+        bool connectSocket();
+        void closeSocket();
         bool handleError(const string &message, bool close_input = true);
     };
 
