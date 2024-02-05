@@ -509,8 +509,8 @@ namespace nvr {
         bool has_nvidia = hasNVIDIA();
         bool has_u30 = hasU30();
 
-        if (!has_vaapi && !has_nvidia) {
-            logger->info("Not using vaapi/nvidia for encoding/decoding");
+        if (!has_u30 && !has_vaapi && !has_nvidia) {
+            logger->info("Not using vaapi/nvidia/u30 for encoding/decoding");
 
             if (appData->is_h265)
                 appData->decoder = gst_element_factory_make("avdec_h265", "dec");
