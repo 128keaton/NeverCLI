@@ -4,6 +4,8 @@
 
 #include "janus.h"
 
+#include <utility>
+
 using json = nlohmann::json;
 using nvr_logger = std::shared_ptr<spdlog::logger>;
 
@@ -371,7 +373,7 @@ namespace nvr {
         body["request"] = "create";
         body["name"] = camera_id;
         body["type"] = "rtp";
-        body["media"] = buildMedia(port, media_id, codec);
+        body["media"] = buildMedia(port, media_id, std::move(codec));
         body["metadata"] = to_string(metadata);
         body["threads"] = 2;
 

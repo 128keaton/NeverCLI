@@ -318,7 +318,12 @@ namespace nvr {
             exit(-1);
         }
 
-        string codec = hasU30() ? "h264" : "vp8";
+        string codec = "vp8";
+
+        if (hasU30()) {
+            data->logger->info("Using h264 stream since we are using U30");
+            codec = "h264";
+        }
 
         if (data->janus.createStream(data->stream_id, data->rtp_port, codec)) {
             data->janus.keepAlive();
