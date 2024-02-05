@@ -119,7 +119,7 @@ namespace nvr {
                 appData.rtspSrc,
                 appData.dePayloader,
                 appData.parser,
-                appData.timestamper,
+          //      appData.timestamper,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
@@ -131,7 +131,7 @@ namespace nvr {
         gst_element_link_many(
                 appData.dePayloader,
                 appData.parser,
-                appData.timestamper,
+      //          appData.timestamper,
                 appData.decoder,
                 appData.encoder,
                 appData.payloader,
@@ -428,7 +428,7 @@ namespace nvr {
                 appData->rtspSrc,
                 appData->dePayloader,
                 appData->parser,
-                appData->timestamper,
+            //    appData->timestamper,
                 appData->decoder,
                 nullptr
         );
@@ -437,7 +437,7 @@ namespace nvr {
         gst_element_link_many(
                 appData->dePayloader,
                 appData->parser,
-                appData->timestamper,
+        //        appData->timestamper,
                 appData->decoder,
                 appData->encoder,
                 NULL);
