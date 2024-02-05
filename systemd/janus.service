@@ -1,7 +1,6 @@
 [Unit]
 Description=Janus WebRTC Gateway
 After=syslog.target network-online.target
-PartOf=janus.service
 
 [Service]
 ExecStart=/usr/local/bin/janus
