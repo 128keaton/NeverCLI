@@ -635,8 +635,7 @@ namespace nvr {
         for (p = plugins; p; p = p->next) {
             auto *plugin = static_cast<GstPlugin *>(p->data);
             // Check for vvas_xvcudec
-            printf("%s\r\n", gst_plugin_get_name(plugin));
-            if (strcmp(gst_plugin_get_name(plugin), "vvas_xvcudec") == 0) {
+            if (strcmp(gst_plugin_get_name(plugin), "libgstvvas_xvcuenc.so") == 0) {
                 has_u30 = true;
                 break;
             }
