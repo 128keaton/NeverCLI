@@ -636,10 +636,8 @@ namespace nvr {
             auto *plugin = static_cast<GstPlugin *>(p->data);
             // Check for vvas_xvcudec
             if (strcmp(gst_plugin_get_name(plugin), "vvas_xvcudec") == 0) {
-                has_u30 = gst_registry_check_feature_version(gst_registry_get(), "vvas_xvcudec", 0, 1, 0);
-
-                if (has_u30)
-                    break;
+                has_u30 = true;
+                break;
             }
         }
 
