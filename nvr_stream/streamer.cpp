@@ -103,7 +103,7 @@ namespace nvr {
 
         // udp output sink
         appData.sink = gst_element_factory_make("udpsink", "udp");
-        g_object_set(G_OBJECT(appData.sink), "host", "127.0.0.1", nullptr);
+        g_object_set(G_OBJECT(appData.sink), "host", "0.0.0.0", nullptr);
         g_object_set(G_OBJECT(appData.sink), "port", rtp_port, nullptr);
         g_object_set(G_OBJECT(appData.sink), "sync", false, nullptr);
 
