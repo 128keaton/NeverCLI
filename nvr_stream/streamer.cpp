@@ -92,11 +92,12 @@ namespace nvr {
         if (hasU30()) {
             // h264 final payloader
             appData.payloader = gst_element_factory_make("rtph264pay", "pay");
-            g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
+            logger->info("Using rtph264pay");
             g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
         } else {
             // vp8 final payloader
             appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
+            logger->info("Using rtpvp8pay");
             g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
         }
 
@@ -538,10 +539,9 @@ namespace nvr {
             if (create_encoder) {
                 appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
                 g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "enable-pipeline", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "b-frames", 4, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", 1000, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", 1000, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "prefetch-buffer", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "num-slices", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
