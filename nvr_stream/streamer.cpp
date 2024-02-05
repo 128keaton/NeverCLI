@@ -533,11 +533,11 @@ namespace nvr {
             logger->info("Using XILINX U30 Media Accelerator");
 
             appData->decoder = gst_element_factory_make("vvas_xvcudec", "dec");
-            g_object_set(G_OBJECT(appData->decoder), "dev-idx", 1, nullptr);
+            g_object_set(G_OBJECT(appData->decoder), "dev-idx", 0, nullptr);
 
             if (create_encoder) {
                 appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
-                g_object_set(G_OBJECT(appData->encoder), "dev-idx", 1, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "enable-pipeline", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "b-frames", 4, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
