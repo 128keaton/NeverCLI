@@ -540,7 +540,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "prefetch-buffer", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "num-slices", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-mode", "low-delay-p", nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
             }
         } else if (has_nvidia) {
             logger->info("Using nvidia hardware acceleration");
