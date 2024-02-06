@@ -40,10 +40,8 @@ namespace nvr {
         void configure(const CameraConfig &config);
         bool connect();
         int startRecording(long _clip_runtime);
-        int clipCount();
         void quit();
         bool valid();
-        string getName();
         void notifyClip(string clip_path);
         void notifySnapshot(string snapshot_path);
         static std::shared_ptr<Recorder> instance();
@@ -58,15 +56,14 @@ namespace nvr {
         AVStream *output_stream{};
         CURL *curl_handle{};
         nvr_logger logger;
-        string camera_id = "";
-        string stream_url = "";
-        string snapshot_url = "";
-        string output_path = "";
-        string rtsp_username = "";
-        string rtsp_password = "";
-        string ip_address = "";
-        string last_clip = "";
-
+        string camera_id;
+        string stream_url;
+        string snapshot_url;
+        string output_path;
+        string rtsp_username;
+        string rtsp_password;
+        string ip_address;
+        string last_clip;
 
         bool configured = false;
         int port{};
