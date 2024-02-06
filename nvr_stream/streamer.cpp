@@ -595,9 +595,11 @@ namespace nvr {
             if (create_encoder) {
                 appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
                 g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "b-frames", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "b-frames", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate - 125, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate - 75, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gop-mode", 1, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "gop-length", 120, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 120, nullptr);
             }
