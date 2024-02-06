@@ -114,29 +114,56 @@ namespace nvr {
         Streamer::setupStreamOutput(&appData, true);
 
         // add everything
-        gst_bin_add_many(
-                GST_BIN(appData.pipeline),
-                appData.rtspSrc,
-                appData.dePayloader,
-                appData.parser,
-          //      appData.timestamper,
-                appData.decoder,
-                appData.encoder,
-                appData.payloader,
-                appData.sink,
-                nullptr
-        );
+        if (hasTimestamper()) {
+            gst_bin_add_many(
+                    GST_BIN(appData.pipeline),
+                    appData.rtspSrc,
+                    appData.dePayloader,
+                    appData.parser,
+                    appData.timestamper,
+                    appData.decoder,
+                    appData.encoder,
+                    appData.payloader,
+                    appData.sink,
+                    nullptr
+            );
 
-        // link everything except source
-        gst_element_link_many(
-                appData.dePayloader,
-                appData.parser,
-      //          appData.timestamper,
-                appData.decoder,
-                appData.encoder,
-                appData.payloader,
-                appData.sink,
-                NULL);
+            // link everything except source
+            gst_element_link_many(
+                    appData.dePayloader,
+                    appData.parser,
+                    appData.timestamper,
+                    appData.decoder,
+                    appData.encoder,
+                    appData.payloader,
+                    appData.sink,
+                    nullptr
+            );
+        } else {
+            gst_bin_add_many(
+                    GST_BIN(appData.pipeline),
+                    appData.rtspSrc,
+                    appData.dePayloader,
+                    appData.parser,
+                    appData.decoder,
+                    appData.encoder,
+                    appData.payloader,
+                    appData.sink,
+                    nullptr
+            );
+
+            // link everything except source
+            gst_element_link_many(
+                    appData.dePayloader,
+                    appData.parser,
+                    appData.decoder,
+                    appData.encoder,
+                    appData.payloader,
+                    appData.sink,
+                    nullptr
+            );
+        }
+
 
         g_signal_connect(appData.rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), &appData);
 
@@ -423,24 +450,41 @@ namespace nvr {
         Streamer::setupStreamOutput(appData, false);
 
         logger->info("Adding elements");
-        gst_bin_add_many(
-                GST_BIN(appData->pipeline),
-                appData->rtspSrc,
-                appData->dePayloader,
-                appData->parser,
-            //    appData->timestamper,
-                appData->decoder,
-                nullptr
-        );
+        if (hasTimestamper()) {
+            gst_bin_add_many(
+                    GST_BIN(appData->pipeline),
+                    appData->rtspSrc,
+                    appData->dePayloader,
+                    appData->parser,
+                    appData->timestamper,
+                    appData->decoder,
+                    nullptr
+            );
 
+            gst_element_link_many(
+                    appData->dePayloader,
+                    appData->parser,
+                    appData->timestamper,
+                    appData->decoder,
+                    appData->encoder,
+                    nullptr);
+        } else {
+            gst_bin_add_many(
+                    GST_BIN(appData->pipeline),
+                    appData->rtspSrc,
+                    appData->dePayloader,
+                    appData->parser,
+                    appData->decoder,
+                    nullptr
+            );
 
-        gst_element_link_many(
-                appData->dePayloader,
-                appData->parser,
-        //        appData->timestamper,
-                appData->decoder,
-                appData->encoder,
-                NULL);
+            gst_element_link_many(
+                    appData->dePayloader,
+                    appData->parser,
+                    appData->decoder,
+                    appData->encoder,
+                    nullptr);
+        }
 
 
         g_signal_connect(appData->rtspSrc, "pad-added", G_CALLBACK(nvr::Streamer::padAddedHandler), appData);
@@ -458,14 +502,18 @@ namespace nvr {
         gst_element_set_state(appData->rtspSrc, GST_STATE_NULL);
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
-        gst_element_set_state(appData->timestamper, GST_STATE_NULL);
         gst_element_set_state(appData->decoder, GST_STATE_NULL);
 
         gst_bin_remove(GST_BIN(appData->pipeline), appData->rtspSrc);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
-        gst_bin_remove(GST_BIN(appData->pipeline), appData->timestamper);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
+
+        if (hasTimestamper()) {
+            gst_element_set_state(appData->timestamper, GST_STATE_NULL);
+            gst_bin_remove(GST_BIN(appData->pipeline), appData->timestamper);
+        }
+
     }
 
     void Streamer::setupStreamInput(StreamData *appData) {
@@ -482,8 +530,10 @@ namespace nvr {
             appData->parser = gst_element_factory_make("h265parse", nullptr);
             g_object_set(G_OBJECT(appData->parser), "config-interval", -1, nullptr);
 
-            // h265 timestamper
-            appData->timestamper = gst_element_factory_make("h265timestamper", nullptr);
+            if (hasTimestamper()) {
+                // h265 timestamper
+                appData->timestamper = gst_element_factory_make("h265timestamper", nullptr);
+            }
 
             // h265 de-payload
             appData->dePayloader = gst_element_factory_make("rtph265depay", "depay");
@@ -499,8 +549,11 @@ namespace nvr {
             appData->parser = gst_element_factory_make("h264parse", nullptr);
             g_object_set(G_OBJECT(appData->parser), "config-interval", -1, nullptr);
 
-            // h264 timestamper
-            appData->timestamper = gst_element_factory_make("h264timestamper", nullptr);
+
+            if (hasTimestamper()) {
+                // h264 timestamper
+                appData->timestamper = gst_element_factory_make("h264timestamper", nullptr);
+            }
 
             // h264 de-payload
             appData->dePayloader = gst_element_factory_make("rtph264depay", "depay");
@@ -530,7 +583,7 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
             }
 
-        }  else if (has_u30) {
+        } else if (has_u30) {
             logger->info("Using XILINX U30 Media Accelerator");
 
             appData->decoder = gst_element_factory_make("vvas_xvcudec", "dec");
@@ -540,12 +593,13 @@ namespace nvr {
                 appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
                 g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "b-frames", 4, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", 1000, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", 1000, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "prefetch-buffer", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "num-slices", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "control-rate", 1, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "enable-pipeline", true, nullptr);
             }
         } else if (has_nvidia) {
             logger->info("Using nvidia hardware acceleration");
@@ -630,6 +684,27 @@ namespace nvr {
         gst_plugin_list_free(plugins);
 
         return has_vaapi;
+    }
+
+    bool Streamer::hasTimestamper() {
+        GList *plugins, *p;
+
+        bool has_timestamper = false;
+        plugins = gst_registry_get_plugin_list(gst_registry_get());
+        for (p = plugins; p; p = p->next) {
+            auto *plugin = static_cast<GstPlugin *>(p->data);
+            // Check for codectimestamper
+            if (strcmp(gst_plugin_get_name(plugin), "codectimestamper") == 0) {
+                has_timestamper = gst_registry_check_feature_version(gst_registry_get(), "h264timestamper", 1, 22, 0);
+
+                if (has_timestamper)
+                    break;
+            }
+        }
+
+        gst_plugin_list_free(plugins);
+
+        return has_timestamper;
     }
 
     bool Streamer::hasU30() {

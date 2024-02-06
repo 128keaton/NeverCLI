@@ -37,6 +37,7 @@ namespace nvr {
         string stream_url;
         string rtsp_username;
         string rtsp_password;
+        bool has_timestamper;
     } StreamData;
 
 
@@ -76,6 +77,7 @@ namespace nvr {
         static bool hasVAAPI();
         static bool hasNVIDIA();
         static bool hasU30();
+        static bool hasTimestamper();
         int findOpenPort();
     };
 }
