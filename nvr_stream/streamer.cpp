@@ -38,7 +38,7 @@ namespace nvr {
         this->appData.error_count = 0;
         this->appData.needs_codec_switch = false;
 
-        // Use substream for streaming
+        // Use sub stream for streaming
         this->stream_url = config.sub_stream_url;
     }
 
