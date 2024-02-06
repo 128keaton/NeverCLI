@@ -600,11 +600,10 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate - 50, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "tune-metrics", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "num-slices", 4, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "control-rate", 3, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "ultra-low-latency", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "avc-lowlat", true, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-mode", 1, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-length", 240, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "qp-mode", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 240, nullptr);
             }
