@@ -644,16 +644,16 @@ namespace nvr {
             logger->info("Using software for encoding/decoding");
             buildStreamOutput(appData, none, create_encoder);
         } else {
-            if (has_nvidia && std::equal(priority.begin(), priority.end(), "nvidia") ||
-                std::equal(priority.begin(), priority.end(), "none")) {
+            if (has_nvidia && (std::equal(priority.begin(), priority.end(), "nvidia") ||
+                               std::equal(priority.begin(), priority.end(), "none"))) {
                 logger->info("Using NVidia GPU for encoding/decoding");
                 buildStreamOutput(appData, nvidia, create_encoder);
-            } else if (has_u30 && std::equal(priority.begin(), priority.end(), "u30") ||
-                       std::equal(priority.begin(), priority.end(), "none")) {
+            } else if (has_u30 && (std::equal(priority.begin(), priority.end(), "u30") ||
+                                    std::equal(priority.begin(), priority.end(), "none"))) {
                 logger->info("Using U30 Media Accelerator for encoding/decoding");
                 buildStreamOutput(appData, u30, create_encoder);
-            } else if (has_vaapi && std::equal(priority.begin(), priority.end(), "vaapi") ||
-                       std::equal(priority.begin(), priority.end(), "none")) {
+            } else if (has_vaapi && (std::equal(priority.begin(), priority.end(), "vaapi") ||
+                                     std::equal(priority.begin(), priority.end(), "none"))) {
                 logger->info("Using VAAPI for encoding/decoding");
                 buildStreamOutput(appData, vaapi, create_encoder);
             } else {
