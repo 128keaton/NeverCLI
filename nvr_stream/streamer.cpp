@@ -588,6 +588,11 @@ namespace nvr {
 
             appData->decoder = gst_element_factory_make("vvas_xvcudec", "dec");
             g_object_set(G_OBJECT(appData->decoder), "dev-idx", 0, nullptr);
+            g_object_set(G_OBJECT(appData->decoder), "discard-corrupted-frames", true, nullptr);
+            g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
+            g_object_set(G_OBJECT(appData->decoder), "avoid-output-copy", true, nullptr);
+            g_object_set(G_OBJECT(appData->decoder), "avoid-dynamic-alloc", false, nullptr);
+            g_object_set(G_OBJECT(appData->decoder), "num-entropy-buf", 10, nullptr);
 
             if (create_encoder) {
                 appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
