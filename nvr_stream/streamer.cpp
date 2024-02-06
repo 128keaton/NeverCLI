@@ -97,6 +97,7 @@ namespace nvr {
             g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
             g_object_set(G_OBJECT(appData.payloader), "mtu", 1200, nullptr);
             g_object_set(G_OBJECT(appData.payloader), "onvif-no-rate-control", true, nullptr);
+            g_object_set(G_OBJECT(appData.payloader), "perfect-rtptime", false, nullptr);
         } else {
             // vp8 final payloader
             appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
