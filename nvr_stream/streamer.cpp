@@ -584,6 +584,7 @@ namespace nvr {
                     g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
                     g_object_set(G_OBJECT(appData->encoder), "quality-level", 3, nullptr);
                 }
+                break;
             case nvidia:
                 if (appData->is_h265)
                     appData->decoder = gst_element_factory_make("nvh265dec", "dec");
