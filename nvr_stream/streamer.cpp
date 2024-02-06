@@ -94,7 +94,7 @@ namespace nvr {
             logger->info("Using rtph264pay");
             g_object_set(G_OBJECT(appData.payloader), "pt", 96, nullptr);
             g_object_set(G_OBJECT(appData.payloader), "config-interval", -1, nullptr);
-            g_object_set(G_OBJECT(appData.payloader), "mtu", 1145, nullptr);
+            g_object_set(G_OBJECT(appData.payloader), "mtu", 2200, nullptr);
         } else {
             // vp8 final payloader
             appData.payloader = gst_element_factory_make("rtpvp8pay", "pay");
