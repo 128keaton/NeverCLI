@@ -201,7 +201,7 @@ namespace nvr {
                 gst_message_parse_error(msg, &err, &debug);
 
 
-                bool switch_codecs = false;
+                bool switch_codecs = true;
                 if (strcmp(err->message, "Could not read from resource.") == 0) {
                     data->logger->warn("Could not read from resource, retrying");
                 } else {
@@ -222,7 +222,7 @@ namespace nvr {
 
                 if (switch_codecs) {
                     data->is_h265 = !data->is_h265;
-                    Streamer::switchCodecs(data);
+                    switchCodecs(data);
                 }
 
                 break;
@@ -440,6 +440,8 @@ namespace nvr {
         this->logger = nullptr;
     }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnreachableCallsOfFunction"
     void Streamer::switchCodecs(StreamData *appData) {
         auto logger = appData->logger;
 
@@ -515,6 +517,8 @@ namespace nvr {
 
     }
 
+#pragma clang diagnostic pop
+
     void Streamer::setupStreamInput(StreamData *appData) {
         auto logger = appData->logger;
         bool has_u30 = hasU30();
@@ -561,6 +565,9 @@ namespace nvr {
         logger->info("Done creating input");
     }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "ConstantParameter"
+#pragma ide diagnostic ignored "ConstantConditionsOC"
     void Streamer::setupStreamOutput(StreamData *appData, bool create_encoder) {
         auto logger = appData->logger;
         bool has_vaapi = hasVAAPI();
@@ -594,12 +601,11 @@ namespace nvr {
                 appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
                 g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "b-frames", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate + 75, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate - 75, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "num-slices", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-length", 240, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gop-length", 140, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 120, nullptr);
             }
         } else if (has_nvidia) {
@@ -634,6 +640,7 @@ namespace nvr {
             }
         }
     }
+#pragma clang diagnostic pop
 
     void Streamer::setupRTSPStream(StreamData *appData) {
         appData->rtspSrc = gst_element_factory_make("rtspsrc", "src");
