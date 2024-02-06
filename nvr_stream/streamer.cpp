@@ -597,7 +597,11 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "prefetch-buffer", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "num-slices", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "control-rate", 1, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gdr-mode", 2, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "cpb-size", 1000, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "b-frames", 0, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "qos", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "enable-pipeline", true, nullptr);
             }
