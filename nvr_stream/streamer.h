@@ -23,9 +23,9 @@ namespace nvr {
         GstElement *payloader;
         GstElement *sink;
         string stream_name;
+        string hardware_enc_priority;
         int64_t rtp_port;
         int64_t bitrate;
-        int64_t buffer_size;
         string stream_id;
         std::shared_ptr<spdlog::logger> logger;
         Janus janus;
@@ -38,6 +38,14 @@ namespace nvr {
         string rtsp_username;
         string rtsp_password;
     } StreamData;
+
+    enum StreamHardwareType {
+        vaapi,
+        u30,
+        nvidia,
+        none
+    };
+
 
 
     class Streamer {
@@ -68,9 +76,11 @@ namespace nvr {
         static void createJanusStream(StreamData *data);
         static void setupStreamInput(StreamData *appData);
         static void setupStreamOutput(StreamData *appData,  bool create_encoder);
+        static void buildStreamOutput(StreamData *appData, StreamHardwareType type, bool create_encoder);
         static void teardownStreamCodecs(StreamData *appData);
         static void setupRTSPStream(StreamData *appData);
         static void switchCodecs(StreamData *appData);
+
         static bool hasVAAPI();
         static bool hasNVIDIA();
         static bool hasU30();

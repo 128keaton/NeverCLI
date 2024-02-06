@@ -55,6 +55,7 @@ namespace nvr {
         string rtsp_password;
         StreamType type;
         string stream_id;
+        string hardware_enc_priority;
         const long clip_runtime;
         const long snapshot_interval;
         const int port;

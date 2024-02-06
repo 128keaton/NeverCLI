@@ -73,6 +73,7 @@ namespace nvr {
 
         // Get optional fields
         string sub_stream_url =  config["streamURL"];
+        string hardware_enc_priority = "none";
         int port = 554;
         long snapshot_interval = config["splitEvery"];
 
@@ -85,6 +86,9 @@ namespace nvr {
         if (config.contains("snapshotInterval"))
             snapshot_interval = config["snapshotInterval"];
 
+        if (config.contains("hardwareEncoderPriority"))
+            hardware_enc_priority = config["hardwareEncoderPriority"];
+
         return {
             stream_url,
             sub_stream_url,
@@ -96,6 +100,7 @@ namespace nvr {
             rtsp_password,
             type,
             stream_id,
+            hardware_enc_priority,
             clip_runtime,
             snapshot_interval,
             port,

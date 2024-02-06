@@ -29,7 +29,7 @@ namespace nvr {
 
         this->appData.rtp_port = this->rtp_port;
         this->appData.bitrate = 900; // The recorded video is ~about~ this
-        this->appData.buffer_size = 2500000;
+        this->appData.hardware_enc_priority = config.hardware_enc_priority;
         this->appData.stream_name = this->camera_id;
         this->bus = nullptr;
         this->appData.stream_id = config.stream_id;
@@ -442,6 +442,7 @@ namespace nvr {
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnreachableCallsOfFunction"
+
     void Streamer::switchCodecs(StreamData *appData) {
         auto logger = appData->logger;
 
@@ -533,10 +534,9 @@ namespace nvr {
             appData->parser = gst_element_factory_make("h265parse", nullptr);
             g_object_set(G_OBJECT(appData->parser), "config-interval", -1, nullptr);
 
-            if (hasTimestamper()) {
-                // h265 timestamper
+            // h265 timestamper
+            if (hasTimestamper())
                 appData->timestamper = gst_element_factory_make("h265timestamper", nullptr);
-            }
 
             // h265 de-payload
             appData->dePayloader = gst_element_factory_make("rtph265depay", "depay");
@@ -552,11 +552,9 @@ namespace nvr {
             appData->parser = gst_element_factory_make("h264parse", nullptr);
             g_object_set(G_OBJECT(appData->parser), "config-interval", -1, nullptr);
 
-
-            if (hasTimestamper()) {
-                // h264 timestamper
+            // h264 timestamper
+            if (hasTimestamper())
                 appData->timestamper = gst_element_factory_make("h264timestamper", nullptr);
-            }
 
             // h264 de-payload
             appData->dePayloader = gst_element_factory_make("rtph264depay", "depay");
@@ -566,81 +564,105 @@ namespace nvr {
     }
 
 #pragma clang diagnostic push
-#pragma ide diagnostic ignored "ConstantParameter"
 #pragma ide diagnostic ignored "ConstantConditionsOC"
+#pragma ide diagnostic ignored "ConstantParameter"
+
+    void Streamer::buildStreamOutput(StreamData *appData, StreamHardwareType type, bool create_encoder) {
+        switch (type) {
+            case vaapi:
+                if (appData->is_h265) {
+                    appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
+                    g_object_set(G_OBJECT(appData->decoder), "discard-corrupted-frames", true, nullptr);
+                } else {
+                    appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
+                    g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
+                }
+
+                if (create_encoder) {
+                    appData->encoder = gst_element_factory_make("vaapivp8enc", "enc");
+                    g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "quality-level", 3, nullptr);
+                }
+            case nvidia:
+                if (appData->is_h265)
+                    appData->decoder = gst_element_factory_make("nvh265dec", "dec");
+                else
+                    appData->decoder = gst_element_factory_make("nvh264dec", "dec");
+
+                if (create_encoder) {
+                    appData->encoder = gst_element_factory_make("vp8enc", "enc");
+                    g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+                }
+                break;
+            case u30:
+                appData->decoder = gst_element_factory_make("vvas_xvcudec", "dec");
+                g_object_set(G_OBJECT(appData->decoder), "dev-idx", 0, nullptr);
+                g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
+                g_object_set(G_OBJECT(appData->decoder), "splitbuff-mode", true, nullptr);
+
+                if (create_encoder) {
+                    appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
+                    g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "b-frames", 0, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate - 75, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "gop-length", 120, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "initial-delay", 0, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 120, nullptr);
+                }
+                break;
+            case none:
+                if (appData->is_h265)
+                    appData->decoder = gst_element_factory_make("avdec_h265", "dec");
+                else
+                    appData->decoder = gst_element_factory_make("avdec_h264", "dec");
+
+
+                if (create_encoder) {
+                    appData->encoder = gst_element_factory_make("vp8enc", "enc");
+                    g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
+                    g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
+                }
+                break;
+        }
+    }
+
     void Streamer::setupStreamOutput(StreamData *appData, bool create_encoder) {
         auto logger = appData->logger;
         bool has_vaapi = hasVAAPI();
         bool has_nvidia = hasNVIDIA();
         bool has_u30 = hasU30();
+        string priority = appData->hardware_enc_priority;
 
-        if (!has_u30 && !has_vaapi && !has_nvidia) {
-            logger->info("Not using vaapi/nvidia/u30 for encoding/decoding");
+        logger->info("Hardware encoder priority: {}", priority);
 
-            if (appData->is_h265)
-                appData->decoder = gst_element_factory_make("avdec_h265", "dec");
-            else
-                appData->decoder = gst_element_factory_make("avdec_h264", "dec");
-
-
-            if (create_encoder) {
-                appData->encoder = gst_element_factory_make("vp8enc", "enc");
-                g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-            }
-
-        } else if (has_u30) {
-            logger->info("Using XILINX U30 Media Accelerator");
-
-            appData->decoder = gst_element_factory_make("vvas_xvcudec", "dec");
-            g_object_set(G_OBJECT(appData->decoder), "dev-idx", 0, nullptr);
-            g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
-            g_object_set(G_OBJECT(appData->decoder), "splitbuff-mode", true, nullptr);
-
-            if (create_encoder) {
-                appData->encoder = gst_element_factory_make("vvas_xvcuenc", "enc");
-                g_object_set(G_OBJECT(appData->encoder), "dev-idx", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "b-frames", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate - 75, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-length", 120, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "initial-delay", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 120, nullptr);
-            }
-        } else if (has_nvidia) {
-            logger->info("Using nvidia hardware acceleration");
-
-            if (appData->is_h265)
-                appData->decoder = gst_element_factory_make("nvh265dec", "dec");
-            else
-                appData->decoder = gst_element_factory_make("nvh264dec", "dec");
-
-            if (create_encoder) {
-                appData->encoder = gst_element_factory_make("vp8enc", "enc");
-                g_object_set(G_OBJECT(appData->encoder), "threads", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "target-bitrate", appData->bitrate, nullptr);
-            }
+        if (!has_u30 && !has_vaapi && !has_nvidia || std::equal(priority.begin(), priority.end(), "software")) {
+            logger->info("Using software for encoding/decoding");
+            buildStreamOutput(appData, none, create_encoder);
         } else {
-            logger->info("Using vaapi for encoding/decoding");
-
-            if (appData->is_h265) {
-                appData->decoder = gst_element_factory_make("vaapih265dec", "dec");
-                g_object_set(G_OBJECT(appData->decoder), "discard-corrupted-frames", true, nullptr);
+            if (has_nvidia && std::equal(priority.begin(), priority.end(), "nvidia") ||
+                std::equal(priority.begin(), priority.end(), "none")) {
+                logger->info("Using NVidia GPU for encoding/decoding");
+                buildStreamOutput(appData, nvidia, create_encoder);
+            } else if (has_u30 && std::equal(priority.begin(), priority.end(), "u30") ||
+                       std::equal(priority.begin(), priority.end(), "none")) {
+                logger->info("Using U30 Media Accelerator for encoding/decoding");
+                buildStreamOutput(appData, u30, create_encoder);
+            } else if (has_vaapi && std::equal(priority.begin(), priority.end(), "vaapi") ||
+                       std::equal(priority.begin(), priority.end(), "none")) {
+                logger->info("Using VAAPI for encoding/decoding");
+                buildStreamOutput(appData, vaapi, create_encoder);
             } else {
-                appData->decoder = gst_element_factory_make("vaapih264dec", "dec");
-                g_object_set(G_OBJECT(appData->decoder), "low-latency", true, nullptr);
-            }
-
-            if (create_encoder) {
-                appData->encoder = gst_element_factory_make("vaapivp8enc", "enc");
-                g_object_set(G_OBJECT(appData->encoder), "rate-control", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "bitrate", appData->bitrate, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "quality-level", 3, nullptr);
+                logger->warn("All cases fell through, we are using software encoder");
+                buildStreamOutput(appData, none, create_encoder);
             }
         }
     }
+
 #pragma clang diagnostic pop
 
     void Streamer::setupRTSPStream(StreamData *appData) {
