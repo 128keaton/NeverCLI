@@ -347,7 +347,8 @@ namespace nvr {
 
         string codec = "vp8";
 
-        if (hasU30()) {
+        if (hasU30() && (std::equal(data->hardware_enc_priority.begin(), data->hardware_enc_priority.end(), "u30") ||
+                         std::equal(data->hardware_enc_priority.begin(), data->hardware_enc_priority.end(), "none"))) {
             data->logger->info("Using h264 stream since we are using U30");
             codec = "h264";
         }
@@ -650,7 +651,7 @@ namespace nvr {
                 logger->info("Using NVidia GPU for encoding/decoding");
                 buildStreamOutput(appData, nvidia, create_encoder);
             } else if (has_u30 && (std::equal(priority.begin(), priority.end(), "u30") ||
-                                    std::equal(priority.begin(), priority.end(), "none"))) {
+                                   std::equal(priority.begin(), priority.end(), "none"))) {
                 logger->info("Using U30 Media Accelerator for encoding/decoding");
                 buildStreamOutput(appData, u30, create_encoder);
             } else if (has_vaapi && (std::equal(priority.begin(), priority.end(), "vaapi") ||
