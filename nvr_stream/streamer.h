@@ -37,7 +37,6 @@ namespace nvr {
         string stream_url;
         string rtsp_username;
         string rtsp_password;
-        bool has_timestamper;
     } StreamData;
 
 
@@ -63,8 +62,6 @@ namespace nvr {
         string rtsp_username;
         string rtsp_password;
         string ip_address;
-        bool has_vaapi = false;
-        bool has_nvidia = false;
         bool quitting = false;
         static void callbackMessage ([[maybe_unused]] GstBus *bus, GstMessage *msg, StreamData *data);
         static void padAddedHandler(GstElement *src, GstPad *new_pad, StreamData *data);

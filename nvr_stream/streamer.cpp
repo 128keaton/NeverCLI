@@ -18,7 +18,6 @@ using json = nlohmann::json;
 
 namespace nvr {
     Streamer::Streamer(const CameraConfig &config) {
-        this->has_vaapi = false;
         this->type = config.type;
         this->logger = nvr::buildLogger(config);
         this->camera_id = config.stream_id;
