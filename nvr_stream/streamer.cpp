@@ -605,7 +605,8 @@ namespace nvr {
                 g_object_set(G_OBJECT(appData->encoder), "max-bitrate", appData->bitrate, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "gop-mode", 2, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "control-rate", 2, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-length", 140, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "gop-length", 120, nullptr);
+                g_object_set(G_OBJECT(appData->encoder), "initial-delay", 0, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 120, nullptr);
             }
         } else if (has_nvidia) {
