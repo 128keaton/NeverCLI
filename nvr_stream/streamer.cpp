@@ -605,9 +605,9 @@ namespace nvr {
             //   g_object_set(G_OBJECT(appData->encoder), "ultra-low-latency", true, nullptr);
          //       g_object_set(G_OBJECT(appData->encoder), "avc-lowlat", true, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "gop-mode", 1, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "gop-length", 240, nullptr);
+           //     g_object_set(G_OBJECT(appData->encoder), "gop-length", 240, nullptr);
                 g_object_set(G_OBJECT(appData->encoder), "qp-mode", 0, nullptr);
-                g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 240, nullptr);
+           //     g_object_set(G_OBJECT(appData->encoder), "periodicity-idr", 240, nullptr);
             }
         } else if (has_nvidia) {
             logger->info("Using nvidia hardware acceleration");
