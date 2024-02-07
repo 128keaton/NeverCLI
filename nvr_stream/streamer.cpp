@@ -476,6 +476,7 @@ namespace nvr {
                     appData->dePayloader,
                     appData->parser,
                     appData->decoder,
+                    appData->encoder,
                     nullptr
             );
 
