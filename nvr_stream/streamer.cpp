@@ -462,6 +462,7 @@ namespace nvr {
             );
 
             gst_element_link_many(
+                    appData->rtspSrc,
                     appData->dePayloader,
                     appData->parser,
                     appData->timestamper,
@@ -479,6 +480,7 @@ namespace nvr {
             );
 
             gst_element_link_many(
+                    appData->rtspSrc,
                     appData->dePayloader,
                     appData->parser,
                     appData->decoder,
@@ -556,6 +558,7 @@ namespace nvr {
 
             // h264 de-payload
             appData->dePayloader = gst_element_factory_make("rtph264depay", "depay");
+            g_object_set(G_OBJECT(appData->dePayloader), "source-info", true, nullptr);
         }
 
         logger->info("Done creating input");
