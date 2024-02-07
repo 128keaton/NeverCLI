@@ -332,7 +332,7 @@ namespace nvr {
      *
      * @return
      */
-    json Janus::buildMedia(int64_t port, int64_t media_id, string codec) {
+    json Janus::buildMedia(int64_t port, int64_t media_id, const string& codec) {
         json media;
 
         media["mid"] = std::to_string(media_id);
@@ -368,6 +368,8 @@ namespace nvr {
         body["media"] = buildMedia(port, media_id, std::move(codec));
         body["metadata"] = to_string(metadata);
         body["threads"] = 2;
+
+        logger->debug("Body: {}", body.dump());
 
         json request = buildMessage(body);
 
