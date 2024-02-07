@@ -447,7 +447,7 @@ namespace nvr {
         Streamer::teardownStreamCodecs(appData);
         Streamer::setupStreamInput(appData);
         Streamer::setupRTSPStream(appData);
-        Streamer::setupStreamOutput(appData, true);
+        Streamer::setupStreamOutput(appData, false);
 
         logger->info("Adding elements");
         if (hasTimestamper()) {
