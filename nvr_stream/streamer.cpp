@@ -213,7 +213,7 @@ namespace nvr {
                     if (!switch_codecs) {
                         g_main_loop_quit(data->loop);
                     } else {
-                        gst_element_set_state(data->pipeline, GST_STATE_READY);
+                        gst_element_set_state(data->pipeline, GST_STATE_NULL);
                     }
                 }
 
@@ -506,15 +506,16 @@ namespace nvr {
         gst_element_set_state(appData->parser, GST_STATE_NULL);
         gst_element_set_state(appData->decoder, GST_STATE_NULL);
 
+        if (hasTimestamper())
+            gst_element_set_state(appData->timestamper, GST_STATE_NULL);
+
         gst_bin_remove(GST_BIN(appData->pipeline), appData->rtspSrc);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
 
-        if (hasTimestamper()) {
-            gst_element_set_state(appData->timestamper, GST_STATE_NULL);
+        if (hasTimestamper())
             gst_bin_remove(GST_BIN(appData->pipeline), appData->timestamper);
-        }
 
     }
 
