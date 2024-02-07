@@ -213,7 +213,7 @@ namespace nvr {
                     if (!switch_codecs) {
                         g_main_loop_quit(data->loop);
                     } else {
-                        gst_element_set_state(data->pipeline, GST_STATE_NULL);
+                        gst_element_set_state(data->pipeline, GST_STATE_READY);
                     }
                 }
 
@@ -462,6 +462,7 @@ namespace nvr {
             );
 
             gst_element_link_many(
+                    appData->rtspSrc,
                     appData->dePayloader,
                     appData->parser,
                     appData->timestamper,
@@ -475,11 +476,11 @@ namespace nvr {
                     appData->dePayloader,
                     appData->parser,
                     appData->decoder,
-                    appData->encoder,
                     nullptr
             );
 
             gst_element_link_many(
+                    appData->rtspSrc,
                     appData->dePayloader,
                     appData->parser,
                     appData->decoder,
@@ -504,7 +505,6 @@ namespace nvr {
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
         gst_element_set_state(appData->decoder, GST_STATE_NULL);
-        gst_element_set_state(appData->encoder, GST_STATE_NULL);
 
         if (hasTimestamper())
             gst_element_set_state(appData->timestamper, GST_STATE_NULL);
@@ -513,7 +513,6 @@ namespace nvr {
         gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
-        gst_bin_remove(GST_BIN(appData->pipeline), appData->encoder);
 
         if (hasTimestamper())
             gst_bin_remove(GST_BIN(appData->pipeline), appData->timestamper);
