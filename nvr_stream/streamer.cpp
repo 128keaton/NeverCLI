@@ -329,8 +329,6 @@ namespace nvr {
             break;
         }
 
-        if (current_port == 6000)
-            throw std::invalid_argument("Exhausted port possibilities, cannot continue");
 
         return current_port;
     }
