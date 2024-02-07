@@ -369,7 +369,7 @@ namespace nvr {
         body["metadata"] = to_string(metadata);
         body["threads"] = 2;
 
-        logger->debug("Body: {}", body.dump());
+        logger->info("Body: {}", body.dump());
 
         json request = buildMessage(body);
 
