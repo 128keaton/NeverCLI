@@ -447,7 +447,7 @@ namespace nvr {
         Streamer::teardownStreamCodecs(appData);
         Streamer::setupStreamInput(appData);
         Streamer::setupRTSPStream(appData);
-        Streamer::setupStreamOutput(appData, false);
+        Streamer::setupStreamOutput(appData, true);
 
         logger->info("Adding elements");
         if (hasTimestamper()) {
@@ -462,7 +462,6 @@ namespace nvr {
             );
 
             gst_element_link_many(
-                    appData->rtspSrc,
                     appData->dePayloader,
                     appData->parser,
                     appData->timestamper,
@@ -481,7 +480,6 @@ namespace nvr {
             );
 
             gst_element_link_many(
-                    appData->rtspSrc,
                     appData->dePayloader,
                     appData->parser,
                     appData->decoder,
@@ -506,6 +504,7 @@ namespace nvr {
         gst_element_set_state(appData->dePayloader, GST_STATE_NULL);
         gst_element_set_state(appData->parser, GST_STATE_NULL);
         gst_element_set_state(appData->decoder, GST_STATE_NULL);
+        gst_element_set_state(appData->encoder, GST_STATE_NULL);
 
         if (hasTimestamper())
             gst_element_set_state(appData->timestamper, GST_STATE_NULL);
@@ -514,6 +513,7 @@ namespace nvr {
         gst_bin_remove(GST_BIN(appData->pipeline), appData->dePayloader);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->parser);
         gst_bin_remove(GST_BIN(appData->pipeline), appData->decoder);
+        gst_bin_remove(GST_BIN(appData->pipeline), appData->encoder);
 
         if (hasTimestamper())
             gst_bin_remove(GST_BIN(appData->pipeline), appData->timestamper);
