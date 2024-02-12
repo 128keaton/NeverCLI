@@ -358,7 +358,8 @@ namespace nvr {
             data->logger->warn("Stream created, but unable to notify Janus, trying to recreate stream");
             data->error_count += 1;
             data->logger->info("Retrying stream creation");
-            sleep(1);
+            sleep(10);
+            data->rtp_port += 1;
             return createJanusStream(data);
         }
     }
